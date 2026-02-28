@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getSetting, getSettings, SETTINGS_KEYS } from '@/lib/config'
 import { getAuthUser } from '@/lib/auth'
 import { StoreHeader } from '@/components/store/StoreHeader'
-import { ProductCard } from '@/components/store/ProductCard'
+import { ProductFilter } from '@/components/store/ProductFilter'
 import { StoreFooter } from '@/components/store/StoreFooter'
 import { cookies } from 'next/headers'
 import { dictionaries, defaultLocale, Locale, translateDb } from '@/lib/i18n'
@@ -88,37 +88,14 @@ export default async function HomePage({
           </section>
         )}
 
-        {/* Filtros */}
-        <form method="GET" className="filter-form" style={{ display: 'flex', gap: 12, marginBottom: 32, flexWrap: 'wrap' }}>
-          <input
-            type="text"
-            name="search"
-            placeholder={dict.store.search}
-            defaultValue={params.search}
-            className="input"
-            style={{ flex: '1 1 200px' }}
-          />
-          <select name="category" className="input" style={{ flex: '1 1 150px', maxWidth: 'unset' }} defaultValue={params.category || ''}>
-            <option value="">{dict.store.categoryAll}</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.slug}>{translateDb(c.name, currentLocale)}</option>
-            ))}
-          </select>
-          <button type="submit" className="btn btn-primary" style={{ flex: '1 1 100px' }}>{dict.store.searchBtn}</button>
-        </form>
-
-        {/* Grid de Produtos */}
-        {products.length === 0 ? (
-          <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '60px 0' }}>
-            <p style={{ fontSize: '1.2rem' }}>{dict.store.noProducts}</p>
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 'clamp(12px, 2vw, 24px)' }}>
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} dict={dict.product} locale={currentLocale} />
-            ))}
-          </div>
-        )}
+        <ProductFilter
+          initialProducts={products}
+          categories={categories}
+          dict={dict}
+          locale={currentLocale}
+          initialSearch={params.search}
+          initialCategory={params.category}
+        />
       </main>
       <StoreFooter storeName={storeName} dict={dict} />
     </>

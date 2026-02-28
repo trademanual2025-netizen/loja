@@ -14,6 +14,8 @@ function createPrismaClient() {
         connectionString: rawUrl + (rawUrl.includes('uselibpqcompat') ? '' : (rawUrl.includes('?') ? '&' : '?') + 'uselibpqcompat=true'),
         ssl: { rejectUnauthorized: false },
         connectionTimeoutMillis: 10000,
+        max: 5,
+        idleTimeoutMillis: 30000,
     })
     const adapter = new PrismaPg(pool)
     return new PrismaClient({ adapter })

@@ -13,7 +13,28 @@ export default async function PedidoPage({ params }: { params: Promise<{ id: str
 
     const order = await prisma.order.findUnique({
         where: { id },
-        include: { items: { include: { product: true } }, user: true },
+        select: {
+            id: true,
+            status: true,
+            total: true,
+            shippingCost: true,
+            street: true,
+            number: true,
+            complement: true,
+            neighborhood: true,
+            city: true,
+            state: true,
+            zipCode: true,
+            user: { select: { name: true } },
+            items: {
+                select: {
+                    id: true,
+                    quantity: true,
+                    price: true,
+                    product: { select: { name: true } },
+                },
+            },
+        },
     })
 
     if (!order) redirect('/')

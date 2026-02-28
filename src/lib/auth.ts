@@ -11,6 +11,9 @@ export interface AuthUser {
     avatarUrl?: string | null
 }
 
+const activeCache = new Map<string, { active: boolean; ts: number }>()
+const ACTIVE_TTL = 60_000
+
 export async function getAuthUser(): Promise<AuthUser | null> {
     if (!JWT_SECRET) return null
     try {
@@ -18,16 +21,29 @@ export async function getAuthUser(): Promise<AuthUser | null> {
         const token = cookieStore.get('auth_token')?.value
         if (!token) return null
         const payload = verify(token, JWT_SECRET) as AuthUser & { iat: number; exp: number }
-        const dbUser = await prisma.user.findUnique({
-            where: { id: payload.id },
-            select: { avatarUrl: true, active: true },
-        })
-        if (!dbUser || !dbUser.active) return null
+
+        const cached = activeCache.get(payload.id)
+        const now = Date.now()
+        let isActive: boolean
+
+        if (cached && now - cached.ts < ACTIVE_TTL) {
+            isActive = cached.active
+        } else {
+            const dbUser = await prisma.user.findUnique({
+                where: { id: payload.id },
+                select: { active: true },
+            })
+            isActive = dbUser?.active ?? false
+            activeCache.set(payload.id, { active: isActive, ts: now })
+        }
+
+        if (!isActive) return null
+
         return {
             id: payload.id,
             name: payload.name,
             email: payload.email,
-            avatarUrl: dbUser.avatarUrl ?? null,
+            avatarUrl: payload.avatarUrl ?? null,
         }
     } catch {
         return null

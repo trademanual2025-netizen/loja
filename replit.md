@@ -53,6 +53,16 @@ Loja online construída com Next.js 16, Prisma 7, PostgreSQL (Neon) e TailwindCS
 - `npx prisma generate` - Gerar client Prisma
 - `npx prisma db push` - Sincronizar schema com banco
 
+## Performance
+- Queries Prisma usam `select` em vez de `include` para buscar apenas campos necessários
+- API `/api/products` retorna apenas 7 campos do produto (id, name, slug, price, comparePrice, images, stock)
+- Cache HTTP nos endpoints de listagem (`s-maxage=30, stale-while-revalidate=60`)
+- Settings do banco com cache per-key e TTL de 60s (`src/lib/config.ts`)
+- `getAuthUser` cacheia status `active` do usuário por 60s (evita query ao banco a cada page load)
+- Admin dashboard usa `prisma.order.aggregate()` para receita (em vez de buscar todos os pedidos pagos)
+- Página de produto paraleliza queries (produto + settings + auth + cookies em Promise.all)
+- Pool de conexões pg limitado a 5 conexões com idle timeout de 30s
+
 ## Notas Técnicas
 - Next.js 16 usa `proxy.ts` em vez de `middleware.ts` (com `export default`)
 - `allowedDevOrigins` vai na raiz do next.config (não em experimental)

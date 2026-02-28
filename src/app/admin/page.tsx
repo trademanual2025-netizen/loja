@@ -2,25 +2,36 @@ import { prisma } from '@/lib/prisma'
 import { ShoppingBag, Users, DollarSign, TrendingUp } from 'lucide-react'
 
 export default async function AdminDashboard() {
-    const [orderCount, leadCount, paidOrders] = await Promise.all([
+    const [orderCount, leadCount, revenueAgg, recentOrders] = await Promise.all([
         prisma.order.count(),
         prisma.lead.count(),
-        prisma.order.findMany({ where: { status: 'PAID' }, select: { total: true } }),
+        prisma.order.aggregate({
+            where: { status: 'PAID' },
+            _sum: { total: true },
+            _count: true,
+        }),
+        prisma.order.findMany({
+            take: 5,
+            orderBy: { createdAt: 'desc' },
+            select: {
+                id: true,
+                total: true,
+                status: true,
+                gateway: true,
+                user: { select: { name: true } },
+            },
+        }),
     ])
 
-    const revenue = paidOrders.reduce((s, o) => s + o.total, 0)
+    const revenue = revenueAgg._sum.total || 0
+    const paidCount = revenueAgg._count || 0
 
     const stats = [
         { label: 'Receita Total', value: `R$ ${revenue.toFixed(2).replace('.', ',')}`, icon: DollarSign, color: '#22c55e' },
         { label: 'Pedidos', value: orderCount, icon: ShoppingBag, color: '#6366f1' },
         { label: 'Leads', value: leadCount, icon: Users, color: '#a855f7' },
-        { label: 'Ticket Médio', value: paidOrders.length > 0 ? `R$ ${(revenue / paidOrders.length).toFixed(2).replace('.', ',')}` : 'R$ 0,00', icon: TrendingUp, color: '#eab308' },
+        { label: 'Ticket Médio', value: paidCount > 0 ? `R$ ${(revenue / paidCount).toFixed(2).replace('.', ',')}` : 'R$ 0,00', icon: TrendingUp, color: '#eab308' },
     ]
-
-    const recentOrders = await prisma.order.findMany({
-        take: 5, orderBy: { createdAt: 'desc' },
-        include: { user: true, items: { include: { product: true } } },
-    })
 
     return (
         <div>

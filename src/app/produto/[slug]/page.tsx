@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import { getSetting, SETTINGS_KEYS } from '@/lib/config'
+import { getSettings, SETTINGS_KEYS } from '@/lib/config'
 import { getAuthUser } from '@/lib/auth'
 import { StoreHeader } from '@/components/store/StoreHeader'
 import { StoreFooter } from '@/components/store/StoreFooter'
@@ -12,24 +12,25 @@ export const revalidate = 60
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params
-    const product = await prisma.product.findUnique({
-        where: { slug },
-        include: {
-            category: true,
-            options: true,
-            variants: true
-        },
-    })
 
-    if (!product || !product.active) notFound()
-
-    const [storeName, logoUrl, user, cookieStore] = await Promise.all([
-        getSetting(SETTINGS_KEYS.STORE_NAME),
-        getSetting(SETTINGS_KEYS.STORE_LOGO),
+    const [product, storeSettings, user, cookieStore] = await Promise.all([
+        prisma.product.findUnique({
+            where: { slug },
+            include: {
+                category: true,
+                options: true,
+                variants: true
+            },
+        }),
+        getSettings([SETTINGS_KEYS.STORE_NAME, SETTINGS_KEYS.STORE_LOGO]),
         getAuthUser(),
         cookies()
     ])
-    const name = storeName || 'Loja Virtual'
+
+    if (!product || !product.active) notFound()
+
+    const storeName = storeSettings[SETTINGS_KEYS.STORE_NAME] || 'Loja Virtual'
+    const logoUrl = storeSettings[SETTINGS_KEYS.STORE_LOGO] || undefined
 
     const localeCookie = cookieStore.get('NEXT_LOCALE')?.value as Locale
     const currentLocale = (localeCookie && dictionaries[localeCookie]) ? localeCookie : defaultLocale
@@ -37,8 +38,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
     return (
         <>
-            <StoreHeader storeName={name} logoUrl={logoUrl || undefined} user={user} dict={dict} />
-            {/* Banner do produto */}
+            <StoreHeader storeName={storeName} logoUrl={logoUrl} user={user} dict={dict} />
             {product.bannerUrl && (
                 <div style={{ width: '100%', maxHeight: 'clamp(200px, 40vw, 400px)', overflow: 'hidden', position: 'relative' }}>
                     <img
@@ -66,7 +66,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     dict={dict.product}
                 />
             </main>
-            <StoreFooter storeName={name} dict={dict} />
+            <StoreFooter storeName={storeName} dict={dict} />
         </>
     )
 }

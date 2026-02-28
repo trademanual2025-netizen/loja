@@ -23,13 +23,39 @@ export async function GET(req: NextRequest) {
 
     const user = await prisma.user.findUnique({
         where: { id: session.id },
-        omit: { password: true },
-        include: {
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            avatarUrl: true,
+            zipCode: true,
+            street: true,
+            number: true,
+            complement: true,
+            neighborhood: true,
+            city: true,
+            state: true,
+            active: true,
             orders: {
                 orderBy: { createdAt: 'desc' },
                 take: 20,
-                include: {
-                    items: { include: { product: { select: { name: true, images: true, slug: true } } } },
+                select: {
+                    id: true,
+                    status: true,
+                    total: true,
+                    createdAt: true,
+                    trackingCode: true,
+                    trackingUrl: true,
+                    shippingNote: true,
+                    items: {
+                        select: {
+                            id: true,
+                            quantity: true,
+                            price: true,
+                            product: { select: { name: true, images: true, slug: true } },
+                        },
+                    },
                 },
             },
         },
@@ -80,7 +106,20 @@ export async function PATCH(req: NextRequest) {
     const updated = await prisma.user.update({
         where: { id: session.id },
         data: updateData,
-        omit: { password: true },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            avatarUrl: true,
+            zipCode: true,
+            street: true,
+            number: true,
+            complement: true,
+            neighborhood: true,
+            city: true,
+            state: true,
+        },
     })
     return NextResponse.json(updated)
 }

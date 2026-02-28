@@ -16,10 +16,14 @@ async function getProducts(search?: string, category?: string) {
   if (search) where.name = { contains: search, mode: 'insensitive' }
   return prisma.product.findMany({
     where,
-    include: {
-      category: true,
-      options: true,
-      variants: true
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      price: true,
+      comparePrice: true,
+      images: true,
+      stock: true,
     },
     orderBy: { createdAt: 'desc' },
     take: 48,

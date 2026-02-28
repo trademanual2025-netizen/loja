@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { prisma } from "@/lib/prisma";
 import { SETTINGS_KEYS } from "@/lib/config";
@@ -6,6 +7,12 @@ import { FacebookPixel } from "@/components/tracking/FacebookPixel";
 import { GoogleAds } from "@/components/tracking/GoogleAds";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "sonner";
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Loja Virtual",
@@ -84,9 +91,6 @@ export default async function RootLayout({
       } as React.CSSProperties}
     >
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
         <title>{metaTitle}</title>
         <meta name="description" content={metaDesc} />
         <meta property="og:title" content={metaTitle} />
@@ -100,11 +104,11 @@ export default async function RootLayout({
         {favicon && <link rel="icon" href={favicon} />}
         {!favicon && <link rel="icon" href="/favicon.ico" />}
       </head>
-      <body suppressHydrationWarning>
+      <body className={inter.className} suppressHydrationWarning>
         <ThemeProvider>
           {fbEnabled && fbPixelId && <FacebookPixel pixelId={fbPixelId} />}
           {googleEnabled && googleAdsId && <GoogleAds adsId={googleAdsId} />}
-          <Toaster theme="system" position="top-right" />
+          <Toaster theme="dark" position="top-right" />
           {children}
         </ThemeProvider>
       </body>

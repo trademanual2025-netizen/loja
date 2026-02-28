@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ShoppingCart, User, LogOut } from 'lucide-react'
 import { useCart } from '@/lib/cart'
 import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { LanguageSelector } from '@/components/LanguageSelector'
 import { Dictionary } from '@/lib/i18n'
@@ -18,6 +19,8 @@ interface Props {
 export function StoreHeader({ storeName, logoUrl, user, dict }: Props) {
     const itemCount = useCart((s) => s.itemCount())
     const router = useRouter()
+    const [mounted, setMounted] = useState(false)
+    useEffect(() => { setMounted(true) }, [])
 
     async function handleLogout() {
         await fetch('/api/auth/logout', { method: 'POST' })
@@ -64,7 +67,7 @@ export function StoreHeader({ storeName, logoUrl, user, dict }: Props) {
                     <Link href="/carrinho" className="btn btn-secondary" style={{ padding: '6px 12px', position: 'relative', color: 'var(--icon-cart)', borderColor: 'var(--border)', fontSize: '0.8rem' }}>
                         <ShoppingCart size={16} />
                         <span className="hide-mobile">{dict.store.cart}</span>
-                        {itemCount > 0 && (
+                        {mounted && itemCount > 0 && (
                             <span style={{ position: 'absolute', top: -6, right: -6, background: '#ef4444', color: 'white', borderRadius: '50%', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 700 }}>
                                 {itemCount > 9 ? '9+' : itemCount}
                             </span>

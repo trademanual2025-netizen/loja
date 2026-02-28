@@ -72,7 +72,9 @@ export default async function RootLayout({
   return (
     <html
       lang="pt-BR"
+      data-theme="dark"
       suppressHydrationWarning
+      data-scroll-behavior="smooth"
       style={{
         // Only brand/accent colors in inline styles — theme bg/text are CSS-controlled
         ["--primary" as string]: primaryColor,

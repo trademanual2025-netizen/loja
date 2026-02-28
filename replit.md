@@ -4,18 +4,20 @@
 Loja online construída com Next.js 16, Prisma 7, PostgreSQL (Neon) e TailwindCSS 4.
 
 ## Estrutura
-- `app/` - Páginas e rotas da aplicação (Next.js App Router)
-  - `app/api/` - Rotas de API (auth, admin, checkout, webhooks)
-  - `app/admin/` - Painel administrativo
-  - `app/auth/` - Login/cadastro de usuários
-  - `app/carrinho/` - Carrinho de compras
-  - `app/checkout/` - Finalização de compra
-  - `app/embed/` - Widget para embed em outros sites
-  - `app/minha-conta/` - Área do usuário
-  - `app/pedido/[id]/` - Detalhes do pedido
-  - `app/produto/[slug]/` - Página de produto
-- `lib/` - Módulos utilitários (prisma, auth, settings, webhook)
+- `src/app/` - Páginas e rotas da aplicação (Next.js App Router)
+  - `src/app/api/` - Rotas de API (auth, admin, checkout, webhooks)
+  - `src/app/admin/` - Painel administrativo
+  - `src/app/auth/` - Login/cadastro de usuários
+  - `src/app/carrinho/` - Carrinho de compras
+  - `src/app/checkout/` - Finalização de compra
+  - `src/app/embed/` - Widget para embed em outros sites
+  - `src/app/minha-conta/` - Área do usuário
+  - `src/app/pedido/[id]/` - Detalhes do pedido
+  - `src/app/produto/[slug]/` - Página de produto
+- `src/lib/` - Módulos utilitários (prisma, auth, settings, webhook)
+- `src/components/` - Componentes React compartilhados
 - `prisma/` - Schema do banco de dados
+- `prisma.config.ts` - Configuração do Prisma (usa NEON_DATABASE_URL)
 
 ## Banco de Dados
 - PostgreSQL hospedado no Neon (externo ao Replit)

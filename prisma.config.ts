@@ -9,6 +9,6 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: (process.env["NEON_DATABASE_URL"] || process.env["DATABASE_URL"] || '').replace(/[&?]channel_binding=[^&]*/g, ''),
+    url: (process.env["NEON_DATABASE_URL"] || process.env["DATABASE_URL"] || '').replace(/[&?]channel_binding=[^&]*/g, '').replace(/sslmode=require/, 'sslmode=verify-full'),
   },
 });

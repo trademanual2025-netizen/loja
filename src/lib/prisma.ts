@@ -7,8 +7,11 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 function createPrismaClient() {
+    const rawUrl = (process.env.NEON_DATABASE_URL || process.env.DATABASE_URL || '')
+        .replace(/[&?]channel_binding=[^&]*/g, '')
+        .replace(/sslmode=require/, 'sslmode=no-verify')
     const pool = new Pool({
-        connectionString: (process.env.NEON_DATABASE_URL || process.env.DATABASE_URL || '').replace(/[&?]channel_binding=[^&]*/g, ''),
+        connectionString: rawUrl + (rawUrl.includes('uselibpqcompat') ? '' : (rawUrl.includes('?') ? '&' : '?') + 'uselibpqcompat=true'),
         ssl: { rejectUnauthorized: false },
         connectionTimeoutMillis: 10000,
     })

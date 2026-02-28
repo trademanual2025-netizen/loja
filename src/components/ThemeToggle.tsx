@@ -1,6 +1,6 @@
 'use client'
 
-import { useTheme } from 'next-themes'
+import { useTheme } from '@/components/ThemeProvider'
 import { useEffect, useState } from 'react'
 import { Sun, Moon } from 'lucide-react'
 
@@ -13,7 +13,7 @@ export function ThemeToggle() {
     }, [])
 
     if (!mounted) {
-        return <div style={{ width: 36, height: 36 }} /> // Placeholder to prevent CLS
+        return <div style={{ width: 36, height: 36 }} />
     }
 
     return (

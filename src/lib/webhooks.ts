@@ -14,7 +14,9 @@ async function dispatch(url: string, payload: object, type: 'lead' | 'buyer', le
         })
         status = res.status
         success = res.ok
-    } catch { }
+    } catch (err) {
+        console.error(`[Webhook] Falha ao enviar para ${url}:`, err instanceof Error ? err.message : err)
+    }
 
     await prisma.webhookLog.create({
         data: {

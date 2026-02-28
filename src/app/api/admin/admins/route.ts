@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import crypto from 'crypto'
+import bcrypt from 'bcryptjs'
 
-// GET — lista todos os admins
 export async function GET() {
     const admins = await prisma.adminUser.findMany({
         orderBy: { createdAt: 'asc' },
@@ -11,7 +10,6 @@ export async function GET() {
     return NextResponse.json({ admins })
 }
 
-// POST — cria novo admin
 export async function POST(req: NextRequest) {
     const { name, email, password } = await req.json()
     if (!name || !email || !password)
@@ -21,7 +19,7 @@ export async function POST(req: NextRequest) {
     if (existing)
         return NextResponse.json({ error: 'E-mail já cadastrado.' }, { status: 409 })
 
-    const hashed = crypto.createHash('sha256').update(password).digest('hex')
+    const hashed = await bcrypt.hash(password, 10)
     const admin = await prisma.adminUser.create({
         data: { name, email, password: hashed },
         select: { id: true, name: true, email: true, createdAt: true },

@@ -33,6 +33,16 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Nome e preço são obrigatórios.' }, { status: 400 })
     }
 
+    const numericPrice = parseFloat(String(price).replace(',', '.'))
+    if (isNaN(numericPrice) || numericPrice < 0) {
+        return NextResponse.json({ error: 'Preço deve ser um valor válido e não negativo.' }, { status: 400 })
+    }
+
+    const numericStock = parseInt(String(stock))
+    if (!isNaN(numericStock) && numericStock < 0) {
+        return NextResponse.json({ error: 'Estoque não pode ser negativo.' }, { status: 400 })
+    }
+
     const slug = name
         .toLowerCase()
         .normalize('NFD')

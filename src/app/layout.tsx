@@ -24,15 +24,13 @@ async function getLayoutSettings() {
             SETTINGS_KEYS.GOOGLE_ADS_ENABLED,
             SETTINGS_KEYS.STORE_NAME,
             SETTINGS_KEYS.STORE_PRIMARY_COLOR,
-            ...[
-              'store_text_color',
-              'store_bg_color',
-              'store_bg_card_color',
-              'store_text_title',
-              'store_btn_buy',
-              'store_btn_header',
-              'store_icon_cart'
-            ],
+            SETTINGS_KEYS.STORE_TEXT_COLOR,
+            SETTINGS_KEYS.STORE_BG_COLOR,
+            SETTINGS_KEYS.STORE_BG_CARD_COLOR,
+            SETTINGS_KEYS.STORE_TEXT_TITLE,
+            SETTINGS_KEYS.STORE_BTN_BUY,
+            SETTINGS_KEYS.STORE_BTN_HEADER,
+            SETTINGS_KEYS.STORE_ICON_CART,
             SETTINGS_KEYS.STORE_LOGO,
             SETTINGS_KEYS.STORE_FAVICON,
             SETTINGS_KEYS.SEO_META_TITLE,
@@ -64,8 +62,8 @@ export default async function RootLayout({
 
   const storeName = settings[SETTINGS_KEYS.STORE_NAME] || "Loja Virtual";
   const primaryColor = settings[SETTINGS_KEYS.STORE_PRIMARY_COLOR] || "#6366f1";
-  const btnBuyColor = settings['store_btn_buy'] || primaryColor;
-  const btnHeaderColor = settings['store_btn_header'] || primaryColor;
+  const btnBuyColor = settings[SETTINGS_KEYS.STORE_BTN_BUY] || primaryColor;
+  const btnHeaderColor = settings[SETTINGS_KEYS.STORE_BTN_HEADER] || primaryColor;
   const favicon = settings[SETTINGS_KEYS.STORE_FAVICON] || "";
   const metaTitle = settings[SETTINGS_KEYS.SEO_META_TITLE] || storeName;
   const metaDesc = settings[SETTINGS_KEYS.SEO_META_DESCRIPTION] || `Bem-vindo à ${storeName}`;

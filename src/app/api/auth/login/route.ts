@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import crypto from 'crypto'
+import bcrypt from 'bcryptjs'
 import { sign } from 'jsonwebtoken'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'loja-secret-change-in-production'
+const JWT_SECRET = process.env.JWT_SECRET || ''
 
 export async function POST(req: NextRequest) {
     try {
+        if (!JWT_SECRET) {
+            return NextResponse.json({ error: 'Configuração de segurança ausente.' }, { status: 500 })
+        }
+
         const { email, password } = await req.json()
 
         const user = await prisma.user.findUnique({ where: { email } })
@@ -14,8 +19,23 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Credenciais inválidas.' }, { status: 401 })
         }
 
-        const hashedInput = crypto.createHash('sha256').update(password).digest('hex')
-        if (hashedInput !== user.password) {
+        if (!user.active) {
+            return NextResponse.json({ error: 'Conta desativada.' }, { status: 403 })
+        }
+
+        let passwordValid = false
+        if (user.password.startsWith('$2')) {
+            passwordValid = await bcrypt.compare(password, user.password)
+        } else {
+            const sha256Hash = crypto.createHash('sha256').update(password).digest('hex')
+            passwordValid = sha256Hash === user.password
+            if (passwordValid) {
+                const bcryptHash = await bcrypt.hash(password, 10)
+                await prisma.user.update({ where: { id: user.id }, data: { password: bcryptHash } })
+            }
+        }
+
+        if (!passwordValid) {
             return NextResponse.json({ error: 'Credenciais inválidas.' }, { status: 401 })
         }
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import crypto from 'crypto'
+import bcrypt from 'bcryptjs'
 import { dispatchLeadWebhook } from '@/lib/webhooks'
 
 export async function POST(req: NextRequest) {
@@ -16,22 +16,20 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'E-mail já cadastrado.' }, { status: 409 })
         }
 
-        const hashed = crypto.createHash('sha256').update(password).digest('hex')
+        const hashed = await bcrypt.hash(password, 10)
 
         const user = await prisma.user.create({
             data: { name, email, phone, cpf, password: hashed },
         })
 
-        // Salvar lead e disparar webhook
         const lead = await prisma.lead.create({
             data: { userId: user.id, source: 'checkout' },
         })
 
-        // Dispatch sem aguardar (não bloqueia resposta)
         dispatchLeadWebhook({
             ...lead,
             user: { name: user.name, email: user.email, phone: user.phone, cpf: user.cpf },
-        }).catch(() => { })
+        }).catch((err) => { console.error('[Webhook] Lead dispatch failed:', err) })
 
         return NextResponse.json({
             id: user.id,

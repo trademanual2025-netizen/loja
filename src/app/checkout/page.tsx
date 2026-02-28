@@ -43,16 +43,19 @@ export default function CheckoutPage() {
     const [locale, setLocale] = useState<Locale>(defaultLocale)
     const dict = dictionaries[locale]
 
+    const [mounted, setMounted] = useState(false)
     const addressForm = useForm<AddressForm>()
 
     useEffect(() => {
+        setMounted(true)
         const saved = Cookies.get('NEXT_LOCALE') as Locale
         if (saved && dictionaries[saved]) setLocale(saved)
 
-        fbTrackInitiateCheckout(total(), items.length)
-        gtagBeginCheckout(total(), items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })))
+        if (items.length > 0) {
+            fbTrackInitiateCheckout(total(), items.length)
+            gtagBeginCheckout(total(), items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })))
+        }
 
-        // Buscar configs (gateways e ads)
         fetch('/api/admin/settings').then(r => r.json()).then(s => {
             setConfigs(s)
             if (s.google_ads_id && s.google_ads_label) {
@@ -61,7 +64,6 @@ export default function CheckoutPage() {
             if (s.stripe_public_key) {
                 setStripePromise(loadStripe(s.stripe_public_key))
             }
-            // default gateway if MP not available
             if (!s.mp_public_key && s.stripe_public_key) setPaymentGateway('stripe')
         }).catch(() => { })
     }, [])
@@ -141,6 +143,10 @@ export default function CheckoutPage() {
         address: dict.checkout.address,
         shipping: dict.checkout.shipping,
         payment: dict.checkout.payment
+    }
+
+    if (!mounted) {
+        return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}><span className="spinner" /></div>
     }
 
     if (items.length === 0 && step === 'address') {

@@ -153,9 +153,9 @@ export async function calculateShipping(
             console.error('[Correios] Falha na consulta:', e)
         }
 
-        // Fallback se a API falhar
-        return [{ label: 'Entrega Padrão (consulte prazo)', value: 0 }]
+        const fallbackValue = parseFloat(cfg[SETTINGS_KEYS.SHIPPING_FIXED_VALUE] || '15')
+        return [{ label: 'Entrega Padrão (consulte prazo)', value: fallbackValue > 0 ? fallbackValue : 15 }]
     }
 
-    return [{ label: 'Frete Grátis', value: 0 }]
+    return [{ label: 'Entrega Padrão', value: 15 }]
 }

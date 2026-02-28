@@ -1,26 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import crypto from 'crypto'
+import bcrypt from 'bcryptjs'
 
-// DELETE — remove admin
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
     try {
+        const admin = await prisma.adminUser.findUnique({ where: { id } })
+        if (!admin) {
+            return NextResponse.json({ error: 'Admin não encontrado.' }, { status: 404 })
+        }
         await prisma.adminUser.delete({ where: { id } })
         return NextResponse.json({ ok: true })
-    } catch {
-        return NextResponse.json({ error: 'Admin não encontrado.' }, { status: 404 })
+    } catch (err) {
+        console.error('Erro ao deletar admin:', err)
+        return NextResponse.json({ error: 'Erro interno ao deletar admin.' }, { status: 500 })
     }
 }
 
-// PATCH — altera senha do admin
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
     const { password } = await req.json()
-    if (!password)
-        return NextResponse.json({ error: 'Nova senha é obrigatória.' }, { status: 400 })
+    if (!password || password.length < 6)
+        return NextResponse.json({ error: 'Nova senha deve ter no mínimo 6 caracteres.' }, { status: 400 })
 
-    const hashed = crypto.createHash('sha256').update(password).digest('hex')
+    const hashed = await bcrypt.hash(password, 10)
     await prisma.adminUser.update({ where: { id }, data: { password: hashed } })
     return NextResponse.json({ ok: true })
 }

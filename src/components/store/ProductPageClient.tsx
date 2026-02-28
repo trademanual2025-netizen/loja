@@ -77,7 +77,7 @@ export function ProductPageClient({ product, dict }: { product: Product; dict: a
                 <div style={{ position: 'relative', aspectRatio: '1', background: 'var(--bg-card)', borderRadius: 12, overflow: 'hidden', marginBottom: 12 }}>
                     {product.images.length > 0 ? (
                         <>
-                            <Image src={product.images[mainImage]} alt={product.name} fill style={{ objectFit: 'cover' }} />
+                            <Image src={product.images[mainImage]} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" style={{ objectFit: 'cover' }} />
                             {product.images.length > 1 && (
                                 <>
                                     <button onClick={() => setMainImage((p) => (p - 1 + product.images.length) % product.images.length)}
@@ -100,7 +100,7 @@ export function ProductPageClient({ product, dict }: { product: Product; dict: a
                         {product.images.map((img, i) => (
                             <button key={i} onClick={() => setMainImage(i)}
                                 style={{ width: 70, height: 70, borderRadius: 8, overflow: 'hidden', border: `2px solid ${i === mainImage ? 'var(--primary)' : 'var(--border)'}`, flexShrink: 0, cursor: 'pointer', padding: 0, position: 'relative', background: 'var(--bg-card2)' }}>
-                                <Image src={img} alt="" fill style={{ objectFit: 'cover' }} />
+                                <Image src={img} alt="" fill sizes="70px" style={{ objectFit: 'cover' }} />
                             </button>
                         ))}
                     </div>

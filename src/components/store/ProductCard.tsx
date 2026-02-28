@@ -50,7 +50,7 @@ export function ProductCard({ product, dict, locale = 'pt' }: { product: Product
                 {/* Imagem */}
                 <div style={{ position: 'relative', aspectRatio: '1', background: 'var(--bg-card2)', overflow: 'hidden' }}>
                     {product.images[0] ? (
-                        <Image src={product.images[0]} alt={product.name} fill style={{ objectFit: 'cover' }} />
+                        <Image src={product.images[0]} alt={product.name} fill sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw" style={{ objectFit: 'cover' }} />
                     ) : (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                             Sem imagem

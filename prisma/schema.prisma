@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String
+  name         String
+  phone        String?
+  cpf          String?
+  zipCode      String?
+  street       String?
+  number       String?
+  complement   String?
+  neighborhood String?
+  city         String?
+  state        String?
+  avatarUrl    String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  orders       Order[]
+  leads        Lead[]
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+  products  Product[]
+}
+
+model Product {
+  id           String           @id @default(cuid())
+  name         String
+  slug         String           @unique
+  description  String?
+  price        Float
+  comparePrice Float?
+  stock        Int              @default(0)
+  images       String[]         @default([])
+  bannerUrl    String?
+  active       Boolean          @default(true)
+  categoryId   String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  category     Category?        @relation(fields: [categoryId], references: [id])
+  variants     ProductVariant[]
+  options      ProductOption[]
+  orderItems   OrderItem[]
+}
+
+model ProductOption {
+  id        String   @id @default(cuid())
+  productId String
+  name      String
+  values    String[]
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model ProductVariant {
+  id         String      @id @default(cuid())
+  productId  String
+  name       String
+  price      Float?
+  stock      Int         @default(0)
+  sku        String?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  product    Product     @relation(fields: [productId], references: [id])
+  orderItems OrderItem[]
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+  REFUNDED
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  userId       String
+  status       OrderStatus @default(PENDING)
+  gateway      String
+  gatewayId    String?
+  subtotal     Float
+  shippingCost Float       @default(0)
+  total        Float
+  zipCode      String
+  street       String
+  number       String
+  complement   String?
+  neighborhood String
+  city         String
+  state        String
+  shippingNote String?
+  trackingCode String?
+  trackingUrl  String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  user         User        @relation(fields: [userId], references: [id])
+  items        OrderItem[]
+  webhookLogs  WebhookLog[]
+}
+
+model OrderItem {
+  id        String          @id @default(cuid())
+  orderId   String
+  productId String
+  variantId String?
+  quantity  Int
+  price     Float
+  order     Order           @relation(fields: [orderId], references: [id])
+  product   Product         @relation(fields: [productId], references: [id])
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+}
+
+model Lead {
+  id          String       @id @default(cuid())
+  userId      String
+  source      String       @default("checkout")
+  createdAt   DateTime     @default(now())
+  user        User         @relation(fields: [userId], references: [id])
+  webhookLogs WebhookLog[]
+}
+
+model Settings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model WebhookLog {
+  id        String   @id @default(cuid())
+  type      String
+  url       String
+  payload   String
+  status    Int?
+  success   Boolean  @default(false)
+  orderId   String?
+  leadId    String?
+  createdAt DateTime @default(now())
+  order     Order?   @relation(fields: [orderId], references: [id])
+  lead      Lead?    @relation(fields: [leadId], references: [id])
+}

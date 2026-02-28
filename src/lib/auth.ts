@@ -11,8 +11,8 @@ export interface AuthUser {
     avatarUrl?: string | null
 }
 
-const activeCache = new Map<string, { active: boolean; ts: number }>()
-const ACTIVE_TTL = 60_000
+const userCache = new Map<string, { avatarUrl: string | null; active: boolean; ts: number }>()
+const CACHE_TTL = 60_000
 
 export async function getAuthUser(): Promise<AuthUser | null> {
     if (!JWT_SECRET) return null
@@ -22,28 +22,29 @@ export async function getAuthUser(): Promise<AuthUser | null> {
         if (!token) return null
         const payload = verify(token, JWT_SECRET) as AuthUser & { iat: number; exp: number }
 
-        const cached = activeCache.get(payload.id)
+        const cached = userCache.get(payload.id)
         const now = Date.now()
-        let isActive: boolean
+        let dbData: { avatarUrl: string | null; active: boolean }
 
-        if (cached && now - cached.ts < ACTIVE_TTL) {
-            isActive = cached.active
+        if (cached && now - cached.ts < CACHE_TTL) {
+            dbData = cached
         } else {
             const dbUser = await prisma.user.findUnique({
                 where: { id: payload.id },
-                select: { active: true },
+                select: { avatarUrl: true, active: true },
             })
-            isActive = dbUser?.active ?? false
-            activeCache.set(payload.id, { active: isActive, ts: now })
+            if (!dbUser) return null
+            dbData = { avatarUrl: dbUser.avatarUrl, active: dbUser.active }
+            userCache.set(payload.id, { ...dbData, ts: now })
         }
 
-        if (!isActive) return null
+        if (!dbData.active) return null
 
         return {
             id: payload.id,
             name: payload.name,
             email: payload.email,
-            avatarUrl: payload.avatarUrl ?? null,
+            avatarUrl: dbData.avatarUrl,
         }
     } catch {
         return null

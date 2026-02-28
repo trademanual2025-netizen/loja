@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model AdminUser {
@@ -107,10 +108,6 @@ model Order {
   neighborhood    String
   city            String
   state           String
-  // Informações de envio (atualizadas pelo admin)
-  trackingCode    String?
-  trackingUrl     String?
-  shippingNote    String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
@@ -126,13 +123,13 @@ enum OrderStatus {
 }
 
 model OrderItem {
-  id        String           @id @default(cuid())
+  id        String  @id @default(cuid())
   orderId   String
-  order     Order            @relation(fields: [orderId], references: [id])
+  order     Order   @relation(fields: [orderId], references: [id])
   productId String
-  product   Product          @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
   variantId String?
-  variant   ProductVariant?  @relation(fields: [variantId], references: [id])
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
   quantity  Int
   price     Float
 }

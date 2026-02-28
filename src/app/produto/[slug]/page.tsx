@@ -1,0 +1,72 @@
+import { notFound } from 'next/navigation'
+import { prisma } from '@/lib/prisma'
+import { getSetting, SETTINGS_KEYS } from '@/lib/config'
+import { getAuthUser } from '@/lib/auth'
+import { StoreHeader } from '@/components/store/StoreHeader'
+import { StoreFooter } from '@/components/store/StoreFooter'
+import { ProductPageClient } from '@/components/store/ProductPageClient'
+import { cookies } from 'next/headers'
+import { dictionaries, Locale, defaultLocale, translateDb } from '@/lib/i18n'
+
+export const revalidate = 60
+
+export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params
+    const product = await prisma.product.findUnique({
+        where: { slug },
+        include: {
+            category: true,
+            options: true,
+            variants: true
+        },
+    })
+
+    if (!product || !product.active) notFound()
+
+    const [storeName, logoUrl, user, cookieStore] = await Promise.all([
+        getSetting(SETTINGS_KEYS.STORE_NAME),
+        getSetting(SETTINGS_KEYS.STORE_LOGO),
+        getAuthUser(),
+        cookies()
+    ])
+    const name = storeName || 'Loja Virtual'
+
+    const localeCookie = cookieStore.get('NEXT_LOCALE')?.value as Locale
+    const currentLocale = (localeCookie && dictionaries[localeCookie]) ? localeCookie : defaultLocale
+    const dict = dictionaries[currentLocale]
+
+    return (
+        <>
+            <StoreHeader storeName={name} logoUrl={logoUrl || undefined} user={user} dict={dict} />
+            {/* Banner do produto */}
+            {product.bannerUrl && (
+                <div style={{ width: '100%', maxHeight: 'clamp(200px, 40vw, 400px)', overflow: 'hidden', position: 'relative' }}>
+                    <img
+                        src={product.bannerUrl}
+                        alt={`Banner ${product.name}`}
+                        style={{ width: '100%', height: 'clamp(200px, 40vw, 400px)', objectFit: 'cover', display: 'block' }}
+                    />
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 50%, var(--bg) 100%)' }} />
+                </div>
+            )}
+            <main style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 16px 60px' }}>
+                <ProductPageClient
+                    product={{
+                        id: product.id,
+                        name: translateDb(product.name, currentLocale),
+                        slug: product.slug,
+                        description: product.description ? translateDb(product.description, currentLocale) : null,
+                        price: product.price,
+                        comparePrice: product.comparePrice,
+                        images: product.images,
+                        stock: product.stock,
+                        options: product.options,
+                        variants: product.variants,
+                    }}
+                    dict={dict.product}
+                />
+            </main>
+            <StoreFooter storeName={name} dict={dict} />
+        </>
+    )
+}

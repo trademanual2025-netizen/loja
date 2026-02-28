@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { LayoutDashboard, Package, ShoppingBag, Users, Settings, Code2, Shield, Tag, LogOut } from 'lucide-react'
 
 const navItems = [
@@ -21,6 +21,13 @@ interface Props {
 
 export function AdminSidebar({ isOpen }: Props) {
     const pathname = usePathname()
+    const router = useRouter()
+
+    async function handleLogout() {
+        await fetch('/api/admin/logout', { method: 'POST' })
+        router.push('/admin/login')
+        router.refresh()
+    }
 
     return (
         <aside style={{
@@ -73,11 +80,9 @@ export function AdminSidebar({ isOpen }: Props) {
                 <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8, color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.88rem', marginBottom: 4 }}>
                     <Package size={18} /> Ver Loja
                 </Link>
-                <form action="/api/auth/logout" method="post">
-                    <button type="submit" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8, color: 'var(--error)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.88rem', width: '100%' }}>
-                        <LogOut size={18} /> Sair
-                    </button>
-                </form>
+                <button onClick={handleLogout} type="button" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8, color: 'var(--error)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.88rem', width: '100%' }}>
+                    <LogOut size={18} /> Sair
+                </button>
             </div>
         </aside>
     )

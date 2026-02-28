@@ -9,7 +9,8 @@ export default function proxy(req: NextRequest) {
 
     if (pathname.startsWith('/admin') &&
         !pathname.startsWith('/admin/setup') &&
-        !pathname.startsWith('/admin/login')) {
+        !pathname.startsWith('/admin/login') &&
+        !pathname.startsWith('/api/admin/logout')) {
         const token = req.cookies.get('admin_token')?.value
         if (!token) {
             if (pathname.startsWith('/api/')) {

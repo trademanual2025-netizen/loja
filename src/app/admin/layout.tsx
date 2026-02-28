@@ -1,17 +1,23 @@
 'use client'
 
 import '@/app/globals.css'
-import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { AdminSidebar } from './AdminSidebar'
 import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+    const pathname = usePathname()
+
+    const isLoginOrSetup = pathname === '/admin/login' || pathname === '/admin/setup'
+
+    if (isLoginOrSetup) {
+        return <>{children}</>
+    }
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)', fontFamily: 'Inter, sans-serif' }}>
-            {/* Mobile Header */}
             <header className="show-mobile" style={{
                 position: 'fixed', top: 0, left: 0, right: 0, height: 60,
                 background: 'var(--bg-card)', borderBottom: '1px solid var(--border)',
@@ -26,14 +32,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
             <AdminSidebar isOpen={isSidebarOpen} />
 
-            {/* Overlay */}
             {isSidebarOpen && (
                 <div onClick={() => setIsSidebarOpen(false)}
                     className="show-mobile"
                     style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 90 }} />
             )}
 
-            {/* Main */}
             <main style={{ flex: 1, padding: '32px', minHeight: '100vh', color: 'var(--text)', transition: 'margin 0.3s' }}
                 className="admin-main">
                 <style jsx>{`

@@ -34,6 +34,22 @@ export async function POST(req: NextRequest) {
     const shipping = typeof shippingCost === 'number' ? shippingCost : parseFloat(shippingCost) || 0
     const total = Math.round((subtotal + shipping) * 100) / 100
 
+    const recentOrder = await prisma.order.findFirst({
+        where: {
+            userId: session.id,
+            status: 'PENDING',
+            createdAt: { gte: new Date(Date.now() - 30000) },
+        },
+        orderBy: { createdAt: 'desc' },
+    })
+    if (recentOrder) {
+        return NextResponse.json({
+            orderId: recentOrder.id,
+            status: 'pending',
+            statusDetail: 'Pedido já em andamento',
+        })
+    }
+
     try {
         // Criar pagamento no MP
         const { MercadoPagoConfig, Payment } = await import('mercadopago')

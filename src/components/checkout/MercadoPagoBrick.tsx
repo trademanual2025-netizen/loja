@@ -20,6 +20,7 @@ interface MPProps {
 
 export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shippingCost, adsConfig }: MPProps) {
     const [isReady, setIsReady] = useState(false)
+    const [isProcessing, setIsProcessing] = useState(false)
     const [pendingOrderId, setPendingOrderId] = useState<string | null>(null)
     const [pendingStatus, setPendingStatus] = useState<'pix' | 'boleto' | 'other' | null>(null)
     const [pixData, setPixData] = useState<{ qrCode: string | null; qrCodeBase64: string | null } | null>(null)
@@ -56,6 +57,8 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
     }
 
     const onSubmit = async ({ selectedPaymentMethod, formData }: any) => {
+        if (isProcessing) return Promise.reject()
+        setIsProcessing(true)
         return new Promise<void>((resolve, reject) => {
             fetch('/api/checkout/mercadopago', {
                 method: 'POST',
@@ -66,6 +69,7 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
                 .then(data => {
                     if (data.error) {
                         toast.error(data.error)
+                        setIsProcessing(false)
                         reject()
                         return
                     }
@@ -101,6 +105,7 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
                 })
                 .catch(() => {
                     toast.error('Erro ao processar pagamento.')
+                    setIsProcessing(false)
                     reject()
                 })
         })

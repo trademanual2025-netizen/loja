@@ -13,6 +13,35 @@ import { StripeCheckoutForm } from '@/components/checkout/StripeCheckoutForm'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 import Cookies from 'js-cookie'
+
+function getCepState(cep: string): string | null {
+    const prefix = parseInt(cep.substring(0, 3), 10)
+    if (prefix >= 10 && prefix <= 19) return 'SP'
+    if (prefix >= 20 && prefix <= 28) return 'RJ'
+    if (prefix >= 29 && prefix <= 29) return 'ES'
+    if (prefix >= 30 && prefix <= 39) return 'MG'
+    if (prefix >= 40 && prefix <= 48) return 'BA'
+    if (prefix >= 49 && prefix <= 49) return 'SE'
+    if (prefix >= 50 && prefix <= 56) return 'PE'
+    if (prefix >= 57 && prefix <= 57) return 'AL'
+    if (prefix >= 58 && prefix <= 58) return 'PB'
+    if (prefix >= 59 && prefix <= 59) return 'RN'
+    if (prefix >= 60 && prefix <= 63) return 'CE'
+    if (prefix >= 64 && prefix <= 64) return 'PI'
+    if (prefix >= 65 && prefix <= 65) return 'MA'
+    if (prefix >= 66 && prefix <= 68) return 'PA'
+    if (prefix >= 69 && prefix <= 69) return 'AM'
+    if (prefix >= 70 && prefix <= 73) return 'DF'
+    if (prefix >= 74 && prefix <= 76) return 'GO'
+    if (prefix >= 77 && prefix <= 77) return 'TO'
+    if (prefix >= 78 && prefix <= 78) return 'MT'
+    if (prefix >= 79 && prefix <= 79) return 'MS'
+    if (prefix >= 80 && prefix <= 87) return 'PR'
+    if (prefix >= 88 && prefix <= 89) return 'SC'
+    if (prefix >= 90 && prefix <= 99) return 'RS'
+    if (prefix >= 1 && prefix <= 9) return 'SP'
+    return null
+}
 import { dictionaries, Locale, defaultLocale } from '@/lib/i18n'
 
 type Step = 'address' | 'shipping' | 'payment'
@@ -121,8 +150,21 @@ export default function CheckoutPage() {
                 if (data.bairro) addressForm.setValue('neighborhood', data.bairro)
                 if (data.localidade) addressForm.setValue('city', data.localidade)
                 if (data.uf) addressForm.setValue('state', data.uf)
+                toast.success('Endereço encontrado!')
+            } else {
+                const stateFromCep = getCepState(clean)
+                if (stateFromCep) {
+                    addressForm.setValue('state', stateFromCep)
+                    toast.info('CEP genérico — estado preenchido. Preencha os demais campos.')
+                } else {
+                    toast.warning('CEP não encontrado. Preencha o endereço manualmente.')
+                }
             }
-        } catch { } finally {
+        } catch {
+            const stateFromCep = getCepState(clean)
+            if (stateFromCep) addressForm.setValue('state', stateFromCep)
+            toast.warning('Não foi possível buscar o CEP. Preencha o endereço manualmente.')
+        } finally {
             setCepLoading(false)
         }
     }, [addressForm])

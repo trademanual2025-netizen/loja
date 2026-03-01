@@ -214,7 +214,7 @@ export default function AdminSettings() {
                                         <li>Acesse <a href="https://dashboard.stripe.com/webhooks" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>dashboard.stripe.com/webhooks</a></li>
                                         <li>Clique em <strong>Add endpoint</strong></li>
                                         <li>URL: <code style={{ background: 'var(--bg)', padding: '2px 6px', borderRadius: 4 }}>{typeof window !== 'undefined' ? window.location.origin : 'https://seudominio.com'}/api/webhooks/stripe</code></li>
-                                        <li>Evento: <strong>payment_intent.succeeded</strong></li>
+                                        <li>Eventos: <strong>payment_intent.succeeded</strong>, <strong>payment_intent.payment_failed</strong>, <strong>charge.refunded</strong></li>
                                         <li>Copie o <strong>Signing secret</strong> e cole acima</li>
                                     </ol>
                                 </div>

@@ -31,6 +31,14 @@ async function verifyMPSignature(req: NextRequest, body: string): Promise<boolea
     return hmac === hash
 }
 
+const MP_STATUS_MAP: Record<string, string> = {
+    approved: 'PAID',
+    rejected: 'CANCELLED',
+    cancelled: 'CANCELLED',
+    refunded: 'REFUNDED',
+    charged_back: 'REFUNDED',
+}
+
 export async function POST(req: NextRequest) {
     const rawBody = await req.text()
     let body: any
@@ -62,24 +70,53 @@ export async function POST(req: NextRequest) {
         const payment = new Payment(client)
         const paymentData = await payment.get({ id: String(paymentId) })
 
-        if (paymentData.status === 'approved') {
-            const order = await prisma.order.findFirst({
-                where: { gatewayId: String(paymentId) },
-                include: { user: true, items: { include: { product: true } } },
-            })
-
-            if (order && order.status !== 'PAID') {
-                const updated = await prisma.order.update({
-                    where: { id: order.id },
-                    data: { status: 'PAID' },
-                    include: { user: true, items: { include: { product: true } } },
-                })
-                decreaseStock(updated.items).catch((err) => { console.error('[MP Webhook] Erro estoque:', err) })
-                dispatchBuyerWebhook(updated).catch((err) => { console.error('[MP Webhook] Erro webhook:', err) })
-            }
+        const newStatus = MP_STATUS_MAP[paymentData.status || '']
+        if (!newStatus) {
+            console.log(`[MP Webhook] Status "${paymentData.status}" não mapeado, ignorando.`)
+            return NextResponse.json({ ok: true })
         }
+
+        const order = await prisma.order.findFirst({
+            where: { gatewayId: String(paymentId) },
+            include: { user: true, items: { include: { product: true } } },
+        })
+
+        if (!order) {
+            console.warn(`[MP Webhook] Pedido não encontrado para gatewayId ${paymentId}`)
+            return NextResponse.json({ ok: true })
+        }
+
+        if (order.status === newStatus) {
+            return NextResponse.json({ ok: true })
+        }
+
+        let existingGw: Record<string, unknown> = {}
+        try { if (order.gatewayData) existingGw = JSON.parse(order.gatewayData) } catch {}
+
+        const updatedGw = {
+            ...existingGw,
+            lastWebhookStatus: paymentData.status,
+            lastWebhookAt: new Date().toISOString(),
+            statusDetail: paymentData.status_detail || existingGw.statusDetail,
+        }
+
+        const updated = await prisma.order.update({
+            where: { id: order.id },
+            data: {
+                status: newStatus,
+                gatewayData: JSON.stringify(updatedGw),
+            },
+            include: { user: true, items: { include: { product: true } } },
+        })
+
+        if (newStatus === 'PAID') {
+            decreaseStock(updated.items).catch((err) => { console.error('[MP Webhook] Erro estoque:', err) })
+            dispatchBuyerWebhook(updated).catch((err) => { console.error('[MP Webhook] Erro webhook:', err) })
+        }
+
+        console.log(`[MP Webhook] Pedido ${order.id} atualizado: ${order.status} → ${newStatus}`)
     } catch (err) {
-        console.error('MP Webhook error:', err)
+        console.error('[MP Webhook] Error:', err)
     }
 
     return NextResponse.json({ ok: true })

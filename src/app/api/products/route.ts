@@ -23,6 +23,7 @@ export async function GET(req: NextRequest) {
                 comparePrice: true,
                 images: true,
                 stock: true,
+                variants: { select: { id: true } },
             },
             orderBy: { createdAt: 'desc' },
             skip: (page - 1) * limit,

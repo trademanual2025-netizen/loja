@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ShoppingCart } from 'lucide-react'
 import { useCart } from '@/lib/cart'
+import { useRouter } from 'next/navigation'
 import { fbTrackAddToCart } from '@/components/tracking/FacebookPixel'
 import { gtagAddToCart } from '@/components/tracking/GoogleAds'
 import { toast } from 'sonner'
@@ -17,13 +18,21 @@ interface Product {
     comparePrice?: number | null
     images: string[]
     stock: number
+    variants?: { id: string }[]
 }
 
 export function ProductCard({ product, dict, locale = 'pt' }: { product: Product, dict?: any, locale?: Locale }) {
     const addItem = useCart((s) => s.addItem)
+    const router = useRouter()
+    const hasVariants = product.variants && product.variants.length > 0
 
     function handleAdd(e: React.MouseEvent) {
         e.preventDefault()
+        if (hasVariants) {
+            router.push(`/produto/${product.slug}`)
+            toast.info(locale === 'pt' ? 'Selecione as opções do produto' : locale === 'en' ? 'Select product options' : 'Seleccione las opciones')
+            return
+        }
         addItem({
             id: product.id,
             name: product.name,
@@ -85,7 +94,7 @@ export function ProductCard({ product, dict, locale = 'pt' }: { product: Product
                         disabled={product.stock === 0}
                     >
                         <ShoppingCart size={16} />
-                        {product.stock === 0 ? 'Esgotado' : (dict ? dict.addToCart : 'Adicionar ao Carrinho')}
+                        {product.stock === 0 ? 'Esgotado' : hasVariants ? (locale === 'pt' ? 'Ver Opções' : locale === 'en' ? 'View Options' : 'Ver Opciones') : (dict ? dict.addToCart : 'Adicionar ao Carrinho')}
                     </button>
                 </div>
             </div>

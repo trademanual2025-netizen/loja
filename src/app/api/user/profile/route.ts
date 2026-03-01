@@ -44,6 +44,8 @@ export async function GET(req: NextRequest) {
                     id: true,
                     status: true,
                     total: true,
+                    gateway: true,
+                    gatewayData: true,
                     createdAt: true,
                     trackingCode: true,
                     trackingUrl: true,

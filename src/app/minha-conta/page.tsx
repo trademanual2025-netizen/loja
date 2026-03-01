@@ -20,6 +20,8 @@ interface Order {
     id: string
     status: string
     total: number
+    gateway: string
+    gatewayData: string | null
     createdAt: string
     trackingCode: string | null
     trackingUrl: string | null
@@ -278,6 +280,22 @@ export default function MinhaContaPage() {
                                     ))}
                                 </div>
                                 <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                    {order.status === 'PENDING' && (() => {
+                                        let gd: Record<string, any> = {}
+                                        try { if (order.gatewayData) gd = JSON.parse(order.gatewayData) } catch {}
+                                        const pm = gd.paymentMethod || ''
+                                        const isPix = pm === 'pix'
+                                        const isBoleto = pm === 'boleto'
+                                        return (isPix || isBoleto) ? (
+                                            <div style={{ padding: '10px 14px', background: 'rgba(234,179,8,0.08)', borderRadius: 8, border: '1px solid rgba(234,179,8,0.2)', fontSize: '0.82rem', color: '#d97706' }}>
+                                                <strong>{isPix ? '⏳ Aguardando Pix' : '⏳ Aguardando Boleto'}</strong>
+                                                <span style={{ margin: '0 6px' }}>·</span>
+                                                <Link href={`/pedido/${order.id}`} style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>
+                                                    Ver dados de pagamento →
+                                                </Link>
+                                            </div>
+                                        ) : null
+                                    })()}
                                     {(order.trackingCode || order.shippingNote) && (
                                         <div style={{ padding: '12px 14px', background: 'rgba(34,197,94,0.08)', borderRadius: 10, border: '1px solid rgba(34,197,94,0.2)' }}>
                                             <p style={{ fontSize: '0.78rem', fontWeight: 700, color: '#22c55e', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}>

@@ -74,12 +74,29 @@ export async function POST(req: NextRequest) {
 
         const mpPayment = await payment.create({ body: requestData })
 
-        // Criar pedido no banco
+        const gwData: Record<string, unknown> = {
+            paymentMethod: mpPayment.payment_method_id,
+            statusDetail: mpPayment.status_detail,
+        }
+        if (mpPayment.point_of_interaction?.transaction_data) {
+            const txData = mpPayment.point_of_interaction.transaction_data
+            gwData.pixQrCode = txData.qr_code || null
+            gwData.pixQrCodeBase64 = txData.qr_code_base64 || null
+            gwData.ticketUrl = txData.ticket_url || null
+        }
+        if (mpPayment.transaction_details?.external_resource_url) {
+            gwData.boletoUrl = mpPayment.transaction_details.external_resource_url
+        }
+        if (mpPayment.date_of_expiration) {
+            gwData.expiresAt = mpPayment.date_of_expiration
+        }
+
         const order = await prisma.order.create({
             data: {
                 userId: user.id,
                 gateway: 'mercadopago',
                 gatewayId: String(mpPayment.id),
+                gatewayData: JSON.stringify(gwData),
                 status: mpPayment.status === 'approved' ? 'PAID' : 'PENDING',
                 subtotal,
                 shippingCost: shipping,

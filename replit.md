@@ -83,3 +83,6 @@ Loja online construída com Next.js 16, Prisma 7, PostgreSQL (Neon) e TailwindCS
 - Carrinho do cliente sincronizado com servidor via `/api/user/sync-cart` (debounce 2s)
 - Campo `cartData` (JSON) no model User armazena itens do carrinho do usuário logado
 - Admin Leads exibe produtos do carrinho de cada lead com detalhes (nome, imagem, variante, quantidade, total)
+- Campo `gatewayData` (JSON string) no model Order armazena dados do gateway de pagamento (PIX QR code, boleto URL, validade, status_detail)
+- Componente `PaymentInfo` exibe dados de pagamento na página do pedido (QR Code Pix com cópia, link boleto, status cartão, countdown de expiração)
+- Página minha-conta mostra indicadores de pagamento pendente (Pix/Boleto) com link para ver dados de pagamento

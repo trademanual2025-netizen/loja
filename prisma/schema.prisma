@@ -101,6 +101,7 @@ model Order {
   status          OrderStatus @default(PENDING)
   gateway         String
   gatewayId       String?
+  gatewayData     String?
   subtotal        Float
   shippingCost    Float       @default(0)
   total           Float

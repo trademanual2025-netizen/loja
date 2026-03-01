@@ -90,11 +90,24 @@ export async function POST(req: NextRequest) {
             dispatchBuyerWebhook(order).catch(() => { })
         }
 
-        return NextResponse.json({
+        const response: Record<string, unknown> = {
             orderId: order.id,
             status: mpPayment.status,
             statusDetail: mpPayment.status_detail,
-        })
+        }
+
+        if (mpPayment.point_of_interaction?.transaction_data) {
+            const txData = mpPayment.point_of_interaction.transaction_data
+            response.pixQrCode = txData.qr_code || null
+            response.pixQrCodeBase64 = txData.qr_code_base64 || null
+            response.ticketUrl = txData.ticket_url || null
+        }
+
+        if (mpPayment.transaction_details?.external_resource_url) {
+            response.boletoUrl = mpPayment.transaction_details.external_resource_url
+        }
+
+        return NextResponse.json(response)
     } catch (err: unknown) {
         console.error('[MercadoPago] Error:', err)
         let msg = 'Erro ao processar pagamento.'

@@ -22,6 +22,9 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
     const [isReady, setIsReady] = useState(false)
     const [pendingOrderId, setPendingOrderId] = useState<string | null>(null)
     const [pendingStatus, setPendingStatus] = useState<'pix' | 'boleto' | 'other' | null>(null)
+    const [pixData, setPixData] = useState<{ qrCode: string | null; qrCodeBase64: string | null } | null>(null)
+    const [boletoUrl, setBoletoUrl] = useState<string | null>(null)
+    const [pixCopied, setPixCopied] = useState(false)
     const { clearCart } = useCart()
     const router = useRouter()
 
@@ -84,10 +87,14 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
                         clearCart()
                         router.push(`/pedido/${data.orderId}`)
                     } else {
-                        // Pagamento pendente (Pix QR ou Boleto) 
-                        // → NÃO redirecionar: o Brick exibe o QR/código automaticamente
                         setPendingOrderId(data.orderId)
                         setPendingStatus(isPix ? 'pix' : isBoleto ? 'boleto' : 'other')
+                        if (isPix && (data.pixQrCode || data.pixQrCodeBase64)) {
+                            setPixData({ qrCode: data.pixQrCode, qrCodeBase64: data.pixQrCodeBase64 })
+                        }
+                        if (isBoleto && (data.boletoUrl || data.ticketUrl)) {
+                            setBoletoUrl(data.boletoUrl || data.ticketUrl)
+                        }
                     }
 
                     resolve()
@@ -106,6 +113,118 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
 
     const onReady = async () => { }
 
+    if (pendingOrderId) {
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                {pendingStatus === 'pix' && pixData && (
+                    <div style={{
+                        padding: '24px',
+                        background: 'var(--bg-card2)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 12,
+                        textAlign: 'center',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 16,
+                    }}>
+                        <p style={{ fontWeight: 700, fontSize: '1.1rem' }}>Pix gerado com sucesso!</p>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Escaneie o QR Code abaixo ou copie o código Pix para pagar.</p>
+                        {pixData.qrCodeBase64 && (
+                            <img
+                                src={`data:image/png;base64,${pixData.qrCodeBase64}`}
+                                alt="QR Code Pix"
+                                style={{ width: 220, height: 220, borderRadius: 8, background: '#fff', padding: 8 }}
+                            />
+                        )}
+                        {pixData.qrCode && (
+                            <div style={{ width: '100%', maxWidth: 400 }}>
+                                <textarea
+                                    readOnly
+                                    value={pixData.qrCode}
+                                    style={{
+                                        width: '100%',
+                                        padding: 10,
+                                        borderRadius: 8,
+                                        border: '1px solid var(--border)',
+                                        background: 'var(--bg-card)',
+                                        color: 'var(--text)',
+                                        fontSize: '0.75rem',
+                                        resize: 'none',
+                                        height: 60,
+                                    }}
+                                />
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(pixData.qrCode || '')
+                                        setPixCopied(true)
+                                        toast.success('Código Pix copiado!')
+                                        setTimeout(() => setPixCopied(false), 3000)
+                                    }}
+                                    className="btn btn-primary"
+                                    style={{ marginTop: 8, width: '100%' }}
+                                >
+                                    {pixCopied ? 'Copiado!' : 'Copiar código Pix'}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {pendingStatus === 'boleto' && (
+                    <div style={{
+                        padding: '24px',
+                        background: 'var(--bg-card2)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 12,
+                        textAlign: 'center',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 16,
+                    }}>
+                        <p style={{ fontWeight: 700, fontSize: '1.1rem' }}>Boleto gerado com sucesso!</p>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Clique abaixo para visualizar e pagar o boleto.</p>
+                        {boletoUrl && (
+                            <a href={boletoUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ width: '100%', maxWidth: 300 }}>
+                                Abrir Boleto
+                            </a>
+                        )}
+                    </div>
+                )}
+
+                {pendingStatus === 'other' && (
+                    <div style={{
+                        padding: '20px',
+                        background: 'var(--bg-card2)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 12,
+                        textAlign: 'center',
+                    }}>
+                        <p style={{ fontWeight: 700 }}>Pagamento em processamento...</p>
+                    </div>
+                )}
+
+                <div style={{
+                    padding: '16px 20px',
+                    background: 'var(--bg-card2)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 10,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 10,
+                }}>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                        Seu pedido foi registrado. O status será atualizado automaticamente após a confirmação do pagamento.
+                    </p>
+                    <Link href={`/pedido/${pendingOrderId}`} className="btn btn-secondary" style={{ fontSize: '0.85rem', width: 'fit-content' }}>
+                        Ver meu pedido
+                    </Link>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div>
             <Payment
@@ -115,32 +234,6 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
                 onReady={onReady}
                 onError={onError}
             />
-
-            {/* Banner exibido APÓS submissão de Pix ou Boleto */}
-            {pendingOrderId && (
-                <div style={{
-                    marginTop: 20,
-                    padding: '16px 20px',
-                    background: 'var(--bg-card2)',
-                    border: '1px solid var(--border)',
-                    borderRadius: 10,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 10,
-                }}>
-                    <p style={{ fontWeight: 700, fontSize: '0.95rem' }}>
-                        {pendingStatus === 'pix' && '📱 Pix gerado! Escaneie o QR Code acima para pagar.'}
-                        {pendingStatus === 'boleto' && '🧾 Boleto gerado! Copie o código acima ou baixe o PDF.'}
-                        {pendingStatus === 'other' && '⏳ Pagamento em processamento...'}
-                    </p>
-                    <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                        Seu pedido foi registrado. O status será atualizado automaticamente após a confirmação do pagamento.
-                    </p>
-                    <Link href={`/pedido/${pendingOrderId}`} className="btn btn-secondary" style={{ fontSize: '0.85rem', width: 'fit-content' }}>
-                        Ver meu pedido →
-                    </Link>
-                </div>
-            )}
         </div>
     )
 }

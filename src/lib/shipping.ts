@@ -45,7 +45,14 @@ async function calcCorreios(
     })
 
     const url = `https://ws.correios.com.br/calculador/CalcPrecoPrazo.aspx?${params.toString()}`
-    const res = await fetch(url, { next: { revalidate: 300 } })
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 8000)
+    let res: Response
+    try {
+        res = await fetch(url, { signal: controller.signal, next: { revalidate: 300 } })
+    } finally {
+        clearTimeout(timeout)
+    }
     if (!res.ok) throw new Error('Correios API error')
     const xml = await res.text()
 
@@ -125,6 +132,7 @@ export async function calculateShipping(
             SETTINGS_KEYS.SHIPPING_CORREIOS_USER,
             SETTINGS_KEYS.SHIPPING_CORREIOS_PASS,
             SETTINGS_KEYS.SHIPPING_FREE_ABOVE,
+            SETTINGS_KEYS.SHIPPING_FIXED_VALUE,
         ])
 
         const originCep = cfg[SETTINGS_KEYS.SHIPPING_ORIGIN_CEP]

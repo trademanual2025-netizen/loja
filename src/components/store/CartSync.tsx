@@ -8,16 +8,22 @@ export function CartSync() {
     const prevRef = useRef<string>('')
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const skipNextUpload = useRef(false)
-    const isEmpty = items.length === 0
+    const hasLoadedFromServer = useRef(false)
+    const userHasInteracted = useRef(false)
 
     useEffect(() => {
-        if (!isEmpty) return
+        if (hasLoadedFromServer.current) return
+        if (items.length > 0) {
+            hasLoadedFromServer.current = true
+            return
+        }
 
         let cancelled = false
         fetch('/api/user/sync-cart')
-            .then(res => res.json())
+            .then(res => res.ok ? res.json() : null)
             .then(data => {
-                if (cancelled) return
+                if (cancelled || !data) return
+                hasLoadedFromServer.current = true
                 if (Array.isArray(data.items) && data.items.length > 0) {
                     skipNextUpload.current = true
                     setItems(data.items.map((item: any) => ({
@@ -32,10 +38,10 @@ export function CartSync() {
                     })))
                 }
             })
-            .catch(() => {})
+            .catch(() => { hasLoadedFromServer.current = true })
 
         return () => { cancelled = true }
-    }, [isEmpty])
+    }, [])
 
     useEffect(() => {
         if (skipNextUpload.current) {
@@ -55,6 +61,8 @@ export function CartSync() {
         if (serialized === prevRef.current) return
         prevRef.current = serialized
 
+        if (!hasLoadedFromServer.current) return
+
         if (timerRef.current) clearTimeout(timerRef.current)
 
         timerRef.current = setTimeout(() => {
@@ -63,7 +71,7 @@ export function CartSync() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ items }),
             }).catch(() => {})
-        }, 2000)
+        }, 1000)
     }, [items])
 
     return null

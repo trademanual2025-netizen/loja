@@ -109,7 +109,7 @@ export default async function RootLayout({
         <ThemeProvider>
           {fbEnabled && fbPixelId && <FacebookPixel pixelId={fbPixelId} />}
           {googleEnabled && googleAdsId && <GoogleAds adsId={googleAdsId} />}
-          <Toaster theme="dark" position="top-right" />
+          <Toaster theme="dark" position="bottom-center" />
           <CartSync />
           {children}
         </ThemeProvider>

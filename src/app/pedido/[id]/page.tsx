@@ -1,9 +1,11 @@
 import { prisma } from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { CheckCircle2, Clock, AlertCircle, Copy } from 'lucide-react'
+import { CheckCircle2, Clock, AlertCircle } from 'lucide-react'
 import { dictionaries, Locale, defaultLocale, translateDb } from '@/lib/i18n'
 import { PaymentInfo } from '@/components/store/PaymentInfo'
+import { ChangePaymentMethod } from '@/components/store/ChangePaymentMethod'
+import { getAuthUser } from '@/lib/auth'
 
 export default async function PedidoPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
@@ -33,12 +35,15 @@ export default async function PedidoPage({ params }: { params: Promise<{ id: str
             trackingUrl: true,
             shippingNote: true,
             user: { select: { name: true } },
+            userId: true,
             items: {
                 select: {
                     id: true,
                     quantity: true,
                     price: true,
-                    product: { select: { name: true } },
+                    variantId: true,
+                    product: { select: { id: true, name: true, slug: true, images: true } },
+                    variant: { select: { name: true } },
                 },
             },
         },
@@ -46,10 +51,24 @@ export default async function PedidoPage({ params }: { params: Promise<{ id: str
 
     if (!order) redirect('/')
 
+    const authUser = await getAuthUser()
+    const isOwner = authUser?.id === order.userId
+
     let gatewayData: Record<string, any> = {}
     if (order.gatewayData) {
         try { gatewayData = JSON.parse(order.gatewayData) } catch {}
     }
+
+    const orderItemsForCart = order.items.map(item => ({
+        id: item.product.id,
+        name: item.product.name,
+        slug: item.product.slug,
+        price: item.price,
+        image: item.product.images?.[0] || '',
+        quantity: item.quantity,
+        variantId: item.variantId || undefined,
+        variantName: item.variant?.name || undefined,
+    }))
 
     return (
         <div style={{ maxWidth: 600, margin: '0 auto', padding: '60px 16px', textAlign: 'center' }}>
@@ -89,7 +108,19 @@ export default async function PedidoPage({ params }: { params: Promise<{ id: str
                 />
             )}
 
-            {order.status === 'CANCELLED' && gatewayData.statusDetail && (
+            {order.status === 'PENDING' && isOwner && (
+                <ChangePaymentMethod orderId={order.id} orderItems={orderItemsForCart} />
+            )}
+
+            {order.status === 'CANCELLED' && gatewayData.cancelledReason === 'user_changed_payment_method' && (
+                <div className="card" style={{ textAlign: 'left', marginBottom: 24, border: '1px solid rgba(139,92,246,0.3)', background: 'rgba(139,92,246,0.06)' }}>
+                    <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
+                        Este pedido foi cancelado porque você optou por alterar a forma de pagamento. Os produtos foram restaurados ao carrinho para finalizar um novo pedido.
+                    </p>
+                </div>
+            )}
+
+            {order.status === 'CANCELLED' && gatewayData.statusDetail && gatewayData.cancelledReason !== 'user_changed_payment_method' && (
                 <div className="card" style={{ textAlign: 'left', marginBottom: 24, border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.06)' }}>
                     <p style={{ fontWeight: 700, fontSize: '0.85rem', color: '#ef4444', marginBottom: 8 }}>Motivo</p>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{getStatusDetailLabel(gatewayData.statusDetail)}</p>

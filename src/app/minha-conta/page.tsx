@@ -251,6 +251,9 @@ export default function MinhaContaPage() {
                     ) : profile.orders.map(order => {
                         const statusLevelKey = order.status === 'PENDING' ? 'statusPending' : order.status === 'PAID' ? 'statusPaid' : order.status === 'CANCELLED' ? 'statusCancelled' : 'statusRefunded'
                         const statusObj = STATUS_LABELS[order.status] || { label: order.status, color: 'var(--text-muted)' }
+                        let orderGd: Record<string, any> = {}
+                        try { if (order.gatewayData) orderGd = JSON.parse(order.gatewayData) } catch {}
+                        const wasPmChange = orderGd.cancelledReason === 'user_changed_payment_method'
 
                         return (
                             <div key={order.id} className="card">
@@ -260,7 +263,11 @@ export default function MinhaContaPage() {
                                         <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>{new Date(order.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                        <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.8rem', fontWeight: 700, background: `${statusObj.color}22`, color: statusObj.color }}>{dict.profile[statusLevelKey] || statusObj.label}</span>
+                                        {wasPmChange ? (
+                                            <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.8rem', fontWeight: 700, background: 'rgba(139,92,246,0.12)', color: '#8b5cf6' }}>Alterou pagamento</span>
+                                        ) : (
+                                            <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.8rem', fontWeight: 700, background: `${statusObj.color}22`, color: statusObj.color }}>{dict.profile[statusLevelKey] || statusObj.label}</span>
+                                        )}
                                         <span style={{ fontWeight: 800, color: 'var(--primary)' }}>R$ {order.total.toFixed(2).replace('.', ',')}</span>
                                     </div>
                                 </div>
@@ -286,15 +293,23 @@ export default function MinhaContaPage() {
                                         const pm = gd.paymentMethod || ''
                                         const isPix = pm === 'pix'
                                         const isBoleto = pm === 'boleto'
-                                        return (isPix || isBoleto) ? (
+                                        return (
                                             <div style={{ padding: '10px 14px', background: 'rgba(234,179,8,0.08)', borderRadius: 8, border: '1px solid rgba(234,179,8,0.2)', fontSize: '0.82rem', color: '#d97706' }}>
-                                                <strong>{isPix ? '⏳ Aguardando Pix' : '⏳ Aguardando Boleto'}</strong>
-                                                <span style={{ margin: '0 6px' }}>·</span>
+                                                {(isPix || isBoleto) && (
+                                                    <>
+                                                        <strong>{isPix ? '⏳ Aguardando Pix' : '⏳ Aguardando Boleto'}</strong>
+                                                        <span style={{ margin: '0 6px' }}>·</span>
+                                                    </>
+                                                )}
                                                 <Link href={`/pedido/${order.id}`} style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>
-                                                    Ver dados de pagamento →
+                                                    {(isPix || isBoleto) ? 'Ver dados de pagamento' : 'Ver pedido'} →
+                                                </Link>
+                                                <span style={{ margin: '0 6px' }}>·</span>
+                                                <Link href={`/pedido/${order.id}`} style={{ color: 'var(--text-muted)', fontWeight: 500, textDecoration: 'none', fontSize: '0.8rem' }}>
+                                                    Alterar forma de pagamento
                                                 </Link>
                                             </div>
-                                        ) : null
+                                        )
                                     })()}
                                     {(order.trackingCode || order.shippingNote) && (
                                         <div style={{ padding: '12px 14px', background: 'rgba(34,197,94,0.08)', borderRadius: 10, border: '1px solid rgba(34,197,94,0.2)' }}>

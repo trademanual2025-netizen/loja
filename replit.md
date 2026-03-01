@@ -86,3 +86,7 @@ Loja online construída com Next.js 16, Prisma 7, PostgreSQL (Neon) e TailwindCS
 - Campo `gatewayData` (JSON string) no model Order armazena dados do gateway de pagamento (PIX QR code, boleto URL, validade, status_detail)
 - Componente `PaymentInfo` exibe dados de pagamento na página do pedido (QR Code Pix com cópia, link boleto, status cartão, countdown de expiração)
 - Página minha-conta mostra indicadores de pagamento pendente (Pix/Boleto) com link para ver dados de pagamento
+- Pedidos pendentes podem ser cancelados pelo usuário para alterar forma de pagamento: cancela o pedido, restaura itens no carrinho e redireciona ao checkout
+- API `/api/orders/cancel` cancela pedido PENDING do próprio usuário e retorna itens para o carrinho
+- Componente `ChangePaymentMethod` com confirmação em 2 passos (botão → card de confirmação → execução)
+- Pedidos cancelados por troca de pagamento exibem badge "Alterou pagamento" (roxo) em vez de "Cancelado" na minha-conta

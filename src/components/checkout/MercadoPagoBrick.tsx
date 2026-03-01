@@ -57,58 +57,53 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
     }
 
     const onSubmit = async ({ selectedPaymentMethod, formData }: any) => {
-        if (isProcessing) return Promise.reject()
+        if (isProcessing) return
         setIsProcessing(true)
-        return new Promise<void>((resolve, reject) => {
-            fetch('/api/checkout/mercadopago', {
+
+        try {
+            const res = await fetch('/api/checkout/mercadopago', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ items, address, shippingCost, formData }),
             })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.error) {
-                        toast.error(data.error)
-                        setIsProcessing(false)
-                        reject()
-                        return
-                    }
+            const data = await res.json()
 
-                    const isApproved = data.status === 'approved'
-                    const isPix = selectedPaymentMethod === 'bank_transfer' || data.statusDetail?.includes('pix')
-                    const isBoleto = selectedPaymentMethod === 'ticket'
+            if (data.error) {
+                toast.error(data.error)
+                setIsProcessing(false)
+                return
+            }
 
-                    if (isApproved) {
-                        // Pagamento aprovado imediatamente (cartão de crédito/débito)
-                        const productIds = items.map((i) => i.id)
-                        fbTrackPurchase(data.orderId, totalAmount, productIds)
-                        fetch('/api/tracking/capi', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ event_name: 'Purchase', value: totalAmount, order_id: data.orderId }),
-                        }).catch(() => { })
-                        if (adsConfig) gtagPurchase(data.orderId, totalAmount, adsConfig.adsLabel, adsConfig.adsId, items)
-                        clearCart()
-                        router.push(`/pedido/${data.orderId}`)
-                    } else {
-                        setPendingOrderId(data.orderId)
-                        setPendingStatus(isPix ? 'pix' : isBoleto ? 'boleto' : 'other')
-                        if (isPix && (data.pixQrCode || data.pixQrCodeBase64)) {
-                            setPixData({ qrCode: data.pixQrCode, qrCodeBase64: data.pixQrCodeBase64 })
-                        }
-                        if (isBoleto && (data.boletoUrl || data.ticketUrl)) {
-                            setBoletoUrl(data.boletoUrl || data.ticketUrl)
-                        }
-                    }
+            const isApproved = data.status === 'approved'
+            const isPix = selectedPaymentMethod === 'bank_transfer' || data.statusDetail?.includes('pix')
+            const isBoleto = selectedPaymentMethod === 'ticket'
 
-                    resolve()
-                })
-                .catch(() => {
-                    toast.error('Erro ao processar pagamento.')
-                    setIsProcessing(false)
-                    reject()
-                })
-        })
+            if (isApproved) {
+                const productIds = items.map((i: any) => i.id)
+                fbTrackPurchase(data.orderId, totalAmount, productIds)
+                fetch('/api/tracking/capi', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ event_name: 'Purchase', value: totalAmount, order_id: data.orderId }),
+                }).catch(() => { })
+                if (adsConfig) gtagPurchase(data.orderId, totalAmount, adsConfig.adsLabel, adsConfig.adsId, items)
+                clearCart()
+                router.push(`/pedido/${data.orderId}`)
+            } else {
+                if (isPix && (data.pixQrCode || data.pixQrCodeBase64)) {
+                    setPixData({ qrCode: data.pixQrCode, qrCodeBase64: data.pixQrCodeBase64 })
+                }
+                if (isBoleto && (data.boletoUrl || data.ticketUrl)) {
+                    setBoletoUrl(data.boletoUrl || data.ticketUrl)
+                }
+                setPendingStatus(isPix ? 'pix' : isBoleto ? 'boleto' : 'other')
+                setPendingOrderId(data.orderId)
+                clearCart()
+            }
+        } catch {
+            toast.error('Erro ao processar pagamento.')
+            setIsProcessing(false)
+        }
     }
 
     const onError = async (error: any) => {
@@ -232,13 +227,21 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
 
     return (
         <div>
-            <Payment
-                initialization={initialization}
-                customization={customization as any}
-                onSubmit={onSubmit}
-                onReady={onReady}
-                onError={onError}
-            />
+            {isProcessing && (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '40px 20px' }}>
+                    <span className="spinner" />
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Processando pagamento...</p>
+                </div>
+            )}
+            <div style={{ display: isProcessing ? 'none' : 'block' }}>
+                <Payment
+                    initialization={initialization}
+                    customization={customization as any}
+                    onSubmit={onSubmit}
+                    onReady={onReady}
+                    onError={onError}
+                />
+            </div>
         </div>
     )
 }

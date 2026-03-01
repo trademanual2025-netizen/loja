@@ -18,12 +18,14 @@ interface Props {
 
 export function StoreHeader({ storeName, logoUrl, user, dict }: Props) {
     const itemCount = useCart((s) => s.itemCount())
+    const clearCart = useCart((s) => s.clearCart)
     const router = useRouter()
     const [mounted, setMounted] = useState(false)
     useEffect(() => { setMounted(true) }, [])
 
     async function handleLogout() {
         await fetch('/api/auth/logout', { method: 'POST' })
+        clearCart()
         router.refresh()
     }
 

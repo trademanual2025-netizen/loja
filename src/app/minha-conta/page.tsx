@@ -7,6 +7,7 @@ import { User, ShoppingBag, KeyRound, Camera, MapPin, Phone, Mail, LogOut, Truck
 import Link from 'next/link'
 import { getCookie } from 'cookies-next'
 import { dictionaries, Locale, defaultLocale, translateDb } from '@/lib/i18n'
+import { useCart } from '@/lib/cart'
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
     PENDING: { label: 'Aguardando', color: '#f59e0b' },
@@ -117,8 +118,11 @@ export default function MinhaContaPage() {
         loadProfile()
     }
 
+    const clearCart = useCart((s) => s.clearCart)
+
     async function handleLogout() {
         await fetch('/api/auth/logout', { method: 'POST' })
+        clearCart()
         router.push('/')
         router.refresh()
     }

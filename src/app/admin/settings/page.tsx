@@ -181,8 +181,20 @@ export default function AdminSettings() {
                         <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8, marginBottom: 8 }}>
                             <p style={{ fontWeight: 700, marginBottom: 12 }}>🟡 Mercado Pago</p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                <F settings={settings} set={set} label="Public Key" k="mp_public_key" placeholder="TEST-xxxx" />
-                                <F settings={settings} set={set} label="Access Token" k="mp_access_token" type="password" placeholder="TEST-xxxx" />
+                                <F settings={settings} set={set} label="Public Key" k="mp_public_key" placeholder="APP_USR-xxxx" />
+                                <F settings={settings} set={set} label="Access Token" k="mp_access_token" type="password" placeholder="APP_USR-xxxx" />
+                                <F settings={settings} set={set} label="Webhook Secret" k="mp_webhook_secret" type="password" placeholder="Chave secreta do webhook (opcional)" help="Encontre em: Mercado Pago → Seu negócio → Configurações → Webhooks → Chave secreta. Usado para validar que as notificações vêm do MercadoPago." />
+                                <div style={{ padding: 12, background: 'rgba(234,179,8,0.08)', borderRadius: 8, border: '1px solid rgba(234,179,8,0.2)', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                                    <p style={{ fontWeight: 700, marginBottom: 6, color: '#d97706' }}>⚠️ Configurar Webhook no Painel do MercadoPago</p>
+                                    <p style={{ marginBottom: 6 }}>Para que pagamentos via Pix e Boleto sejam confirmados automaticamente, você precisa cadastrar a URL do webhook no painel do MercadoPago:</p>
+                                    <ol style={{ paddingLeft: 18, marginBottom: 8, lineHeight: 1.8 }}>
+                                        <li>Acesse <a href="https://www.mercadopago.com.br/developers/panel/app" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>mercadopago.com.br/developers</a></li>
+                                        <li>Vá em <strong>Seu negócio → Configurações → Webhooks</strong></li>
+                                        <li>Adicione a URL: <code style={{ background: 'var(--bg)', padding: '2px 6px', borderRadius: 4 }}>{typeof window !== 'undefined' ? window.location.origin : 'https://seudominio.com'}/api/webhooks/mercadopago</code></li>
+                                        <li>Marque o evento <strong>Pagamentos</strong></li>
+                                    </ol>
+                                    <p style={{ fontSize: '0.78rem', opacity: 0.8 }}>Sem o webhook configurado, pedidos Pix e Boleto ficarão como "Pendente" mesmo após o pagamento.</p>
+                                </div>
                                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                                     <input type="checkbox" checked={settings.mp_enabled === 'true'} onChange={e => set('mp_enabled', e.target.checked ? 'true' : 'false')} />
                                     <span style={{ fontSize: '0.88rem' }}>Habilitar Mercado Pago</span>
@@ -194,14 +206,25 @@ export default function AdminSettings() {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                                 <F settings={settings} set={set} label="Public Key" k="stripe_public_key" placeholder="pk_test_..." />
                                 <F settings={settings} set={set} label="Secret Key" k="stripe_secret_key" type="password" placeholder="sk_test_..." />
-                                <F settings={settings} set={set} label="Webhook Secret" k="stripe_webhook_secret" type="password" placeholder="whsec_..." />
+                                <F settings={settings} set={set} label="Webhook Secret" k="stripe_webhook_secret" type="password" placeholder="whsec_..." help="Encontre em: Stripe Dashboard → Developers → Webhooks → Signing secret" />
+                                <div style={{ padding: 12, background: 'rgba(99,102,241,0.08)', borderRadius: 8, border: '1px solid rgba(99,102,241,0.25)', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                                    <p style={{ fontWeight: 700, marginBottom: 6, color: 'var(--primary)' }}>ℹ️ Configurar Webhook no Stripe</p>
+                                    <p style={{ marginBottom: 6 }}>Para confirmar pagamentos assíncronos (Pix, Boleto), configure o webhook no Stripe:</p>
+                                    <ol style={{ paddingLeft: 18, marginBottom: 8, lineHeight: 1.8 }}>
+                                        <li>Acesse <a href="https://dashboard.stripe.com/webhooks" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>dashboard.stripe.com/webhooks</a></li>
+                                        <li>Clique em <strong>Add endpoint</strong></li>
+                                        <li>URL: <code style={{ background: 'var(--bg)', padding: '2px 6px', borderRadius: 4 }}>{typeof window !== 'undefined' ? window.location.origin : 'https://seudominio.com'}/api/webhooks/stripe</code></li>
+                                        <li>Evento: <strong>payment_intent.succeeded</strong></li>
+                                        <li>Copie o <strong>Signing secret</strong> e cole acima</li>
+                                    </ol>
+                                </div>
                                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                                     <input type="checkbox" checked={settings.stripe_enabled === 'true'} onChange={e => set('stripe_enabled', e.target.checked ? 'true' : 'false')} />
                                     <span style={{ fontSize: '0.88rem' }}>Habilitar Stripe</span>
                                 </label>
                             </div>
                         </div>
-                        <button className="btn btn-primary" onClick={() => save(['mp_public_key', 'mp_access_token', 'mp_enabled', 'stripe_public_key', 'stripe_secret_key', 'stripe_webhook_secret', 'stripe_enabled'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
+                        <button className="btn btn-primary" onClick={() => save(['mp_public_key', 'mp_access_token', 'mp_webhook_secret', 'mp_enabled', 'stripe_public_key', 'stripe_secret_key', 'stripe_webhook_secret', 'stripe_enabled'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
                     </div>
                 )}
 

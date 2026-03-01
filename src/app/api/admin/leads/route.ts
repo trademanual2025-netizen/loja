@@ -8,7 +8,13 @@ export async function GET(req: NextRequest) {
 
     const [leads, total] = await Promise.all([
         prisma.lead.findMany({
-            include: { user: true },
+            include: {
+                user: {
+                    include: {
+                        orders: { select: { id: true }, take: 1 },
+                    }
+                }
+            },
             orderBy: { createdAt: 'desc' },
             skip: (page - 1) * limit,
             take: limit,
@@ -16,5 +22,26 @@ export async function GET(req: NextRequest) {
         prisma.lead.count(),
     ])
 
-    return NextResponse.json({ leads, total })
+    const leadsWithCart = leads.map(lead => {
+        let cartItems: any[] = []
+        try {
+            if (lead.user.cartData) cartItems = JSON.parse(lead.user.cartData)
+        } catch {}
+
+        return {
+            id: lead.id,
+            source: lead.source,
+            createdAt: lead.createdAt,
+            user: {
+                name: lead.user.name,
+                email: lead.user.email,
+                phone: lead.user.phone,
+                cpf: lead.user.cpf,
+                orders: lead.user.orders,
+                cartItems,
+            }
+        }
+    })
+
+    return NextResponse.json({ leads: leadsWithCart, total })
 }

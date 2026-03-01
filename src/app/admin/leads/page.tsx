@@ -1,13 +1,22 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Users, ShoppingBag, Loader2, Download } from 'lucide-react'
+import { Users, ShoppingBag, Loader2, Download, ChevronDown, ChevronUp, ShoppingCart } from 'lucide-react'
+
+interface CartItem {
+    id: string
+    name: string
+    price: number
+    quantity: number
+    image?: string | null
+    variantName?: string | null
+}
 
 interface Lead {
     id: string
     source: string
     createdAt: string
-    user: { name: string; email: string; phone?: string; cpf?: string; orders?: { id: string }[] }
+    user: { name: string; email: string; phone?: string; cpf?: string; orders?: { id: string }[]; cartItems?: CartItem[] }
 }
 
 export default function AdminLeadsPage() {
@@ -15,6 +24,7 @@ export default function AdminLeadsPage() {
     const [total, setTotal] = useState(0)
     const [page, setPage] = useState(1)
     const [loading, setLoading] = useState(true)
+    const [expandedLead, setExpandedLead] = useState<string | null>(null)
     const LIMIT = 20
 
     const fetchLeads = async () => {
@@ -31,13 +41,20 @@ export default function AdminLeadsPage() {
     const pages = Math.ceil(total / LIMIT)
 
     const exportCSV = () => {
-        const rows = [['Nome', 'Email', 'Telefone', 'CPF', 'Origem', 'Data']]
-        leads.forEach(l => rows.push([l.user.name, l.user.email, l.user.phone || '', l.user.cpf || '', l.source, new Date(l.createdAt).toLocaleDateString('pt-BR')]))
+        const rows = [['Nome', 'Email', 'Telefone', 'CPF', 'Origem', 'Produtos no Carrinho', 'Data']]
+        leads.forEach(l => {
+            const cartStr = (l.user.cartItems || []).map(c => `${c.name} x${c.quantity}`).join('; ')
+            rows.push([l.user.name, l.user.email, l.user.phone || '', l.user.cpf || '', l.source, cartStr, new Date(l.createdAt).toLocaleDateString('pt-BR')])
+        })
         const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n')
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a'); a.href = url; a.download = `leads-${new Date().toISOString().slice(0, 10)}.csv`; a.click()
         URL.revokeObjectURL(url)
+    }
+
+    const toggleExpand = (id: string) => {
+        setExpandedLead(prev => prev === id ? null : id)
     }
 
     return (
@@ -50,7 +67,6 @@ export default function AdminLeadsPage() {
                 <button className="btn btn-secondary" onClick={exportCSV} style={{ flexShrink: 0 }}><Download size={15} /> Exportar CSV</button>
             </div>
 
-            {/* Stats row */}
             <div className="grid-2" style={{ marginBottom: 20 }}>
                 <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px' }}>
                     <div style={{ padding: 10, borderRadius: 10, background: 'rgba(168,85,247,0.15)' }}><Users size={20} color="#a855f7" /></div>
@@ -68,7 +84,6 @@ export default function AdminLeadsPage() {
                 </div>
             </div>
 
-            {/* Table */}
             <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
                 {loading ? (
                     <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}><Loader2 size={24} style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }} /></div>
@@ -82,27 +97,86 @@ export default function AdminLeadsPage() {
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                                 <tr style={{ background: 'var(--bg-card2)', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                                    {['Nome', 'Email', 'Telefone', 'CPF', 'Origem', 'Comprou?', 'Data'].map(h => (
+                                    {['Nome', 'Email', 'Telefone', 'Carrinho', 'Comprou?', 'Data', ''].map(h => (
                                         <th key={h} style={{ textAlign: 'left', padding: '12px 16px' }}>{h}</th>
                                     ))}
                                 </tr>
                             </thead>
                             <tbody>
-                                {leads.map(l => (
-                                    <tr key={l.id} style={{ borderTop: '1px solid var(--border)', fontSize: '0.87rem' }}>
-                                        <td style={{ padding: '12px 16px', fontWeight: 600 }}>{l.user.name}</td>
-                                        <td style={{ padding: '12px 16px', color: 'var(--text-muted)' }}>{l.user.email}</td>
-                                        <td style={{ padding: '12px 16px', color: 'var(--text-muted)', fontFamily: 'monospace', fontSize: '0.83rem' }}>{l.user.phone || '—'}</td>
-                                        <td style={{ padding: '12px 16px', color: 'var(--text-muted)', fontFamily: 'monospace', fontSize: '0.83rem' }}>{l.user.cpf || '—'}</td>
-                                        <td style={{ padding: '12px 16px' }}><span className="badge badge-blue" style={{ fontSize: '0.72rem' }}>{l.source}</span></td>
-                                        <td style={{ padding: '12px 16px' }}>
-                                            {(l.user.orders?.length || 0) > 0
-                                                ? <span className="badge badge-green">Sim</span>
-                                                : <span className="badge badge-yellow">Não</span>}
-                                        </td>
-                                        <td style={{ padding: '12px 16px', color: 'var(--text-muted)', fontSize: '0.8rem' }}>{new Date(l.createdAt).toLocaleDateString('pt-BR')}</td>
-                                    </tr>
-                                ))}
+                                {leads.map(l => {
+                                    const cartItems = l.user.cartItems || []
+                                    const hasCart = cartItems.length > 0
+                                    const isExpanded = expandedLead === l.id
+
+                                    return (
+                                        <tr key={l.id} style={{ borderTop: '1px solid var(--border)', fontSize: '0.87rem' }}>
+                                            <td style={{ padding: '12px 16px', fontWeight: 600, verticalAlign: 'top' }}>{l.user.name}</td>
+                                            <td style={{ padding: '12px 16px', color: 'var(--text-muted)', verticalAlign: 'top' }}>{l.user.email}</td>
+                                            <td style={{ padding: '12px 16px', color: 'var(--text-muted)', fontFamily: 'monospace', fontSize: '0.83rem', verticalAlign: 'top' }}>{l.user.phone || '—'}</td>
+                                            <td style={{ padding: '12px 16px', verticalAlign: 'top' }}>
+                                                {hasCart ? (
+                                                    <div>
+                                                        <button
+                                                            onClick={() => toggleExpand(l.id)}
+                                                            style={{
+                                                                display: 'flex', alignItems: 'center', gap: 6,
+                                                                background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)',
+                                                                borderRadius: 6, padding: '4px 10px', cursor: 'pointer',
+                                                                color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 600
+                                                            }}
+                                                        >
+                                                            <ShoppingCart size={13} />
+                                                            {cartItems.length} {cartItems.length === 1 ? 'produto' : 'produtos'}
+                                                            {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                                                        </button>
+                                                        {isExpanded && (
+                                                            <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                                                {cartItems.map((item, idx) => (
+                                                                    <div key={idx} style={{
+                                                                        display: 'flex', alignItems: 'center', gap: 8,
+                                                                        background: 'var(--bg-card2)', borderRadius: 6, padding: '6px 10px',
+                                                                        fontSize: '0.78rem'
+                                                                    }}>
+                                                                        {item.image && (
+                                                                            <img src={item.image} alt="" style={{ width: 28, height: 28, borderRadius: 4, objectFit: 'cover' }} />
+                                                                        )}
+                                                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                                                            <p style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                                                {item.name}
+                                                                                {item.variantName && <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}> ({item.variantName})</span>}
+                                                                            </p>
+                                                                        </div>
+                                                                        <span style={{ color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>x{item.quantity}</span>
+                                                                        <span style={{ fontWeight: 700, color: 'var(--primary)', whiteSpace: 'nowrap' }}>
+                                                                            R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
+                                                                        </span>
+                                                                    </div>
+                                                                ))}
+                                                                <div style={{
+                                                                    textAlign: 'right', fontSize: '0.78rem', fontWeight: 700,
+                                                                    color: 'var(--primary)', paddingTop: 4
+                                                                }}>
+                                                                    Total: R$ {cartItems.reduce((s, i) => s + i.price * i.quantity, 0).toFixed(2).replace('.', ',')}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Vazio</span>
+                                                )}
+                                            </td>
+                                            <td style={{ padding: '12px 16px', verticalAlign: 'top' }}>
+                                                {(l.user.orders?.length || 0) > 0
+                                                    ? <span className="badge badge-green">Sim</span>
+                                                    : <span className="badge badge-yellow">Não</span>}
+                                            </td>
+                                            <td style={{ padding: '12px 16px', color: 'var(--text-muted)', fontSize: '0.8rem', verticalAlign: 'top' }}>{new Date(l.createdAt).toLocaleDateString('pt-BR')}</td>
+                                            <td style={{ padding: '12px 16px', verticalAlign: 'top' }}>
+                                                <span className="badge badge-blue" style={{ fontSize: '0.72rem' }}>{l.source}</span>
+                                            </td>
+                                        </tr>
+                                    )
+                                })}
                             </tbody>
                         </table>
                     </div>

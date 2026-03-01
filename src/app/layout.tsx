@@ -7,6 +7,7 @@ import { FacebookPixel } from "@/components/tracking/FacebookPixel";
 import { GoogleAds } from "@/components/tracking/GoogleAds";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "sonner";
+import { CartSync } from "@/components/store/CartSync";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -109,6 +110,7 @@ export default async function RootLayout({
           {fbEnabled && fbPixelId && <FacebookPixel pixelId={fbPixelId} />}
           {googleEnabled && googleAdsId && <GoogleAds adsId={googleAdsId} />}
           <Toaster theme="dark" position="top-right" />
+          <CartSync />
           {children}
         </ThemeProvider>
       </body>

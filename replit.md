@@ -80,3 +80,6 @@ Loja online construída com Next.js 16, Prisma 7, PostgreSQL (Neon) e TailwindCS
 - Frete calcula peso/volume total do pacote somando itens do carrinho (peso soma, altura/largura máxima, comprimento soma)
 - Se produto não tem dimensões, usa valores padrão das configurações da loja
 - Mínimos dos Correios: 0.3kg, 2cm altura, 11cm largura, 16cm comprimento
+- Carrinho do cliente sincronizado com servidor via `/api/user/sync-cart` (debounce 2s)
+- Campo `cartData` (JSON) no model User armazena itens do carrinho do usuário logado
+- Admin Leads exibe produtos do carrinho de cada lead com detalhes (nome, imagem, variante, quantidade, total)

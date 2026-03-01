@@ -3,24 +3,80 @@ import { getSetting, getSettings, SETTINGS_KEYS } from './config'
 export interface ShippingOption {
     label: string
     value: number
-    days?: number // prazo em dias úteis
+    days?: number
 }
 
-// Códigos de serviço dos Correios
 const SEDEX_CODE = '04014'
 const PAC_CODE = '04510'
 
-/**
- * Chama o webservice público dos Correios e retorna opções de PAC + SEDEX.
- * Não requer autenticação para consultas de preço sem contrato.
- */
+const REGION_MAP: Record<string, string> = {
+    AC: 'norte', AP: 'norte', AM: 'norte', PA: 'norte', RO: 'norte', RR: 'norte', TO: 'norte',
+    MA: 'nordeste', PI: 'nordeste', CE: 'nordeste', RN: 'nordeste', PB: 'nordeste',
+    PE: 'nordeste', AL: 'nordeste', SE: 'nordeste', BA: 'nordeste',
+    MG: 'sudeste', ES: 'sudeste', RJ: 'sudeste', SP: 'sudeste',
+    PR: 'sul', SC: 'sul', RS: 'sul',
+    MS: 'centro-oeste', MT: 'centro-oeste', GO: 'centro-oeste', DF: 'centro-oeste',
+}
+
+const REGION_BASE_PRICES: Record<string, Record<string, { pac: number; sedex: number; pacDays: number; sedexDays: number }>> = {
+    'sudeste': {
+        'sudeste': { pac: 18.90, sedex: 32.90, pacDays: 5, sedexDays: 2 },
+        'sul': { pac: 22.90, sedex: 38.90, pacDays: 7, sedexDays: 3 },
+        'centro-oeste': { pac: 24.90, sedex: 42.90, pacDays: 8, sedexDays: 4 },
+        'nordeste': { pac: 28.90, sedex: 48.90, pacDays: 10, sedexDays: 5 },
+        'norte': { pac: 34.90, sedex: 56.90, pacDays: 12, sedexDays: 6 },
+    },
+    'sul': {
+        'sul': { pac: 18.90, sedex: 32.90, pacDays: 5, sedexDays: 2 },
+        'sudeste': { pac: 22.90, sedex: 38.90, pacDays: 7, sedexDays: 3 },
+        'centro-oeste': { pac: 26.90, sedex: 44.90, pacDays: 8, sedexDays: 4 },
+        'nordeste': { pac: 32.90, sedex: 52.90, pacDays: 11, sedexDays: 5 },
+        'norte': { pac: 38.90, sedex: 62.90, pacDays: 13, sedexDays: 7 },
+    },
+    'centro-oeste': {
+        'centro-oeste': { pac: 18.90, sedex: 32.90, pacDays: 5, sedexDays: 2 },
+        'sudeste': { pac: 24.90, sedex: 42.90, pacDays: 7, sedexDays: 3 },
+        'sul': { pac: 26.90, sedex: 44.90, pacDays: 8, sedexDays: 4 },
+        'nordeste': { pac: 28.90, sedex: 46.90, pacDays: 9, sedexDays: 4 },
+        'norte': { pac: 30.90, sedex: 50.90, pacDays: 10, sedexDays: 5 },
+    },
+    'nordeste': {
+        'nordeste': { pac: 18.90, sedex: 32.90, pacDays: 5, sedexDays: 2 },
+        'sudeste': { pac: 28.90, sedex: 48.90, pacDays: 10, sedexDays: 5 },
+        'centro-oeste': { pac: 28.90, sedex: 46.90, pacDays: 9, sedexDays: 4 },
+        'sul': { pac: 32.90, sedex: 52.90, pacDays: 11, sedexDays: 5 },
+        'norte': { pac: 26.90, sedex: 42.90, pacDays: 8, sedexDays: 4 },
+    },
+    'norte': {
+        'norte': { pac: 18.90, sedex: 32.90, pacDays: 5, sedexDays: 2 },
+        'centro-oeste': { pac: 30.90, sedex: 50.90, pacDays: 10, sedexDays: 5 },
+        'nordeste': { pac: 26.90, sedex: 42.90, pacDays: 8, sedexDays: 4 },
+        'sudeste': { pac: 34.90, sedex: 56.90, pacDays: 12, sedexDays: 6 },
+        'sul': { pac: 38.90, sedex: 62.90, pacDays: 13, sedexDays: 7 },
+    },
+}
+
+function calcByRegion(originState: string, destState: string): ShippingOption[] {
+    const originRegion = REGION_MAP[originState.toUpperCase()] || 'sudeste'
+    const destRegion = REGION_MAP[destState.toUpperCase()] || 'sudeste'
+
+    const prices = REGION_BASE_PRICES[originRegion]?.[destRegion]
+        || REGION_BASE_PRICES['sudeste']?.[destRegion]
+        || { pac: 24.90, sedex: 42.90, pacDays: 8, sedexDays: 4 }
+
+    return [
+        { label: `PAC (${prices.pacDays} dias úteis)`, value: prices.pac, days: prices.pacDays },
+        { label: `SEDEX (${prices.sedexDays} dias úteis)`, value: prices.sedex, days: prices.sedexDays },
+    ]
+}
+
 async function calcCorreios(
     originCep: string,
     destCep: string,
-    weight: number,   // kg
-    height: number,   // cm
-    width: number,    // cm
-    length: number,   // cm
+    weight: number,
+    height: number,
+    width: number,
+    length: number,
     user = '',
     pass = ''
 ): Promise<ShippingOption[]> {
@@ -31,7 +87,7 @@ async function calcCorreios(
         sCepOrigem: originCep.replace(/\D/g, ''),
         sCepDestino: destCep.replace(/\D/g, ''),
         nVlPeso: String(weight),
-        nCdFormato: '1',          // caixa/pacote
+        nCdFormato: '1',
         nVlComprimento: String(length),
         nVlAltura: String(height),
         nVlLargura: String(width),
@@ -56,7 +112,6 @@ async function calcCorreios(
     if (!res.ok) throw new Error('Correios API error')
     const xml = await res.text()
 
-    // Parsear XML com regex (evita dependência de parser)
     const options: ShippingOption[] = []
     const serviceMatches = xml.matchAll(/<cServico>([\s\S]*?)<\/cServico>/g)
 
@@ -78,7 +133,7 @@ async function calcCorreios(
         if (isNaN(price) || price <= 0) continue
 
         options.push({
-            label: `${SERVICE_NAMES[code] ?? code}${days ? ` (${days} dias úteis)` : ''}`,
+            label: `${SERVICE_NAMES[code] ?? code} (${days} dias úteis)`,
             value: price,
             days,
         })
@@ -87,83 +142,114 @@ async function calcCorreios(
     return options
 }
 
+function cepToState(cep: string): string {
+    const num = parseInt(cep.replace(/\D/g, '').substring(0, 5))
+    if (num >= 1000 && num <= 19999) return 'SP'
+    if (num >= 20000 && num <= 28999) return 'RJ'
+    if (num >= 29000 && num <= 29999) return 'ES'
+    if (num >= 30000 && num <= 39999) return 'MG'
+    if (num >= 40000 && num <= 48999) return 'BA'
+    if (num >= 49000 && num <= 49999) return 'SE'
+    if (num >= 50000 && num <= 56999) return 'PE'
+    if (num >= 57000 && num <= 57999) return 'AL'
+    if (num >= 58000 && num <= 58999) return 'PB'
+    if (num >= 59000 && num <= 59999) return 'RN'
+    if (num >= 60000 && num <= 63999) return 'CE'
+    if (num >= 64000 && num <= 64999) return 'PI'
+    if (num >= 65000 && num <= 65999) return 'MA'
+    if (num >= 66000 && num <= 68899) return 'PA'
+    if (num >= 68900 && num <= 68999) return 'AP'
+    if (num >= 69000 && num <= 69299) return 'AM'
+    if (num >= 69300 && num <= 69399) return 'RR'
+    if (num >= 69400 && num <= 69899) return 'AM'
+    if (num >= 69900 && num <= 69999) return 'AC'
+    if (num >= 70000 && num <= 72799) return 'DF'
+    if (num >= 72800 && num <= 72999) return 'GO'
+    if (num >= 73000 && num <= 73699) return 'GO'
+    if (num >= 73700 && num <= 76799) return 'GO'
+    if (num >= 76800 && num <= 76999) return 'RO'
+    if (num >= 77000 && num <= 77999) return 'TO'
+    if (num >= 78000 && num <= 78899) return 'MT'
+    if (num >= 79000 && num <= 79999) return 'MS'
+    if (num >= 80000 && num <= 87999) return 'PR'
+    if (num >= 88000 && num <= 89999) return 'SC'
+    if (num >= 90000 && num <= 99999) return 'RS'
+    return 'SP'
+}
+
 export async function calculateShipping(
     state: string,
     subtotal: number,
     destCep?: string,
 ): Promise<ShippingOption[]> {
-    const mode = (await getSetting(SETTINGS_KEYS.SHIPPING_MODE)) ?? 'free'
+    try {
+        const mode = (await getSetting(SETTINGS_KEYS.SHIPPING_MODE)) ?? 'free'
 
-    // ── Frete Grátis
-    if (mode === 'free') {
-        return [{ label: 'Frete Grátis', value: 0 }]
-    }
+        if (mode === 'free') {
+            return [{ label: 'Frete Grátis', value: 0 }]
+        }
 
-    // ── Fixo
-    if (mode === 'fixed') {
         const freeAbove = parseFloat((await getSetting(SETTINGS_KEYS.SHIPPING_FREE_ABOVE)) ?? '0')
         if (freeAbove > 0 && subtotal >= freeAbove) {
             return [{ label: 'Frete Grátis', value: 0 }]
         }
-        const fixedValue = parseFloat((await getSetting(SETTINGS_KEYS.SHIPPING_FIXED_VALUE)) ?? '0')
-        return [{ label: 'Entrega Padrão', value: fixedValue }]
-    }
 
-    // ── Por Estado
-    if (mode === 'by_state') {
-        const tableJson = await getSetting(SETTINGS_KEYS.SHIPPING_STATE_TABLE)
-        if (tableJson) {
-            const table: Record<string, number> = JSON.parse(tableJson)
-            const val = table[state] ?? table['DEFAULT'] ?? 0
-            return [{ label: 'Entrega para seu estado', value: val }]
+        if (mode === 'fixed') {
+            const fixedValue = parseFloat((await getSetting(SETTINGS_KEYS.SHIPPING_FIXED_VALUE)) ?? '0')
+            return [{ label: 'Entrega Padrão', value: fixedValue }]
         }
-    }
 
-    // ── Correios (PAC + SEDEX)
-    if (mode === 'correios') {
-        if (!destCep) return [{ label: 'Frete Grátis', value: 0 }]
+        if (mode === 'by_state') {
+            const tableJson = await getSetting(SETTINGS_KEYS.SHIPPING_STATE_TABLE)
+            if (tableJson) {
+                try {
+                    const table: Record<string, number> = JSON.parse(tableJson)
+                    const val = table[state] ?? table['DEFAULT'] ?? 0
+                    return [{ label: 'Entrega para seu estado', value: val }]
+                } catch {
+                    return calcByRegion('SP', state)
+                }
+            }
+        }
 
-        const cfg = await getSettings([
-            SETTINGS_KEYS.SHIPPING_ORIGIN_CEP,
-            SETTINGS_KEYS.SHIPPING_DEFAULT_WEIGHT,
-            SETTINGS_KEYS.SHIPPING_DEFAULT_HEIGHT,
-            SETTINGS_KEYS.SHIPPING_DEFAULT_WIDTH,
-            SETTINGS_KEYS.SHIPPING_DEFAULT_LENGTH,
-            SETTINGS_KEYS.SHIPPING_CORREIOS_USER,
-            SETTINGS_KEYS.SHIPPING_CORREIOS_PASS,
-            SETTINGS_KEYS.SHIPPING_FREE_ABOVE,
-            SETTINGS_KEYS.SHIPPING_FIXED_VALUE,
-        ])
+        if (mode === 'correios') {
+            const cfg = await getSettings([
+                SETTINGS_KEYS.SHIPPING_ORIGIN_CEP,
+                SETTINGS_KEYS.SHIPPING_DEFAULT_WEIGHT,
+                SETTINGS_KEYS.SHIPPING_DEFAULT_HEIGHT,
+                SETTINGS_KEYS.SHIPPING_DEFAULT_WIDTH,
+                SETTINGS_KEYS.SHIPPING_DEFAULT_LENGTH,
+                SETTINGS_KEYS.SHIPPING_CORREIOS_USER,
+                SETTINGS_KEYS.SHIPPING_CORREIOS_PASS,
+            ])
 
-        const originCep = cfg[SETTINGS_KEYS.SHIPPING_ORIGIN_CEP]
-        if (!originCep) return [{ label: 'Frete Grátis', value: 0 }]
+            const originCep = cfg[SETTINGS_KEYS.SHIPPING_ORIGIN_CEP] || ''
+            const originState = originCep ? cepToState(originCep) : 'SP'
 
-        try {
-            const options = await calcCorreios(
-                originCep,
-                destCep,
-                parseFloat(cfg[SETTINGS_KEYS.SHIPPING_DEFAULT_WEIGHT] || '0.5'),
-                parseFloat(cfg[SETTINGS_KEYS.SHIPPING_DEFAULT_HEIGHT] || '10'),
-                parseFloat(cfg[SETTINGS_KEYS.SHIPPING_DEFAULT_WIDTH] || '15'),
-                parseFloat(cfg[SETTINGS_KEYS.SHIPPING_DEFAULT_LENGTH] || '20'),
-                cfg[SETTINGS_KEYS.SHIPPING_CORREIOS_USER] || '',
-                cfg[SETTINGS_KEYS.SHIPPING_CORREIOS_PASS] || '',
-            )
-
-            // Aplica frete grátis acima de valor mínimo
-            const freeAbove = parseFloat(cfg[SETTINGS_KEYS.SHIPPING_FREE_ABOVE] || '0')
-            if (freeAbove > 0 && subtotal >= freeAbove) {
-                return [{ label: 'Frete Grátis', value: 0 }]
+            if (destCep && originCep) {
+                try {
+                    const options = await calcCorreios(
+                        originCep,
+                        destCep,
+                        parseFloat(cfg[SETTINGS_KEYS.SHIPPING_DEFAULT_WEIGHT] || '0.5'),
+                        parseFloat(cfg[SETTINGS_KEYS.SHIPPING_DEFAULT_HEIGHT] || '10'),
+                        parseFloat(cfg[SETTINGS_KEYS.SHIPPING_DEFAULT_WIDTH] || '15'),
+                        parseFloat(cfg[SETTINGS_KEYS.SHIPPING_DEFAULT_LENGTH] || '20'),
+                        cfg[SETTINGS_KEYS.SHIPPING_CORREIOS_USER] || '',
+                        cfg[SETTINGS_KEYS.SHIPPING_CORREIOS_PASS] || '',
+                    )
+                    if (options.length > 0) return options
+                } catch (e) {
+                    console.warn('[Correios] Indisponível, usando cálculo por região:', (e as Error).message)
+                }
             }
 
-            if (options.length > 0) return options
-        } catch (e) {
-            console.error('[Correios] Falha na consulta:', e)
+            return calcByRegion(originState, state)
         }
 
-        const fallbackValue = parseFloat(cfg[SETTINGS_KEYS.SHIPPING_FIXED_VALUE] || '15')
-        return [{ label: 'Entrega Padrão (consulte prazo)', value: fallbackValue > 0 ? fallbackValue : 15 }]
+        return calcByRegion('SP', state)
+    } catch (e) {
+        console.error('[Shipping] Erro inesperado, usando fallback por região:', e)
+        return calcByRegion('SP', state)
     }
-
-    return [{ label: 'Entrega Padrão', value: 15 }]
 }

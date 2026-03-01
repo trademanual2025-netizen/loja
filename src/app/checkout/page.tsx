@@ -70,6 +70,10 @@ export default function CheckoutPage() {
 
     async function handleAddressSubmit(data: AddressForm) {
         setLoading(true)
+        const fallbackOptions: ShippingOption[] = [
+            { label: 'PAC (8 dias úteis)', value: 24.90, days: 8 },
+            { label: 'SEDEX (4 dias úteis)', value: 42.90, days: 4 },
+        ]
         try {
             const res = await fetch('/api/shipping', {
                 method: 'POST',
@@ -77,13 +81,16 @@ export default function CheckoutPage() {
                 body: JSON.stringify({ state: data.state, subtotal: total(), zipCode: data.zipCode }),
             })
             const json = await res.json()
+            const opts = json.options && json.options.length > 0 ? json.options : fallbackOptions
             setAddress(data)
-            setShippingOptions(json.options || [{ label: 'Frete Padrão', value: 0 }])
-            if (json.options && json.options.length > 0) setShipping(json.options[0])
-            else setShipping({ label: 'Frete Padrão', value: 0 })
+            setShippingOptions(opts)
+            setShipping(opts[0])
             setStep('shipping')
         } catch {
-            toast.error('Erro ao calcular frete. Verifique o CEP e tente novamente.')
+            setAddress(data)
+            setShippingOptions(fallbackOptions)
+            setShipping(fallbackOptions[0])
+            setStep('shipping')
         } finally {
             setLoading(false)
         }

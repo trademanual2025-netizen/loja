@@ -72,4 +72,7 @@ Loja online construída com Next.js 16, Prisma 7, PostgreSQL (Neon) e TailwindCS
 - PostgreSQL: `uselibpqcompat=true` + `sslmode=no-verify` para suprimir warning de SSL do pg v9
 - `channel_binding=require` removido da URL de conexão (incompatível com lib pg)
 - Estoque validado antes de decremento para evitar valores negativos
-- Fallback de frete nunca retorna R$0 quando API dos Correios falha
+- Cálculo de frete nunca falha: se Correios indisponível, usa tabela de preços por região (PAC/SEDEX)
+- Fallback em 3 camadas: Correios → cálculo por região → valores fixos padrão
+- Timeout de 8s na API dos Correios para não travar checkout
+- Helper `cepToState()` converte CEP em estado para fallback regional

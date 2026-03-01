@@ -24,6 +24,7 @@ async function getProducts(search?: string, category?: string) {
       comparePrice: true,
       images: true,
       stock: true,
+      variants: { select: { id: true } },
     },
     orderBy: { createdAt: 'desc' },
     take: 48,

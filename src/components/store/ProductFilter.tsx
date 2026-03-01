@@ -19,6 +19,7 @@ interface Product {
     comparePrice?: number | null
     images: string[]
     stock: number
+    variants?: { id: string }[]
 }
 
 interface Props {

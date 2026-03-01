@@ -267,14 +267,145 @@ export default function AdminSettings() {
                             </div>
                             <F settings={settings} set={set} label="URL" k="webhook_lead_url" placeholder="https://seu-crm.com/webhook/lead" />
                             <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: 6 }}>Disparado ao novo cadastro de usuário.</p>
+
+                            <details style={{ marginTop: 12 }}>
+                                <summary style={{ cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, color: 'var(--primary)' }}>Ver campos enviados</summary>
+                                <div style={{ marginTop: 10, padding: 12, background: 'var(--bg)', borderRadius: 8, border: '1px solid var(--border)', fontSize: '0.78rem', fontFamily: 'monospace', lineHeight: 2 }}>
+                                    <p style={{ fontWeight: 700, marginBottom: 6, fontFamily: 'inherit', fontSize: '0.82rem' }}>Formato: POST JSON</p>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                        <thead>
+                                            <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                                                <th style={{ textAlign: 'left', padding: '4px 8px', fontWeight: 700 }}>Campo</th>
+                                                <th style={{ textAlign: 'left', padding: '4px 8px', fontWeight: 700 }}>Tipo</th>
+                                                <th style={{ textAlign: 'left', padding: '4px 8px', fontWeight: 700 }}>Descricao</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {[
+                                                ['event', 'string', '"new_lead"'],
+                                                ['timestamp', 'string', 'Data/hora ISO 8601'],
+                                                ['data.id', 'string', 'ID do lead'],
+                                                ['data.name', 'string', 'Nome completo'],
+                                                ['data.email', 'string', 'E-mail'],
+                                                ['data.phone', 'string|null', 'Telefone'],
+                                                ['data.cpf', 'string|null', 'CPF'],
+                                                ['data.source', 'string', 'Origem ("checkout")'],
+                                                ['data.created_at', 'string', 'Data de cadastro ISO 8601'],
+                                            ].map(([campo, tipo, desc]) => (
+                                                <tr key={campo} style={{ borderBottom: '1px solid var(--border)' }}>
+                                                    <td style={{ padding: '4px 8px', color: 'var(--primary)' }}>{campo}</td>
+                                                    <td style={{ padding: '4px 8px', color: 'var(--text-muted)' }}>{tipo}</td>
+                                                    <td style={{ padding: '4px 8px', color: 'var(--text-muted)', fontFamily: 'sans-serif' }}>{desc}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                    <p style={{ marginTop: 10, fontFamily: 'sans-serif', fontSize: '0.78rem', color: 'var(--text-muted)' }}>Exemplo:</p>
+                                    <pre style={{ background: 'var(--bg-card2)', padding: 10, borderRadius: 6, overflow: 'auto', fontSize: '0.72rem', marginTop: 4 }}>{`{
+  "event": "new_lead",
+  "timestamp": "2025-01-15T14:30:00.000Z",
+  "data": {
+    "id": "clx1abc...",
+    "name": "Maria Silva",
+    "email": "maria@email.com",
+    "phone": "(11) 99999-0000",
+    "cpf": "123.456.789-00",
+    "source": "checkout",
+    "created_at": "2025-01-15T14:30:00.000Z"
+  }
+}`}</pre>
+                                </div>
+                            </details>
                         </div>
+
                         <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8 }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                                 <p style={{ fontWeight: 700 }}>Webhook de Compradores</p>
                                 <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={() => testWebhook('buyer')}><TestTube2 size={14} />Testar</button>
                             </div>
                             <F settings={settings} set={set} label="URL" k="webhook_buyer_url" placeholder="https://seu-crm.com/webhook/purchase" />
-                            <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: 6 }}>Disparado após pagamento confirmado.</p>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: 6 }}>Disparado apos pagamento confirmado.</p>
+
+                            <details style={{ marginTop: 12 }}>
+                                <summary style={{ cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, color: 'var(--primary)' }}>Ver campos enviados</summary>
+                                <div style={{ marginTop: 10, padding: 12, background: 'var(--bg)', borderRadius: 8, border: '1px solid var(--border)', fontSize: '0.78rem', fontFamily: 'monospace', lineHeight: 2 }}>
+                                    <p style={{ fontWeight: 700, marginBottom: 6, fontFamily: 'inherit', fontSize: '0.82rem' }}>Formato: POST JSON</p>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                        <thead>
+                                            <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                                                <th style={{ textAlign: 'left', padding: '4px 8px', fontWeight: 700 }}>Campo</th>
+                                                <th style={{ textAlign: 'left', padding: '4px 8px', fontWeight: 700 }}>Tipo</th>
+                                                <th style={{ textAlign: 'left', padding: '4px 8px', fontWeight: 700 }}>Descricao</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {[
+                                                ['event', 'string', '"purchase"'],
+                                                ['timestamp', 'string', 'Data/hora ISO 8601'],
+                                                ['data.order_id', 'string', 'ID do pedido'],
+                                                ['data.gateway_id', 'string', 'ID da transacao no gateway'],
+                                                ['data.name', 'string', 'Nome do comprador'],
+                                                ['data.email', 'string', 'E-mail do comprador'],
+                                                ['data.phone', 'string|null', 'Telefone'],
+                                                ['data.cpf', 'string|null', 'CPF'],
+                                                ['data.address.street', 'string', 'Rua'],
+                                                ['data.address.number', 'string', 'Numero'],
+                                                ['data.address.complement', 'string|null', 'Complemento'],
+                                                ['data.address.neighborhood', 'string', 'Bairro'],
+                                                ['data.address.city', 'string', 'Cidade'],
+                                                ['data.address.state', 'string', 'Estado (UF)'],
+                                                ['data.address.zip', 'string', 'CEP'],
+                                                ['data.subtotal', 'number', 'Subtotal (R$)'],
+                                                ['data.shipping', 'number', 'Frete (R$)'],
+                                                ['data.total', 'number', 'Total pago (R$)'],
+                                                ['data.currency', 'string', '"BRL"'],
+                                                ['data.gateway', 'string', '"mercadopago" ou "stripe"'],
+                                                ['data.products[]', 'array', 'Lista de produtos'],
+                                                ['data.products[].name', 'string', 'Nome do produto'],
+                                                ['data.products[].qty', 'number', 'Quantidade'],
+                                                ['data.products[].price', 'number', 'Preco unitario (R$)'],
+                                            ].map(([campo, tipo, desc]) => (
+                                                <tr key={campo} style={{ borderBottom: '1px solid var(--border)' }}>
+                                                    <td style={{ padding: '4px 8px', color: 'var(--primary)' }}>{campo}</td>
+                                                    <td style={{ padding: '4px 8px', color: 'var(--text-muted)' }}>{tipo}</td>
+                                                    <td style={{ padding: '4px 8px', color: 'var(--text-muted)', fontFamily: 'sans-serif' }}>{desc}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                    <p style={{ marginTop: 10, fontFamily: 'sans-serif', fontSize: '0.78rem', color: 'var(--text-muted)' }}>Exemplo:</p>
+                                    <pre style={{ background: 'var(--bg-card2)', padding: 10, borderRadius: 6, overflow: 'auto', fontSize: '0.72rem', marginTop: 4 }}>{`{
+  "event": "purchase",
+  "timestamp": "2025-01-15T15:00:00.000Z",
+  "data": {
+    "order_id": "clx2def...",
+    "gateway_id": "12345678",
+    "name": "Maria Silva",
+    "email": "maria@email.com",
+    "phone": "(11) 99999-0000",
+    "cpf": "123.456.789-00",
+    "address": {
+      "street": "Rua das Flores",
+      "number": "123",
+      "complement": "Apto 4",
+      "neighborhood": "Centro",
+      "city": "Sao Paulo",
+      "state": "SP",
+      "zip": "01310100"
+    },
+    "subtotal": 199.90,
+    "shipping": 15.00,
+    "total": 214.90,
+    "currency": "BRL",
+    "gateway": "mercadopago",
+    "products": [
+      { "name": "Camiseta P", "qty": 2, "price": 79.95 },
+      { "name": "Bone", "qty": 1, "price": 40.00 }
+    ]
+  }
+}`}</pre>
+                                </div>
+                            </details>
                         </div>
                         <button className="btn btn-primary" onClick={() => save(['webhook_lead_url', 'webhook_buyer_url'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
                     </div>

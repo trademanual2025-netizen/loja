@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useCart } from '@/lib/cart'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
@@ -44,6 +44,8 @@ export default function CheckoutPage() {
     const dict = dictionaries[locale]
 
     const [mounted, setMounted] = useState(false)
+    const [cepLoading, setCepLoading] = useState(false)
+    const lastCepLookedUp = useRef('')
     const addressForm = useForm<AddressForm>()
 
     useEffect(() => {
@@ -81,7 +83,7 @@ export default function CheckoutPage() {
                 body: JSON.stringify({
                     state: data.state,
                     subtotal: total(),
-                    zipCode: data.zipCode,
+                    zipCode: data.zipCode.replace(/\D/g, ''),
                     items: items.map(i => ({ id: i.id, quantity: i.quantity })),
                 }),
             })
@@ -101,20 +103,25 @@ export default function CheckoutPage() {
         }
     }
 
-    async function handleCepBlur(cep: string) {
-        const clean = cep.replace(/\D/g, '')
+    const lookupCep = useCallback(async (raw: string) => {
+        const clean = raw.replace(/\D/g, '')
         if (clean.length !== 8) return
+        if (clean === lastCepLookedUp.current) return
+        lastCepLookedUp.current = clean
+        setCepLoading(true)
         try {
             const res = await fetch(`https://viacep.com.br/ws/${clean}/json/`)
             const data = await res.json()
             if (!data.erro) {
-                addressForm.setValue('street', data.logradouro)
-                addressForm.setValue('neighborhood', data.bairro)
-                addressForm.setValue('city', data.localidade)
-                addressForm.setValue('state', data.uf)
+                if (data.logradouro) addressForm.setValue('street', data.logradouro)
+                if (data.bairro) addressForm.setValue('neighborhood', data.bairro)
+                if (data.localidade) addressForm.setValue('city', data.localidade)
+                if (data.uf) addressForm.setValue('state', data.uf)
             }
-        } catch { }
-    }
+        } catch { } finally {
+            setCepLoading(false)
+        }
+    }, [addressForm])
 
     async function continueToPayment() {
         setStep('payment')
@@ -191,13 +198,32 @@ export default function CheckoutPage() {
                     <form onSubmit={addressForm.handleSubmit(handleAddressSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                         <div className="form-group">
                             <label className="form-label">{dict.checkout.cepPlaceholder} *</label>
-                            <input className="input" placeholder="00000000" maxLength={8}
-                                {...addressForm.register('zipCode', { required: true })}
-                                onChange={(e) => {
-                                    const formatted = e.target.value.replace(/\D/g, '').substring(0, 8)
-                                    addressForm.setValue('zipCode', formatted)
-                                }}
-                                onBlur={(e) => handleCepBlur(e.target.value)} />
+                            <div style={{ position: 'relative' }}>
+                                <input className="input" placeholder="00000-000" maxLength={9}
+                                    {...addressForm.register('zipCode', { required: true })}
+                                    onChange={(e) => {
+                                        let raw = e.target.value.replace(/\D/g, '').substring(0, 8)
+                                        if (raw.length > 5) raw = raw.substring(0, 5) + '-' + raw.substring(5)
+                                        addressForm.setValue('zipCode', raw)
+                                        if (raw.replace(/\D/g, '').length === 8) lookupCep(raw)
+                                    }}
+                                    onPaste={(e) => {
+                                        const pasted = e.clipboardData.getData('text')
+                                        const clean = pasted.replace(/\D/g, '').substring(0, 8)
+                                        if (clean.length === 8) {
+                                            e.preventDefault()
+                                            const formatted = clean.substring(0, 5) + '-' + clean.substring(5)
+                                            addressForm.setValue('zipCode', formatted)
+                                            lookupCep(clean)
+                                        }
+                                    }}
+                                    onBlur={(e) => lookupCep(e.target.value)}
+                                    style={{ paddingRight: cepLoading ? 40 : undefined }}
+                                />
+                                {cepLoading && (
+                                    <span className="spinner" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', width: 18, height: 18 }} />
+                                )}
+                            </div>
                         </div>
                         <div className="form-group">
                             <label className="form-label">{dict.checkout.address} *</label>

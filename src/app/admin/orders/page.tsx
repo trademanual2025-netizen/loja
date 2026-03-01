@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Search, Filter, Eye, Loader2, Truck, ChevronDown, ChevronUp, Check, X } from 'lucide-react'
+import { useState, useEffect, Fragment } from 'react'
+import { Filter, Loader2, Truck, ChevronDown, ChevronUp, Check } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface OrderItem { product: { name: string }; variant?: { name: string }; quantity: number; price: number }
@@ -138,8 +138,8 @@ export default function AdminOrdersPage() {
                             </thead>
                             <tbody>
                                 {orders.map(o => (
-                                    <>
-                                        <tr key={o.id} style={{ borderTop: '1px solid var(--border)', fontSize: '0.87rem', background: expandedId === o.id ? 'var(--bg-card2)' : 'transparent' }}>
+                                    <Fragment key={o.id}>
+                                        <tr style={{ borderTop: '1px solid var(--border)', fontSize: '0.87rem', background: expandedId === o.id ? 'var(--bg-card2)' : 'transparent' }}>
                                             <td style={{ padding: '12px 16px' }}>
                                                 <p style={{ fontFamily: 'monospace', color: 'var(--text-muted)', fontSize: '0.78rem' }}>#{o.id.slice(-8).toUpperCase()}</p>
                                                 {o.trackingCode && (
@@ -153,7 +153,7 @@ export default function AdminOrdersPage() {
                                                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{o.user.email}</p>
                                             </td>
                                             <td style={{ padding: '12px 16px', color: 'var(--text-muted)' }}>{o.items.length} item{o.items.length !== 1 ? 's' : ''}</td>
-                                            <td style={{ padding: '12px 16px', color: 'var(--text-muted)' }}>R$ {o.shippingCost.toFixed(2).replace('.', ',')}</td>
+                                            <td style={{ padding: '12px 16px', color: 'var(--text-muted)' }}>R$ {(o.shippingCost ?? 0).toFixed(2).replace('.', ',')}</td>
                                             <td style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--primary)' }}>R$ {o.total.toFixed(2).replace('.', ',')}</td>
                                             <td style={{ padding: '12px 16px' }}><span className={`badge ${STATUS_BADGES[o.status]}`}>{STATUS_LABELS[o.status]}</span></td>
                                             <td style={{ padding: '12px 16px', color: 'var(--text-muted)', fontSize: '0.8rem' }}>{new Date(o.createdAt).toLocaleDateString('pt-BR')}</td>
@@ -234,7 +234,7 @@ export default function AdminOrdersPage() {
                                                 </td>
                                             </tr>
                                         )}
-                                    </>
+                                    </Fragment>
                                 ))}
                             </tbody>
                         </table>

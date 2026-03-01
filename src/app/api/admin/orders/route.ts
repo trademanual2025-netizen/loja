@@ -17,6 +17,7 @@ export async function GET(req: NextRequest) {
                 id: true,
                 status: true,
                 total: true,
+                shippingCost: true,
                 gateway: true,
                 createdAt: true,
                 trackingCode: true,

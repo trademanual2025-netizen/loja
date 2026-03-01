@@ -40,15 +40,21 @@ export async function POST(req: NextRequest) {
         const client = new MercadoPagoConfig({ accessToken })
         const payment = new Payment(client)
 
-        // O formData.payer.email deve ser o do usuário logado por segurança
-        const requestData = {
+        const requestData: Record<string, unknown> = {
             ...formData,
             transaction_amount: total,
+            description: `Pedido - ${items.length} item(ns)`,
             payer: {
                 ...formData?.payer,
                 email: user.email,
             },
         }
+
+        if (!requestData.transaction_amount || (requestData.transaction_amount as number) <= 0) {
+            return NextResponse.json({ error: 'Valor total inválido.' }, { status: 400 })
+        }
+
+        console.log('[MercadoPago] Request:', JSON.stringify(requestData, null, 2))
 
         const mpPayment = await payment.create({ body: requestData })
 
@@ -90,8 +96,16 @@ export async function POST(req: NextRequest) {
             statusDetail: mpPayment.status_detail,
         })
     } catch (err: unknown) {
-        console.error(err)
-        const msg = err instanceof Error ? err.message : 'Erro ao processar pagamento.'
+        console.error('[MercadoPago] Error:', err)
+        let msg = 'Erro ao processar pagamento.'
+        if (err && typeof err === 'object') {
+            const e = err as { cause?: Array<{ description?: string }>; message?: string }
+            if (e.cause?.[0]?.description) {
+                msg = e.cause[0].description
+            } else if (e.message) {
+                msg = e.message
+            }
+        }
         return NextResponse.json({ error: msg }, { status: 500 })
     }
 }

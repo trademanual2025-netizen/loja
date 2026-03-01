@@ -1,5 +1,28 @@
 import { prisma } from './prisma'
 import { getSetting, SETTINGS_KEYS } from './config'
+import type { FieldMapping } from './webhook-fields'
+
+function applyFieldMapping(data: Record<string, unknown>, mapping: FieldMapping | null): Record<string, unknown> {
+    if (!mapping) return data
+
+    const result: Record<string, unknown> = {}
+
+    for (const [key, value] of Object.entries(data)) {
+        const fieldConfig = mapping[key]
+
+        if (!fieldConfig) {
+            result[key] = value
+            continue
+        }
+
+        if (!fieldConfig.enabled) continue
+
+        const outputKey = fieldConfig.customName || key
+        result[outputKey] = value
+    }
+
+    return result
+}
 
 async function dispatch(url: string, payload: object, type: 'lead' | 'buyer', leadId?: string, orderId?: string) {
     let status: number | null = null
@@ -41,24 +64,31 @@ export async function dispatchLeadWebhook(lead: {
     const url = await getSetting(SETTINGS_KEYS.WEBHOOK_LEAD_URL)
     if (!url) return
 
-    await dispatch(
-        url,
-        {
-            event: 'new_lead',
-            timestamp: new Date().toISOString(),
-            data: {
-                id: lead.id,
-                name: lead.user.name,
-                email: lead.user.email,
-                phone: lead.user.phone,
-                cpf: lead.user.cpf,
-                source: lead.source,
-                created_at: lead.createdAt.toISOString(),
-            },
-        },
-        'lead',
-        lead.id
-    )
+    let mapping: FieldMapping | null = null
+    try {
+        const raw = await getSetting('webhook_lead_fields')
+        if (raw) mapping = JSON.parse(raw)
+    } catch {}
+
+    const metaFields: Record<string, unknown> = {
+        event: 'new_lead',
+        timestamp: new Date().toISOString(),
+    }
+
+    const dataFields: Record<string, unknown> = {
+        id: lead.id,
+        name: lead.user.name,
+        email: lead.user.email,
+        phone: lead.user.phone,
+        cpf: lead.user.cpf,
+        source: lead.source,
+        created_at: lead.createdAt.toISOString(),
+    }
+
+    const mappedMeta = applyFieldMapping(metaFields, mapping)
+    const mappedData = applyFieldMapping(dataFields, mapping)
+
+    await dispatch(url, { ...mappedMeta, data: mappedData }, 'lead', lead.id)
 }
 
 export async function dispatchBuyerWebhook(order: {
@@ -81,41 +111,53 @@ export async function dispatchBuyerWebhook(order: {
     const url = await getSetting(SETTINGS_KEYS.WEBHOOK_BUYER_URL)
     if (!url) return
 
-    await dispatch(
-        url,
-        {
-            event: 'purchase',
-            timestamp: new Date().toISOString(),
-            data: {
-                order_id: order.id,
-                gateway_id: order.gatewayId,
-                name: order.user.name,
-                email: order.user.email,
-                phone: order.user.phone,
-                cpf: order.user.cpf,
-                address: {
-                    street: order.street,
-                    number: order.number,
-                    complement: order.complement,
-                    neighborhood: order.neighborhood,
-                    city: order.city,
-                    state: order.state,
-                    zip: order.zipCode,
-                },
-                subtotal: order.subtotal,
-                shipping: order.shippingCost,
-                total: order.total,
-                currency: 'BRL',
-                gateway: order.gateway,
-                products: order.items.map((i) => ({
-                    name: i.product.name,
-                    qty: i.quantity,
-                    price: i.price,
-                })),
-            },
-        },
-        'buyer',
-        undefined,
-        order.id
-    )
+    let mapping: FieldMapping | null = null
+    try {
+        const raw = await getSetting('webhook_buyer_fields')
+        if (raw) mapping = JSON.parse(raw)
+    } catch {}
+
+    const metaFields: Record<string, unknown> = {
+        event: 'purchase',
+        timestamp: new Date().toISOString(),
+    }
+
+    const addressFields: Record<string, unknown> = {
+        street: order.street,
+        number: order.number,
+        complement: order.complement,
+        neighborhood: order.neighborhood,
+        city: order.city,
+        state: order.state,
+        zip: order.zipCode,
+    }
+
+    const dataFields: Record<string, unknown> = {
+        order_id: order.id,
+        gateway_id: order.gatewayId,
+        name: order.user.name,
+        email: order.user.email,
+        phone: order.user.phone,
+        cpf: order.user.cpf,
+        subtotal: order.subtotal,
+        shipping: order.shippingCost,
+        total: order.total,
+        currency: 'BRL',
+        gateway: order.gateway,
+        products: order.items.map((i) => ({
+            name: i.product.name,
+            qty: i.quantity,
+            price: i.price,
+        })),
+    }
+
+    const mappedMeta = applyFieldMapping(metaFields, mapping)
+    const mappedData = applyFieldMapping(dataFields, mapping)
+    const mappedAddress = applyFieldMapping(addressFields, mapping)
+
+    if (Object.keys(mappedAddress).length > 0) {
+        mappedData.address = mappedAddress
+    }
+
+    await dispatch(url, { ...mappedMeta, data: mappedData }, 'buyer', undefined, order.id)
 }

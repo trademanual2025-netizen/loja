@@ -93,3 +93,8 @@ Loja online construída com Next.js 16, Prisma 7, PostgreSQL (Neon) e TailwindCS
 - Webhook MercadoPago trata: approved→PAID, rejected/cancelled→CANCELLED, refunded/charged_back→REFUNDED
 - Webhook Stripe trata: payment_intent.succeeded→PAID, payment_intent.payment_failed→CANCELLED, charge.refunded→REFUNDED
 - Ambos webhooks atualizam `gatewayData` com lastWebhookStatus, lastWebhookAt e statusDetail
+- Webhook field mapping: admin pode escolher quais campos enviar e personalizar nomes dos campos para compatibilidade com ferramentas externas
+- Mapeamento salvo em settings `webhook_lead_fields` e `webhook_buyer_fields` (JSON)
+- Campos organizados por grupo: meta (envelope), data, address (buyer only)
+- Definições de campos compartilhadas em `src/lib/webhook-fields.ts` (safe for client import)
+- Componente `WebhooksTab` em `src/components/admin/WebhooksTab.tsx` com preview JSON em tempo real

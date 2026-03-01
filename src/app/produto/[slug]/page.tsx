@@ -8,7 +8,16 @@ import { ProductPageClient } from '@/components/store/ProductPageClient'
 import { cookies } from 'next/headers'
 import { dictionaries, Locale, defaultLocale, translateDb } from '@/lib/i18n'
 
-export const revalidate = 60
+export const revalidate = 30
+
+export async function generateStaticParams() {
+    const products = await prisma.product.findMany({
+        where: { active: true },
+        select: { slug: true },
+        take: 100,
+    })
+    return products.map((p) => ({ slug: p.slug }))
+}
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params
@@ -16,10 +25,19 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     const [product, storeSettings, user, cookieStore] = await Promise.all([
         prisma.product.findUnique({
             where: { slug },
-            include: {
-                category: true,
-                options: true,
-                variants: true
+            select: {
+                id: true,
+                name: true,
+                slug: true,
+                description: true,
+                price: true,
+                comparePrice: true,
+                images: true,
+                stock: true,
+                active: true,
+                bannerUrl: true,
+                options: { select: { name: true, values: true } },
+                variants: { select: { id: true, name: true, price: true, stock: true, sku: true } },
             },
         }),
         getSettings([SETTINGS_KEYS.STORE_NAME, SETTINGS_KEYS.STORE_LOGO]),

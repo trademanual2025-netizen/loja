@@ -77,7 +77,7 @@ export function ProductPageClient({ product, dict }: { product: Product; dict: a
                 <div style={{ position: 'relative', aspectRatio: '1', background: 'var(--bg-card)', borderRadius: 12, overflow: 'hidden', marginBottom: 12 }}>
                     {product.images.length > 0 ? (
                         <>
-                            <Image src={product.images[mainImage]} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" style={{ objectFit: 'cover' }} />
+                            <Image src={product.images[mainImage]} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" style={{ objectFit: 'cover' }} priority />
                             {product.images.length > 1 && (
                                 <>
                                     <button onClick={() => setMainImage((p) => (p - 1 + product.images.length) % product.images.length)}

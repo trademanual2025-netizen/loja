@@ -31,7 +31,8 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Usuário não encontrado.' }, { status: 404 })
 
     const subtotal = items.reduce((s: number, i: { price: number; quantity: number }) => s + i.price * i.quantity, 0)
-    const total = subtotal + shippingCost
+    const shipping = typeof shippingCost === 'number' ? shippingCost : parseFloat(shippingCost) || 0
+    const total = Math.round((subtotal + shipping) * 100) / 100
 
     try {
         // Criar pagamento no MP
@@ -42,6 +43,7 @@ export async function POST(req: NextRequest) {
         // O formData.payer.email deve ser o do usuário logado por segurança
         const requestData = {
             ...formData,
+            transaction_amount: total,
             payer: {
                 ...formData?.payer,
                 email: user.email,
@@ -58,7 +60,7 @@ export async function POST(req: NextRequest) {
                 gatewayId: String(mpPayment.id),
                 status: mpPayment.status === 'approved' ? 'PAID' : 'PENDING',
                 subtotal,
-                shippingCost,
+                shippingCost: shipping,
                 total,
                 ...address,
                 items: {

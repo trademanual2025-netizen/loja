@@ -61,6 +61,8 @@
 
 html {
   scroll-behavior: smooth;
+  scrollbar-width: auto;
+  scrollbar-color: var(--primary) var(--bg-card);
 }
 
 body {
@@ -72,17 +74,23 @@ body {
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg);
+  background: var(--bg-card);
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 3px;
+  background: var(--primary);
+  border-radius: 5px;
+  border: 2px solid var(--bg-card);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-hover);
 }
 
 /* Focus */

@@ -1,7 +1,7 @@
 'use client'
 
 import { useCart } from '@/lib/cart'
-import { Trash2, Plus, Minus, ShoppingCart } from 'lucide-react'
+import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getCookie } from 'cookies-next'
@@ -23,10 +23,31 @@ export default function CarrinhoPage() {
 
     if (items.length === 0) {
         return (
-            <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
-                <ShoppingCart size={64} color="var(--text-muted)" />
-                <h2 style={{ color: 'var(--text-muted)' }}>{dict.cart.empty}</h2>
-                <Link href="/" className="btn btn-primary">{dict.store.continueShopping}</Link>
+            <div style={{ minHeight: 'calc(100vh - 80px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 16px' }}>
+                <div style={{ textAlign: 'center', maxWidth: 420 }}>
+                    <div style={{
+                        width: 120, height: 120, borderRadius: '50%',
+                        background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        margin: '0 auto 32px', opacity: 0.15,
+                    }}>
+                        <ShoppingBag size={56} color="white" />
+                    </div>
+                    <h2 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: 12, color: 'var(--text-title)' }}>
+                        {dict.cart.empty}
+                    </h2>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.6, marginBottom: 32 }}>
+                        {locale === 'pt' ? 'Parece que você ainda não escolheu nada. Explore nossa coleção e encontre algo especial para você.' :
+                         locale === 'en' ? 'Looks like you haven\'t picked anything yet. Explore our collection and find something special.' :
+                         'Parece que aún no has elegido nada. Explora nuestra colección y encuentra algo especial.'}
+                    </p>
+                    <Link href="/" className="product-card-btn" style={{ display: 'inline-flex', padding: '14px 40px', fontSize: '1rem', borderRadius: 10, textDecoration: 'none' }}>
+                        <ShoppingBag size={18} />
+                        {locale === 'pt' ? 'Explorar Produtos' :
+                         locale === 'en' ? 'Explore Products' :
+                         'Explorar Productos'}
+                    </Link>
+                </div>
             </div>
         )
     }

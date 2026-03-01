@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
 // POST /api/admin/products — cria produto
 export async function POST(req: NextRequest) {
     const body = await req.json()
-    const { name, description, price, comparePrice, stock, images, bannerUrl, active, categoryId, options, variants } = body
+    const { name, description, price, comparePrice, stock, images, bannerUrl, active, categoryId, options, variants, weight, height, width, length } = body
 
     if (!name || price === undefined) {
         return NextResponse.json({ error: 'Nome e preço são obrigatórios.' }, { status: 400 })
@@ -68,6 +68,10 @@ export async function POST(req: NextRequest) {
             stock: safeParseInt(stock), images: images || [],
             bannerUrl: bannerUrl || null, active: active !== false,
             categoryId: categoryId || null,
+            weight: safeParseFloat(weight),
+            height: safeParseFloat(height),
+            width: safeParseFloat(width),
+            length: safeParseFloat(length),
             options: {
                 create: options?.filter((o: any) => o.name?.trim()).map((o: any) => ({
                     name: o.name,

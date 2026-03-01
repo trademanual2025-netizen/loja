@@ -78,7 +78,12 @@ export default function CheckoutPage() {
             const res = await fetch('/api/shipping', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ state: data.state, subtotal: total(), zipCode: data.zipCode }),
+                body: JSON.stringify({
+                    state: data.state,
+                    subtotal: total(),
+                    zipCode: data.zipCode,
+                    items: items.map(i => ({ id: i.id, quantity: i.quantity })),
+                }),
             })
             const json = await res.json()
             const opts = json.options && json.options.length > 0 ? json.options : fallbackOptions

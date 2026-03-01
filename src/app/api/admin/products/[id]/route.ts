@@ -35,7 +35,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     try {
         const { id } = await params
         const body = await req.json()
-        const { name, description, price, comparePrice, stock, images, bannerUrl, active, categoryId, options, variants } = body
+        const { name, description, price, comparePrice, stock, images, bannerUrl, active, categoryId, options, variants, weight, height, width, length } = body
 
         const safeParseFloat = (val: any) => {
             if (val === undefined || val === null || val === '') return null
@@ -65,6 +65,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
                 ...(categoryId !== undefined && {
                     category: categoryId ? { connect: { id: categoryId } } : { disconnect: true }
                 }),
+                ...(weight !== undefined && { weight: safeParseFloat(weight) }),
+                ...(height !== undefined && { height: safeParseFloat(height) }),
+                ...(width !== undefined && { width: safeParseFloat(width) }),
+                ...(length !== undefined && { length: safeParseFloat(length) }),
             }
         })
 

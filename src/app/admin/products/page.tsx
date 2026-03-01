@@ -25,7 +25,7 @@ interface Product {
     createdAt: string
 }
 
-const emptyForm = { name: '', description: '', price: '', comparePrice: '', hasComparePrice: false, stock: '0', bannerUrl: '', active: true, categoryId: '' }
+const emptyForm = { name: '', description: '', price: '', comparePrice: '', hasComparePrice: false, stock: '0', bannerUrl: '', active: true, categoryId: '', weight: '', height: '', width: '', length: '' }
 
 export default function AdminProductsPage() {
     const [products, setProducts] = useState<Product[]>([])
@@ -77,22 +77,29 @@ export default function AdminProductsPage() {
         setEditingId(p.id)
         setForm({
             name: p.name,
-            description: '', // Descrição não vem no list, buscar se necessário ou simplificar
+            description: '',
             price: String(p.price),
             comparePrice: p.comparePrice ? String(p.comparePrice) : '',
             hasComparePrice: !!p.comparePrice,
             stock: String(p.stock),
             bannerUrl: p.bannerUrl || '',
             active: p.active,
-            categoryId: p.categoryId || ''
+            categoryId: p.categoryId || '',
+            weight: '', height: '', width: '', length: ''
         })
         setImages(p.images || [])
         setOptions(p.options || [])
         setVariants(p.variants || [])
 
-        // Se estiver editando, vamos buscar o detalhe completo para pegar a descrição
         fetch(`/api/admin/products/${p.id}`).then(res => res.json()).then(data => {
-            if (data.description) setForm(f => ({ ...f, description: data.description }))
+            setForm(f => ({
+                ...f,
+                description: data.description || '',
+                weight: data.weight ? String(data.weight) : '',
+                height: data.height ? String(data.height) : '',
+                width: data.width ? String(data.width) : '',
+                length: data.length ? String(data.length) : '',
+            }))
             if (data.options) setOptions(data.options)
             if (data.variants) setVariants(data.variants)
         })
@@ -176,6 +183,10 @@ export default function AdminProductsPage() {
                 price: safeParseFloat(form.price) || 0,
                 comparePrice: safeParseFloat(form.comparePrice),
                 stock: safeParseInt(form.stock),
+                weight: safeParseFloat(form.weight),
+                height: safeParseFloat(form.height),
+                width: safeParseFloat(form.width),
+                length: safeParseFloat(form.length),
                 images,
                 options: (options || []).filter(o => o.name && o.name.trim() !== ''),
                 variants: (variants || []).map(v => ({
@@ -379,6 +390,32 @@ export default function AdminProductsPage() {
                                             <option value="">Sem categoria</option>
                                             {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                         </select>
+                                    </div>
+                                </div>
+
+                                {/* Envio */}
+                                <div style={{ padding: '20px 0', borderTop: '1px solid var(--border)', marginTop: 8 }}>
+                                    <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: 16 }}>Envio</h3>
+                                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 12 }}>Deixe em branco para usar os valores padrão das configurações da loja.</p>
+                                    <div className="grid-2" style={{ marginBottom: 12 }}>
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label className="form-label">Peso (kg)</label>
+                                            <input className="input" type="number" step="0.01" placeholder="Ex: 0.5" value={form.weight} onChange={e => setForm(f => ({ ...f, weight: e.target.value }))} />
+                                        </div>
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label className="form-label">Comprimento (cm)</label>
+                                            <input className="input" type="number" step="1" placeholder="Ex: 20" value={form.length} onChange={e => setForm(f => ({ ...f, length: e.target.value }))} />
+                                        </div>
+                                    </div>
+                                    <div className="grid-2">
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label className="form-label">Altura (cm)</label>
+                                            <input className="input" type="number" step="1" placeholder="Ex: 10" value={form.height} onChange={e => setForm(f => ({ ...f, height: e.target.value }))} />
+                                        </div>
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label className="form-label">Largura (cm)</label>
+                                            <input className="input" type="number" step="1" placeholder="Ex: 15" value={form.width} onChange={e => setForm(f => ({ ...f, width: e.target.value }))} />
+                                        </div>
                                     </div>
                                 </div>
 

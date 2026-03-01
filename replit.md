@@ -76,3 +76,7 @@ Loja online construída com Next.js 16, Prisma 7, PostgreSQL (Neon) e TailwindCS
 - Fallback em 3 camadas: Correios → cálculo por região → valores fixos padrão
 - Timeout de 8s na API dos Correios para não travar checkout
 - Helper `cepToState()` converte CEP em estado para fallback regional
+- Cada produto pode ter peso/dimensões próprias (weight, height, width, length no model Product)
+- Frete calcula peso/volume total do pacote somando itens do carrinho (peso soma, altura/largura máxima, comprimento soma)
+- Se produto não tem dimensões, usa valores padrão das configurações da loja
+- Mínimos dos Correios: 0.3kg, 2cm altura, 11cm largura, 16cm comprimento

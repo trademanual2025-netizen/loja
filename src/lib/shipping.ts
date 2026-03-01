@@ -181,6 +181,10 @@ export async function calculateShipping(
     state: string,
     subtotal: number,
     destCep?: string,
+    pkgWeight?: number,
+    pkgHeight?: number,
+    pkgWidth?: number,
+    pkgLength?: number,
 ): Promise<ShippingOption[]> {
     try {
         const mode = (await getSetting(SETTINGS_KEYS.SHIPPING_MODE)) ?? 'free'
@@ -226,15 +230,25 @@ export async function calculateShipping(
             const originCep = cfg[SETTINGS_KEYS.SHIPPING_ORIGIN_CEP] || ''
             const originState = originCep ? cepToState(originCep) : 'SP'
 
+            const defaultWeight = parseFloat(cfg[SETTINGS_KEYS.SHIPPING_DEFAULT_WEIGHT] || '0.5')
+            const defaultHeight = parseFloat(cfg[SETTINGS_KEYS.SHIPPING_DEFAULT_HEIGHT] || '10')
+            const defaultWidth = parseFloat(cfg[SETTINGS_KEYS.SHIPPING_DEFAULT_WIDTH] || '15')
+            const defaultLength = parseFloat(cfg[SETTINGS_KEYS.SHIPPING_DEFAULT_LENGTH] || '20')
+
+            const finalWeight = Math.max(pkgWeight || defaultWeight, 0.3)
+            const finalHeight = Math.max(pkgHeight || defaultHeight, 2)
+            const finalWidth = Math.max(pkgWidth || defaultWidth, 11)
+            const finalLength = Math.max(pkgLength || defaultLength, 16)
+
             if (destCep && originCep) {
                 try {
                     const options = await calcCorreios(
                         originCep,
                         destCep,
-                        parseFloat(cfg[SETTINGS_KEYS.SHIPPING_DEFAULT_WEIGHT] || '0.5'),
-                        parseFloat(cfg[SETTINGS_KEYS.SHIPPING_DEFAULT_HEIGHT] || '10'),
-                        parseFloat(cfg[SETTINGS_KEYS.SHIPPING_DEFAULT_WIDTH] || '15'),
-                        parseFloat(cfg[SETTINGS_KEYS.SHIPPING_DEFAULT_LENGTH] || '20'),
+                        finalWeight,
+                        finalHeight,
+                        finalWidth,
+                        finalLength,
                         cfg[SETTINGS_KEYS.SHIPPING_CORREIOS_USER] || '',
                         cfg[SETTINGS_KEYS.SHIPPING_CORREIOS_PASS] || '',
                     )

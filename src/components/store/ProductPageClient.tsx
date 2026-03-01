@@ -6,8 +6,8 @@ import { fbTrackViewContent, fbTrackAddToCart } from '@/components/tracking/Face
 import { gtagViewItem, gtagAddToCart } from '@/components/tracking/GoogleAds'
 import { ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react'
 import Image from 'next/image'
-import { toast } from 'sonner'
 import Cookies from 'js-cookie'
+import { triggerCartNotification } from './CartNotification'
 import { dictionaries, Locale, defaultLocale, translateDb } from '@/lib/i18n'
 
 interface ProductOption { name: string; values: string[] }
@@ -65,7 +65,11 @@ export function ProductPageClient({ product, dict }: { product: Product; dict: a
         addItem(cartItem)
         fbTrackAddToCart({ id: product.id, name: product.name, price: displayPrice })
         gtagAddToCart({ id: product.id, name: product.name, price: displayPrice })
-        toast.success(locale === 'pt' ? 'Adicionado ao carrinho!' : locale === 'en' ? 'Added to cart!' : 'Añadido al carrito!')
+        triggerCartNotification({
+            name: product.name,
+            image: product.images[0],
+            price: displayPrice,
+        })
     }
 
     const discount = product.comparePrice ? Math.round((1 - displayPrice / product.comparePrice) * 100) : 0

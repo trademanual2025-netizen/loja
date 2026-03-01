@@ -477,6 +477,141 @@ body {
   opacity: 0.7;
 }
 
+/* Cart Notification */
+@keyframes cartSlideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes cartSlideDown {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(100%); opacity: 0; }
+}
+
+.cart-notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  animation: cartSlideUp 0.3s ease;
+}
+
+.cart-notification-inner {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  width: 320px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.cart-notification-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  color: var(--success, #22c55e);
+}
+
+.cart-notification-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  transition: background 0.15s;
+}
+
+.cart-notification-close:hover {
+  background: var(--bg-card2);
+}
+
+.cart-notification-product {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.cart-notification-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+  background: var(--bg-card2);
+}
+
+.cart-notification-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.cart-notification-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.cart-notification-btn-secondary {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: var(--bg-card2);
+  color: var(--text-body);
+  border: 1px solid var(--border);
+  transition: background 0.15s;
+  cursor: pointer;
+}
+
+.cart-notification-btn-secondary:hover {
+  background: var(--border);
+}
+
+.cart-notification-btn-primary {
+  flex: 1.3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: var(--primary);
+  color: white;
+  transition: background 0.15s;
+  cursor: pointer;
+}
+
+.cart-notification-btn-primary:hover {
+  background: var(--primary-hover, var(--primary-dark));
+}
+
+@media (max-width: 480px) {
+  .cart-notification {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+  }
+  .cart-notification-inner {
+    width: 100%;
+  }
+}
+
 /* -------------------------------------------------------------------------- */
 /* RESPONSIVE OVERRIDES - FIXING BUILD ERRORS & REFINING MOBILE               */
 /* -------------------------------------------------------------------------- */

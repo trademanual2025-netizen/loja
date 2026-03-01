@@ -9,6 +9,7 @@ import { fbTrackAddToCart } from '@/components/tracking/FacebookPixel'
 import { gtagAddToCart } from '@/components/tracking/GoogleAds'
 import { toast } from 'sonner'
 import { translateDb, Locale } from '@/lib/i18n'
+import { triggerCartNotification } from './CartNotification'
 
 interface Product {
     id: string
@@ -52,7 +53,11 @@ export function ProductCard({ product, dict, locale = 'pt' }: { product: Product
         })
         fbTrackAddToCart({ id: product.id, name: product.name, price: product.price })
         gtagAddToCart({ id: product.id, name: product.name, price: product.price })
-        toast.success(`${translateDb(product.name, locale)} ${l.added}`)
+        triggerCartNotification({
+            name: translateDb(product.name, locale),
+            image: product.images[0],
+            price: product.price,
+        })
     }
 
     const discount = product.comparePrice

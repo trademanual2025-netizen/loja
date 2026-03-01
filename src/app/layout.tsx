@@ -8,6 +8,7 @@ import { GoogleAds } from "@/components/tracking/GoogleAds";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "sonner";
 import { CartSync } from "@/components/store/CartSync";
+import { CartNotification } from "@/components/store/CartNotification";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -111,6 +112,7 @@ export default async function RootLayout({
           {googleEnabled && googleAdsId && <GoogleAds adsId={googleAdsId} />}
           <Toaster theme="dark" position="bottom-center" />
           <CartSync />
+          <CartNotification />
           {children}
         </ThemeProvider>
       </body>

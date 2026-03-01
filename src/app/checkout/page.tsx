@@ -49,6 +49,10 @@ export default function CheckoutPage() {
     const addressForm = useForm<AddressForm>()
 
     useEffect(() => {
+        addressForm.register('zipCode', { required: true })
+    }, [addressForm])
+
+    useEffect(() => {
         setMounted(true)
         const saved = Cookies.get('NEXT_LOCALE') as Locale
         if (saved && dictionaries[saved]) setLocale(saved)
@@ -199,23 +203,24 @@ export default function CheckoutPage() {
                         <div className="form-group">
                             <label className="form-label">{dict.checkout.cepPlaceholder} *</label>
                             <div style={{ position: 'relative' }}>
-                                <input className="input" placeholder="00000-000" maxLength={9}
-                                    {...addressForm.register('zipCode', { required: true })}
+                                <input
+                                    className="input"
+                                    placeholder="00000-000"
+                                    maxLength={9}
+                                    value={addressForm.watch('zipCode') || ''}
                                     onChange={(e) => {
-                                        let raw = e.target.value.replace(/\D/g, '').substring(0, 8)
-                                        if (raw.length > 5) raw = raw.substring(0, 5) + '-' + raw.substring(5)
-                                        addressForm.setValue('zipCode', raw)
-                                        if (raw.replace(/\D/g, '').length === 8) lookupCep(raw)
+                                        const digits = e.target.value.replace(/\D/g, '').substring(0, 8)
+                                        const formatted = digits.length > 5 ? digits.substring(0, 5) + '-' + digits.substring(5) : digits
+                                        addressForm.setValue('zipCode', formatted, { shouldValidate: true })
+                                        if (digits.length === 8) lookupCep(digits)
                                     }}
                                     onPaste={(e) => {
+                                        e.preventDefault()
                                         const pasted = e.clipboardData.getData('text')
-                                        const clean = pasted.replace(/\D/g, '').substring(0, 8)
-                                        if (clean.length === 8) {
-                                            e.preventDefault()
-                                            const formatted = clean.substring(0, 5) + '-' + clean.substring(5)
-                                            addressForm.setValue('zipCode', formatted)
-                                            lookupCep(clean)
-                                        }
+                                        const digits = pasted.replace(/\D/g, '').substring(0, 8)
+                                        const formatted = digits.length > 5 ? digits.substring(0, 5) + '-' + digits.substring(5) : digits
+                                        addressForm.setValue('zipCode', formatted, { shouldValidate: true })
+                                        if (digits.length === 8) lookupCep(digits)
                                     }}
                                     onBlur={(e) => lookupCep(e.target.value)}
                                     style={{ paddingRight: cepLoading ? 40 : undefined }}

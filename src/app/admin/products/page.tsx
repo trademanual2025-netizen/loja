@@ -293,7 +293,7 @@ export default function AdminProductsPage() {
                                                 <button onClick={() => openEdit(p)} style={{ padding: '6px 10px', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', color: 'var(--text-muted)' }} title="Editar">
                                                     <Pencil size={14} />
                                                 </button>
-                                                <button onClick={() => setDeleteConfirm(p.id)} style={{ padding: '6px 10px', background: '#1c0000', border: '1px solid #3a1010', borderRadius: 6, cursor: 'pointer', color: 'var(--error)' }} title="Excluir">
+                                                <button onClick={() => setDeleteConfirm(p.id)} style={{ padding: '6px 10px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 6, cursor: 'pointer', color: 'var(--error)' }} title="Excluir">
                                                     <Trash2 size={14} />
                                                 </button>
                                             </div>

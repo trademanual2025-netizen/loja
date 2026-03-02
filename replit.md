@@ -68,7 +68,8 @@ Loja online construída com Next.js 16, Prisma 7, PostgreSQL (Neon) e TailwindCS
 - `allowedDevOrigins` vai na raiz do next.config (não em experimental)
 - `devIndicators: false` desativa indicador de rota no dev mode
 - Fonte Inter carregada via `next/font/google` (não via `<link>` manual no `<head>`)
-- ThemeProvider customizado (sem next-themes) para evitar hydration mismatch
+- ThemeProvider customizado (sem next-themes) para evitar hydration mismatch; suporta `storageKey` e `applyTo` (html ou wrapper) para independência loja vs admin
+- Tema da loja salvo em localStorage key `theme` (aplica no `<html>`), tema do admin em `admin-theme` (aplica em wrapper div) — totalmente independentes
 - PostgreSQL: `uselibpqcompat=true` + `sslmode=no-verify` para suprimir warning de SSL do pg v9
 - `channel_binding=require` removido da URL de conexão (incompatível com lib pg)
 - Estoque validado antes de decremento para evitar valores negativos

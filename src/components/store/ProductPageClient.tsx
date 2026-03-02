@@ -13,6 +13,10 @@ import { dictionaries, Locale, defaultLocale, translateDb } from '@/lib/i18n'
 interface ProductOption { name: string; values: string[] }
 interface ProductVariant { id: string; name: string; price: number | null; stock: number; sku: string | null; image: string | null }
 
+interface RelatedProduct {
+    id: string; name: string; slug: string; price: number; comparePrice: number | null; image: string
+}
+
 interface Product {
     id: string; name: string; slug: string; description: string | null
     price: number; comparePrice: number | null; images: string[]; stock: number
@@ -20,7 +24,7 @@ interface Product {
     variants?: ProductVariant[]
 }
 
-export function ProductPageClient({ product, dict }: { product: Product; dict: any }) {
+export function ProductPageClient({ product, dict, relatedProducts = [] }: { product: Product; dict: any; relatedProducts?: RelatedProduct[] }) {
     const [mainImage, setMainImage] = useState(0)
     const [locale, setLocale] = useState<Locale>(defaultLocale)
     const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
@@ -204,6 +208,48 @@ export function ProductPageClient({ product, dict }: { product: Product; dict: a
             </div>
 
             <style>{`@media(max-width:768px){div[style*='grid-template-columns: 1fr 1fr']{grid-template-columns:1fr!important}}`}</style>
+
+            {relatedProducts.length > 0 && (
+                <div style={{ gridColumn: '1 / -1', marginTop: 48, borderTop: '1px solid var(--border)', paddingTop: 40 }}>
+                    <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: 24, color: 'var(--text-title)' }}>
+                        {locale === 'en' ? 'You may also like' : locale === 'es' ? 'También te puede gustar' : 'Você também pode gostar'}
+                    </h2>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
+                        {relatedProducts.slice(0, 8).map(rp => {
+                            const rpDiscount = rp.comparePrice ? Math.round((1 - rp.price / rp.comparePrice) * 100) : 0
+                            return (
+                                <a key={rp.id} href={`/produto/${rp.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                    <div style={{ background: 'var(--bg-card)', borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)', transition: 'transform 0.2s, box-shadow 0.2s' }}
+                                        onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)' }}
+                                        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = ''; (e.currentTarget as HTMLDivElement).style.boxShadow = '' }}
+                                    >
+                                        <div style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden', background: 'var(--bg-card2)' }}>
+                                            {rp.image ? (
+                                                <Image src={rp.image} alt={rp.name} fill sizes="(max-width: 768px) 50vw, 25vw" style={{ objectFit: 'cover' }} />
+                                            ) : (
+                                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Sem imagem</div>
+                                            )}
+                                            {rpDiscount > 0 && (
+                                                <span style={{ position: 'absolute', top: 8, left: 8, background: 'var(--error)', color: 'white', padding: '2px 8px', borderRadius: 6, fontSize: '0.75rem', fontWeight: 700 }}>-{rpDiscount}%</span>
+                                            )}
+                                        </div>
+                                        <div style={{ padding: '12px 14px' }}>
+                                            <p style={{ fontWeight: 600, fontSize: '0.88rem', marginBottom: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rp.name}</p>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                <span style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '0.95rem' }}>R$ {rp.price.toFixed(2).replace('.', ',')}</span>
+                                                {rp.comparePrice && (
+                                                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>R$ {rp.comparePrice.toFixed(2).replace('.', ',')}</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            )
+                        })}
+                    </div>
+                    <style>{`@media(max-width:768px){div[style*='repeat(4, 1fr)']{grid-template-columns:repeat(2,1fr)!important}}`}</style>
+                </div>
+            )}
         </div>
     )
 }

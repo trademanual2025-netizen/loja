@@ -36,6 +36,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 stock: true,
                 active: true,
                 bannerUrl: true,
+                categoryId: true,
                 options: { select: { name: true, values: true } },
                 variants: { select: { id: true, name: true, price: true, stock: true, sku: true, image: true } },
             },
@@ -46,6 +47,24 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     ])
 
     if (!product || !product.active) notFound()
+
+    const relatedProducts = await prisma.product.findMany({
+        where: {
+            active: true,
+            id: { not: product.id },
+            ...(product.categoryId ? { categoryId: product.categoryId } : {}),
+        },
+        select: {
+            id: true,
+            name: true,
+            slug: true,
+            price: true,
+            comparePrice: true,
+            images: true,
+        },
+        take: product.categoryId ? 8 : 8,
+        orderBy: { createdAt: 'desc' },
+    })
 
     const storeName = storeSettings[SETTINGS_KEYS.STORE_NAME] || 'Loja Virtual'
     const logoUrl = storeSettings[SETTINGS_KEYS.STORE_LOGO] || undefined
@@ -82,6 +101,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                         variants: product.variants,
                     }}
                     dict={dict.product}
+                    relatedProducts={relatedProducts.map(rp => ({
+                        id: rp.id,
+                        name: translateDb(rp.name, currentLocale),
+                        slug: rp.slug,
+                        price: rp.price,
+                        comparePrice: rp.comparePrice,
+                        image: rp.images[0] || '',
+                    }))}
                 />
             </main>
             <StoreFooter storeName={storeName} dict={dict} />

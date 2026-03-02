@@ -104,3 +104,4 @@ Loja online construída com Next.js 16, Prisma 7, PostgreSQL (Neon) e TailwindCS
 - Detecção automática de região para gateway de pagamento: setting `payment_gateway_mode` com valores `manual` (padrão), `auto`, `mp_only`, `stripe_only`
 - Modo `auto`: detecta país do visitante via ipapi.co (fallback ip2c.org), Brasil→MercadoPago, internacional→Stripe
 - Configurado na aba Pagamentos do admin settings, seção "Modo de Gateway"
+- Produtos relacionados exibidos na página do produto: busca até 8 produtos da mesma categoria (ou recentes se sem categoria); renderizado como grid 4 colunas (2 em mobile) com hover effect

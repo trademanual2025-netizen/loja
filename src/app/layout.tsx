@@ -93,6 +93,7 @@ export default async function RootLayout({
       } as React.CSSProperties}
     >
       <head>
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}})()` }} />
         <title>{metaTitle}</title>
         <meta name="description" content={metaDesc} />
         <meta property="og:title" content={metaTitle} />

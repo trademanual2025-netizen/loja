@@ -516,7 +516,6 @@ export default function AdminProductsPage() {
                                                 </tbody>
                                             </table>
                                         </div>
-                                        </div>
                                     )}
                                 </div>
 

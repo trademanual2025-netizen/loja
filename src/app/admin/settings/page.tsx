@@ -225,7 +225,29 @@ export default function AdminSettings() {
                                 </label>
                             </div>
                         </div>
-                        <button className="btn btn-primary" onClick={() => save(['mp_public_key', 'mp_access_token', 'mp_webhook_secret', 'mp_enabled', 'stripe_public_key', 'stripe_secret_key', 'stripe_webhook_secret', 'stripe_enabled'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
+                        <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8 }}>
+                            <p style={{ fontWeight: 700, marginBottom: 12 }}>🌍 Modo de Gateway</p>
+                            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 12 }}>
+                                Defina como o gateway de pagamento é selecionado no checkout. No modo automático, visitantes do Brasil usam MercadoPago e visitantes internacionais usam Stripe.
+                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                {[
+                                    { value: 'manual', label: 'Manual — cliente escolhe o gateway', desc: 'Mostra as duas opções no checkout (comportamento padrão)' },
+                                    { value: 'auto', label: 'Automático por região', desc: 'Brasil → MercadoPago | Internacional → Stripe' },
+                                    { value: 'mp_only', label: 'Apenas MercadoPago', desc: 'Somente MercadoPago disponível no checkout' },
+                                    { value: 'stripe_only', label: 'Apenas Stripe', desc: 'Somente Stripe disponível no checkout (ideal para internacional)' },
+                                ].map(opt => (
+                                    <label key={opt.value} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', background: (settings.payment_gateway_mode || 'manual') === opt.value ? 'rgba(99,102,241,0.1)' : 'var(--bg)', borderRadius: 8, border: `1px solid ${(settings.payment_gateway_mode || 'manual') === opt.value ? 'var(--primary)' : 'var(--border)'}`, cursor: 'pointer', transition: 'all 0.15s' }}>
+                                        <input type="radio" name="gateway_mode" checked={(settings.payment_gateway_mode || 'manual') === opt.value} onChange={() => set('payment_gateway_mode', opt.value)} style={{ marginTop: 3 }} />
+                                        <div>
+                                            <p style={{ fontWeight: 600, fontSize: '0.88rem' }}>{opt.label}</p>
+                                            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 2 }}>{opt.desc}</p>
+                                        </div>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+                        <button className="btn btn-primary" onClick={() => save(['mp_public_key', 'mp_access_token', 'mp_webhook_secret', 'mp_enabled', 'stripe_public_key', 'stripe_secret_key', 'stripe_webhook_secret', 'stripe_enabled', 'payment_gateway_mode'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
                     </div>
                 )}
 

@@ -101,3 +101,6 @@ Loja online construída com Next.js 16, Prisma 7, PostgreSQL (Neon) e TailwindCS
 - Componente `WebhooksTab` em `src/components/admin/WebhooksTab.tsx` com preview JSON em tempo real
 - Variantes de produto suportam imagem individual (`image` field em ProductVariant) — ao selecionar variante na loja, galeria troca para foto da variante
 - Admin: tabela de variantes tem coluna "Foto" com upload inline; storefront: `allImages` combina imagens do produto + variante selecionada
+- Detecção automática de região para gateway de pagamento: setting `payment_gateway_mode` com valores `manual` (padrão), `auto`, `mp_only`, `stripe_only`
+- Modo `auto`: detecta país do visitante via ipapi.co (fallback ip2c.org), Brasil→MercadoPago, internacional→Stripe
+- Configurado na aba Pagamentos do admin settings, seção "Modo de Gateway"

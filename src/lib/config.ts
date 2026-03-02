@@ -63,6 +63,7 @@ export const SETTINGS_KEYS = {
     STRIPE_SECRET_KEY: 'stripe_secret_key',
     STRIPE_WEBHOOK_SECRET: 'stripe_webhook_secret',
     STRIPE_ENABLED: 'stripe_enabled',
+    PAYMENT_GATEWAY_MODE: 'payment_gateway_mode',
     WEBHOOK_LEAD_URL: 'webhook_lead_url',
     WEBHOOK_BUYER_URL: 'webhook_buyer_url',
     SHIPPING_MODE: 'shipping_mode',

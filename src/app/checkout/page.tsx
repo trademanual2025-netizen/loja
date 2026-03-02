@@ -74,6 +74,8 @@ export default function CheckoutPage() {
 
     const [mounted, setMounted] = useState(false)
     const [cepLoading, setCepLoading] = useState(false)
+    const [gatewayMode, setGatewayMode] = useState<string>('manual')
+    const [detectedCountry, setDetectedCountry] = useState<string | null>(null)
     const lastCepLookedUp = useRef('')
     const addressForm = useForm<AddressForm>()
 
@@ -93,15 +95,52 @@ export default function CheckoutPage() {
 
         fetch('/api/admin/settings').then(r => r.json()).then(s => {
             setConfigs(s)
+            const mode = s.payment_gateway_mode || 'manual'
+            setGatewayMode(mode)
             if (s.google_ads_id && s.google_ads_label) {
                 setAdsConfig({ adsId: s.google_ads_id, adsLabel: s.google_ads_label })
             }
             if (s.stripe_public_key) {
                 setStripePromise(loadStripe(s.stripe_public_key))
             }
-            if (!s.mp_public_key && s.stripe_public_key) setPaymentGateway('stripe')
+
+            if (mode === 'mp_only') {
+                setPaymentGateway('mp')
+            } else if (mode === 'stripe_only') {
+                setPaymentGateway('stripe')
+            } else if (mode === 'auto') {
+                detectCountry().then(country => {
+                    setDetectedCountry(country)
+                    if (country === 'BR' && s.mp_public_key) {
+                        setPaymentGateway('mp')
+                    } else if (s.stripe_public_key) {
+                        setPaymentGateway('stripe')
+                    } else {
+                        setPaymentGateway('mp')
+                    }
+                })
+            } else {
+                if (!s.mp_public_key && s.stripe_public_key) setPaymentGateway('stripe')
+            }
         }).catch(() => { })
     }, [])
+
+    async function detectCountry(): Promise<string> {
+        try {
+            const res = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(4000) })
+            const data = await res.json()
+            return data.country_code || 'BR'
+        } catch {
+            try {
+                const res = await fetch('https://ip2c.org/s', { signal: AbortSignal.timeout(3000) })
+                const text = await res.text()
+                const parts = text.split(';')
+                return parts[1] || 'BR'
+            } catch {
+                return 'BR'
+            }
+        }
+    }
 
     async function handleAddressSubmit(data: AddressForm) {
         setLoading(true)
@@ -172,8 +211,7 @@ export default function CheckoutPage() {
     async function continueToPayment() {
         setStep('payment')
 
-        // Se Stripe for o gateway atual (ou único), já criamos o PaymentIntent
-        if (paymentGateway === 'stripe' || (!configs?.mp_public_key && configs?.stripe_public_key)) {
+        if (paymentGateway === 'stripe' && configs?.stripe_public_key) {
             initStripeIntent()
         }
     }
@@ -356,8 +394,15 @@ export default function CheckoutPage() {
                         </div>
                     </div>
 
-                    {/* Gateway Selector (if both configured) */}
-                    {configs?.mp_public_key && configs?.stripe_public_key && (
+                    {/* Gateway Selector */}
+                    {gatewayMode === 'auto' && detectedCountry && (
+                        <div style={{ padding: '10px 14px', background: 'rgba(99,102,241,0.08)', borderRadius: 8, border: '1px solid rgba(99,102,241,0.15)', marginBottom: 16, fontSize: '0.82rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                            🌍 {detectedCountry === 'BR'
+                                ? 'Pagamento via MercadoPago (Brasil detectado)'
+                                : `Pagamento via Stripe (região internacional detectada)`}
+                        </div>
+                    )}
+                    {configs?.mp_public_key && configs?.stripe_public_key && (gatewayMode === 'manual' || !gatewayMode) && (
                         <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
                             <button className={`btn ${paymentGateway === 'mp' ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: 1 }} onClick={() => setPaymentGateway('mp')}>
                                 Mercado Pago

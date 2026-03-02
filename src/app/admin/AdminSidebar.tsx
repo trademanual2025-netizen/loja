@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Package, ShoppingBag, Users, Settings, Code2, Shield, Tag, LogOut } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingBag, Users, Settings, Code2, Shield, Tag, LogOut, Sun, Moon } from 'lucide-react'
+import { useTheme } from '@/components/ThemeProvider'
 
 const navItems = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -22,6 +23,7 @@ interface Props {
 export function AdminSidebar({ isOpen }: Props) {
     const pathname = usePathname()
     const router = useRouter()
+    const { theme, setTheme } = useTheme()
 
     async function handleLogout() {
         await fetch('/api/admin/logout', { method: 'POST' })
@@ -77,6 +79,36 @@ export function AdminSidebar({ isOpen }: Props) {
             </nav>
 
             <div style={{ padding: '12px 10px 20px', borderTop: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px', marginBottom: 8, background: 'var(--bg)', borderRadius: 8 }}>
+                    <button
+                        type="button"
+                        onClick={() => setTheme('light')}
+                        style={{
+                            flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                            padding: '7px 0', borderRadius: 6, fontSize: '0.78rem', fontWeight: 600,
+                            border: 'none', cursor: 'pointer', transition: 'all 0.15s',
+                            background: theme === 'light' ? 'var(--bg-card2)' : 'transparent',
+                            color: theme === 'light' ? 'var(--text)' : 'var(--text-muted)',
+                            boxShadow: theme === 'light' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                        }}
+                    >
+                        <Sun size={14} /> Claro
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setTheme('dark')}
+                        style={{
+                            flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                            padding: '7px 0', borderRadius: 6, fontSize: '0.78rem', fontWeight: 600,
+                            border: 'none', cursor: 'pointer', transition: 'all 0.15s',
+                            background: theme === 'dark' ? 'var(--bg-card2)' : 'transparent',
+                            color: theme === 'dark' ? 'var(--text)' : 'var(--text-muted)',
+                            boxShadow: theme === 'dark' ? '0 1px 3px rgba(0,0,0,0.2)' : 'none',
+                        }}
+                    >
+                        <Moon size={14} /> Escuro
+                    </button>
+                </div>
                 <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8, color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.88rem', marginBottom: 4 }}>
                     <Package size={18} /> Ver Loja
                 </Link>

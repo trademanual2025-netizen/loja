@@ -30,6 +30,29 @@
   --badge-blue-text: #4338ca;
 }
 
+[data-theme='light'] {
+  --bg: #f0f4f8;
+  --bg-card: #ffffff;
+  --bg-card2: #e8edf3;
+  --bg-header: rgba(255, 255, 255, 0.92);
+  --border: #cbd5e1;
+  --text: #0f172a;
+  --text-title: #0f172a;
+  --icon-cart: #1e293b;
+  --text-muted: #64748b;
+  --success: #22c55e;
+  --error: #ef4444;
+
+  --badge-green-bg: #dcfce7;
+  --badge-green-text: #15803d;
+  --badge-yellow-bg: #fef9c3;
+  --badge-yellow-text: #a16207;
+  --badge-red-bg: #fee2e2;
+  --badge-red-text: #b91c1c;
+  --badge-blue-bg: #e0e7ff;
+  --badge-blue-text: #4338ca;
+}
+
 [data-theme='dark'] {
   /* Dark Mode Colors */
   --bg: #07070f;

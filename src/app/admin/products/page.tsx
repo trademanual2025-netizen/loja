@@ -459,7 +459,7 @@ export default function AdminProductsPage() {
                                     {variants.length > 0 && (
                                         <div>
                                             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 10 }}>Foto da variante: 800x800px (1:1 quadrado). Máx. 5MB. Formatos: JPG, PNG, WEBP.</p>
-                                        <div className="table-responsive">
+                                            <div className="table-responsive">
                                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                                                 <thead>
                                                     <tr style={{ background: 'var(--bg-card2)', color: 'var(--text-muted)' }}>
@@ -515,6 +515,7 @@ export default function AdminProductsPage() {
                                                     ))}
                                                 </tbody>
                                             </table>
+                                            </div>
                                         </div>
                                     )}
                                 </div>

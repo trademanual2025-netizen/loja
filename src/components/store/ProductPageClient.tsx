@@ -11,7 +11,7 @@ import { triggerCartNotification } from './CartNotification'
 import { dictionaries, Locale, defaultLocale, translateDb } from '@/lib/i18n'
 
 interface ProductOption { name: string; values: string[] }
-interface ProductVariant { id: string; name: string; price: number | null; stock: number; sku: string | null }
+interface ProductVariant { id: string; name: string; price: number | null; stock: number; sku: string | null; image: string | null }
 
 interface Product {
     id: string; name: string; slug: string; description: string | null
@@ -43,21 +43,42 @@ export function ProductPageClient({ product, dict }: { product: Product; dict: a
         gtagViewItem({ id: product.id, name: product.name, price: product.price })
     }, [product.id])
 
-    // Encontra a variante selecionada baseada nas opções
     const selectedVariantName = product.options?.map(o => selectedOptions[o.name]).join(' / ')
     const selectedVariant = product.variants?.find(v => v.name === selectedVariantName)
 
-    // Preço e estoque exibidos (da variante ou do produto)
+    const allImages = (() => {
+        const base = product.images || []
+        if (selectedVariant?.image) {
+            const idx = base.indexOf(selectedVariant.image)
+            if (idx >= 0) return base
+            return [selectedVariant.image, ...base]
+        }
+        return base
+    })()
+
+    useEffect(() => {
+        if (selectedVariant?.image) {
+            const imgs = selectedVariant.image && !product.images.includes(selectedVariant.image)
+                ? [selectedVariant.image, ...product.images]
+                : product.images
+            const idx = imgs.indexOf(selectedVariant.image)
+            if (idx >= 0) setMainImage(idx)
+        } else {
+            setMainImage(0)
+        }
+    }, [selectedVariantName, selectedVariant?.image])
+
     const displayPrice = selectedVariant?.price ? Number(selectedVariant.price) : product.price
     const displayStock = selectedVariant ? selectedVariant.stock : product.stock
 
     function handleAdd() {
+        const variantImage = selectedVariant?.image || product.images[0] || ''
         const cartItem = {
             id: product.id,
             name: product.name,
             price: displayPrice,
             comparePrice: product.comparePrice,
-            image: product.images[0],
+            image: variantImage,
             slug: product.slug,
             variantId: selectedVariant?.id,
             variantName: selectedVariant?.name
@@ -67,7 +88,7 @@ export function ProductPageClient({ product, dict }: { product: Product; dict: a
         gtagAddToCart({ id: product.id, name: product.name, price: displayPrice })
         triggerCartNotification({
             name: product.name,
-            image: product.images[0],
+            image: variantImage,
             price: displayPrice,
         })
     }
@@ -79,16 +100,16 @@ export function ProductPageClient({ product, dict }: { product: Product; dict: a
             {/* Galeria */}
             <div>
                 <div style={{ position: 'relative', aspectRatio: '1', background: 'var(--bg-card)', borderRadius: 12, overflow: 'hidden', marginBottom: 12 }}>
-                    {product.images.length > 0 ? (
+                    {allImages.length > 0 ? (
                         <>
-                            <Image src={product.images[mainImage]} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" style={{ objectFit: 'cover' }} priority />
-                            {product.images.length > 1 && (
+                            <Image src={allImages[mainImage] || allImages[0]} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" style={{ objectFit: 'cover' }} priority />
+                            {allImages.length > 1 && (
                                 <>
-                                    <button onClick={() => setMainImage((p) => (p - 1 + product.images.length) % product.images.length)}
+                                    <button onClick={() => setMainImage((p) => (p - 1 + allImages.length) % allImages.length)}
                                         style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white' }}>
                                         <ChevronLeft size={18} />
                                     </button>
-                                    <button onClick={() => setMainImage((p) => (p + 1) % product.images.length)}
+                                    <button onClick={() => setMainImage((p) => (p + 1) % allImages.length)}
                                         style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white' }}>
                                         <ChevronRight size={18} />
                                     </button>
@@ -99,9 +120,9 @@ export function ProductPageClient({ product, dict }: { product: Product; dict: a
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)' }}>Sem imagem</div>
                     )}
                 </div>
-                {product.images.length > 1 && (
+                {allImages.length > 1 && (
                     <div style={{ display: 'flex', gap: 8, overflowX: 'auto' }}>
-                        {product.images.map((img, i) => (
+                        {allImages.map((img, i) => (
                             <button key={i} onClick={() => setMainImage(i)}
                                 style={{ width: 70, height: 70, borderRadius: 8, overflow: 'hidden', border: `2px solid ${i === mainImage ? 'var(--primary)' : 'var(--border)'}`, flexShrink: 0, cursor: 'pointer', padding: 0, position: 'relative', background: 'var(--bg-card2)' }}>
                                 <Image src={img} alt="" fill sizes="70px" style={{ objectFit: 'cover' }} />

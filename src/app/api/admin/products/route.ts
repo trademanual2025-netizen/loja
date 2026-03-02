@@ -83,7 +83,8 @@ export async function POST(req: NextRequest) {
                     name: v.name,
                     price: safeParseFloat(v.price),
                     stock: safeParseInt(v.stock),
-                    sku: v.sku || null
+                    sku: v.sku || null,
+                    image: v.image || null
                 })) || []
             }
         },

@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 
 interface Category { id: string; name: string }
 interface ProductOption { name: string; values: string[] }
-interface ProductVariant { id?: string; name: string; price?: number | string; stock: number | string; sku?: string }
+interface ProductVariant { id?: string; name: string; price?: number | string; stock: number | string; sku?: string; image?: string }
 
 interface Product {
     id: string
@@ -192,7 +192,8 @@ export default function AdminProductsPage() {
                 variants: (variants || []).map(v => ({
                     ...v,
                     price: safeParseFloat(v.price),
-                    stock: safeParseInt(v.stock)
+                    stock: safeParseInt(v.stock),
+                    image: v.image || null
                 }))
             }
             const res = await fetch(editingId ? `/api/admin/products/${editingId}` : '/api/admin/products', {
@@ -460,6 +461,7 @@ export default function AdminProductsPage() {
                                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                                                 <thead>
                                                     <tr style={{ background: 'var(--bg-card2)', color: 'var(--text-muted)' }}>
+                                                        <th style={{ textAlign: 'left', padding: '10px' }}>Foto</th>
                                                         <th style={{ textAlign: 'left', padding: '10px' }}>Variante</th>
                                                         <th style={{ textAlign: 'left', padding: '10px' }}>Preço (Opcional)</th>
                                                         <th style={{ textAlign: 'left', padding: '10px' }}>Estoque</th>
@@ -469,6 +471,34 @@ export default function AdminProductsPage() {
                                                 <tbody>
                                                     {variants.map((v, i) => (
                                                         <tr key={i} style={{ borderTop: '1px solid var(--border)' }}>
+                                                            <td style={{ padding: '10px' }}>
+                                                                <label style={{ cursor: 'pointer', display: 'block' }}>
+                                                                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={async e => {
+                                                                        const file = e.target.files?.[0]
+                                                                        if (!file) return
+                                                                        setUploading(true)
+                                                                        const fd = new FormData(); fd.append('file', file)
+                                                                        const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+                                                                        setUploading(false)
+                                                                        if (!res.ok) { toast.error('Erro no upload.'); return }
+                                                                        const data = await res.json()
+                                                                        const next = [...variants]; next[i].image = data.url; setVariants(next)
+                                                                    }} />
+                                                                    {v.image ? (
+                                                                        <div style={{ position: 'relative', width: 48, height: 48 }}>
+                                                                            <img src={v.image} alt="" style={{ width: 48, height: 48, borderRadius: 6, objectFit: 'cover', border: '1px solid var(--border)' }} />
+                                                                            <button type="button" onClick={e => { e.preventDefault(); e.stopPropagation(); const next = [...variants]; next[i].image = undefined; setVariants(next) }}
+                                                                                style={{ position: 'absolute', top: -4, right: -4, background: 'var(--error)', border: 'none', borderRadius: '50%', width: 16, height: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                                                                                <X size={10} />
+                                                                            </button>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div style={{ width: 48, height: 48, borderRadius: 6, border: '1px dashed var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-card2)' }}>
+                                                                            <ImagePlus size={16} color="var(--text-muted)" />
+                                                                        </div>
+                                                                    )}
+                                                                </label>
+                                                            </td>
                                                             <td style={{ padding: '10px', fontWeight: 600 }}>{v.name}</td>
                                                             <td style={{ padding: '10px' }}>
                                                                 <input className="input" type="number" step="0.01" value={v.price} onChange={e => { const next = [...variants]; next[i].price = e.target.value; setVariants(next) }} placeholder={form.price} style={{ height: 32, padding: '0 8px' }} />

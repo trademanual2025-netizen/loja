@@ -99,3 +99,5 @@ Loja online construída com Next.js 16, Prisma 7, PostgreSQL (Neon) e TailwindCS
 - Campos organizados por grupo: meta (envelope), data, address (buyer only)
 - Definições de campos compartilhadas em `src/lib/webhook-fields.ts` (safe for client import)
 - Componente `WebhooksTab` em `src/components/admin/WebhooksTab.tsx` com preview JSON em tempo real
+- Variantes de produto suportam imagem individual (`image` field em ProductVariant) — ao selecionar variante na loja, galeria troca para foto da variante
+- Admin: tabela de variantes tem coluna "Foto" com upload inline; storefront: `allImages` combina imagens do produto + variante selecionada

@@ -100,7 +100,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
                             name: variant.name,
                             price: safeParseFloat(variant.price),
                             stock: safeParseInt(variant.stock),
-                            sku: variant.sku || null
+                            sku: variant.sku || null,
+                            image: variant.image || null
                         }
                     })
                 }

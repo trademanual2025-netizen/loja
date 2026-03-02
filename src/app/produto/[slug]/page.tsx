@@ -37,7 +37,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 active: true,
                 bannerUrl: true,
                 options: { select: { name: true, values: true } },
-                variants: { select: { id: true, name: true, price: true, stock: true, sku: true } },
+                variants: { select: { id: true, name: true, price: true, stock: true, sku: true, image: true } },
             },
         }),
         getSettings([SETTINGS_KEYS.STORE_NAME, SETTINGS_KEYS.STORE_LOGO]),

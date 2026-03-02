@@ -5,12 +5,19 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const category = searchParams.get('category')
     const search = searchParams.get('search')
+    const sort = searchParams.get('sort') || 'newest'
     const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '48')
+    const limit = parseInt(searchParams.get('limit') || '24')
 
     const where: Record<string, unknown> = { active: true }
     if (category) where.category = { slug: category }
     if (search) where.name = { contains: search, mode: 'insensitive' }
+
+    let orderBy: any = { createdAt: 'desc' }
+    if (sort === 'price_asc') orderBy = { price: 'asc' }
+    else if (sort === 'price_desc') orderBy = { price: 'desc' }
+    else if (sort === 'name_asc') orderBy = { name: 'asc' }
+    else if (sort === 'name_desc') orderBy = { name: 'desc' }
 
     const [products, total] = await Promise.all([
         prisma.product.findMany({
@@ -25,7 +32,7 @@ export async function GET(req: NextRequest) {
                 stock: true,
                 variants: { select: { id: true } },
             },
-            orderBy: { createdAt: 'desc' },
+            orderBy,
             skip: (page - 1) * limit,
             take: limit,
         }),

@@ -10,25 +10,29 @@ import { dictionaries, defaultLocale, Locale, translateDb } from '@/lib/i18n'
 
 export const revalidate = 60
 
-async function getProducts(search?: string, category?: string) {
+async function getProducts(search?: string, category?: string, limit = 24) {
   const where: Record<string, unknown> = { active: true }
   if (category) where.category = { slug: category }
   if (search) where.name = { contains: search, mode: 'insensitive' }
-  return prisma.product.findMany({
-    where,
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      price: true,
-      comparePrice: true,
-      images: true,
-      stock: true,
-      variants: { select: { id: true } },
-    },
-    orderBy: { createdAt: 'desc' },
-    take: 48,
-  })
+  const [products, total] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        price: true,
+        comparePrice: true,
+        images: true,
+        stock: true,
+        variants: { select: { id: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    }),
+    prisma.product.count({ where }),
+  ])
+  return { products, total, pages: Math.ceil(total / limit) }
 }
 
 async function getCategories() {
@@ -41,8 +45,11 @@ export default async function HomePage({
   searchParams: Promise<{ search?: string; category?: string }>
 }) {
   const params = await searchParams
-  const [products, categories, storeSettings, user, cookieStore] = await Promise.all([
-    getProducts(params.search, params.category),
+  const perPageSetting = await getSetting(SETTINGS_KEYS.STORE_PRODUCTS_PER_PAGE)
+  const perPage = parseInt(perPageSetting || '24')
+
+  const [productsData, categories, storeSettings, user, cookieStore] = await Promise.all([
+    getProducts(params.search, params.category, perPage),
     getCategories(),
     getSettings([
       SETTINGS_KEYS.STORE_NAME,
@@ -50,6 +57,9 @@ export default async function HomePage({
       SETTINGS_KEYS.STORE_BANNER_URL,
       SETTINGS_KEYS.STORE_BANNER_TITLE,
       SETTINGS_KEYS.STORE_BANNER_SUBTITLE,
+      SETTINGS_KEYS.STORE_PRODUCTS_PER_PAGE,
+      SETTINGS_KEYS.STORE_INSTALLMENTS,
+      SETTINGS_KEYS.STORE_INSTALLMENTS_MIN_VALUE,
     ]),
     getAuthUser(),
     cookies(),
@@ -94,12 +104,17 @@ export default async function HomePage({
         )}
 
         <ProductFilter
-          initialProducts={products}
+          initialProducts={productsData.products}
+          initialTotal={productsData.total}
+          initialPages={productsData.pages}
           categories={categories}
           dict={dict}
           locale={currentLocale}
           initialSearch={params.search}
           initialCategory={params.category}
+          productsPerPage={parseInt(storeSettings[SETTINGS_KEYS.STORE_PRODUCTS_PER_PAGE] || '24')}
+          installments={parseInt(storeSettings[SETTINGS_KEYS.STORE_INSTALLMENTS] || '0')}
+          installmentsMinValue={parseFloat(storeSettings[SETTINGS_KEYS.STORE_INSTALLMENTS_MIN_VALUE] || '0')}
         />
       </main>
       <StoreFooter storeName={storeName} dict={dict} />

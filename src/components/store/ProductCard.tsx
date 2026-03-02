@@ -28,7 +28,7 @@ const labels = {
     es: { buy: 'Comprar', sold: 'Agotado', added: 'agregado al carrito!', select: 'Seleccione las opciones' },
 }
 
-export function ProductCard({ product, dict, locale = 'pt' }: { product: Product, dict?: any, locale?: Locale }) {
+export function ProductCard({ product, dict, locale = 'pt', installments = 0, installmentsMinValue = 0 }: { product: Product, dict?: any, locale?: Locale, installments?: number, installmentsMinValue?: number }) {
     const addItem = useCart((s) => s.addItem)
     const router = useRouter()
     const hasVariants = product.variants && product.variants.length > 0
@@ -101,6 +101,11 @@ export function ProductCard({ product, dict, locale = 'pt' }: { product: Product
                             </span>
                         )}
                     </div>
+                    {installments > 1 && product.price >= installmentsMinValue && (
+                        <p className="product-card-installments">
+                            {locale === 'en' ? `or ${installments}x of` : locale === 'es' ? `o ${installments}x de` : `ou ${installments}x de`} R$ {(product.price / installments).toFixed(2).replace('.', ',')}
+                        </p>
+                    )}
                     <button
                         onClick={handleAdd}
                         className={`product-card-btn${isSoldOut ? ' sold-out' : ''}`}

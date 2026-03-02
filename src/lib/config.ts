@@ -95,5 +95,8 @@ export const SETTINGS_KEYS = {
     SEO_META_TITLE: 'seo_meta_title',
     SEO_META_DESCRIPTION: 'seo_meta_description',
     SEO_OG_IMAGE: 'seo_og_image',
+    STORE_PRODUCTS_PER_PAGE: 'store_products_per_page',
+    STORE_INSTALLMENTS: 'store_installments',
+    STORE_INSTALLMENTS_MIN_VALUE: 'store_installments_min_value',
     ADMIN_SETUP_DONE: 'admin_setup_done',
 } as const

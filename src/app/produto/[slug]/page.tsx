@@ -41,7 +41,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 variants: { select: { id: true, name: true, price: true, stock: true, sku: true, image: true } },
             },
         }),
-        getSettings([SETTINGS_KEYS.STORE_NAME, SETTINGS_KEYS.STORE_LOGO]),
+        getSettings([SETTINGS_KEYS.STORE_NAME, SETTINGS_KEYS.STORE_LOGO, SETTINGS_KEYS.STORE_INSTALLMENTS, SETTINGS_KEYS.STORE_INSTALLMENTS_MIN_VALUE]),
         getAuthUser(),
         cookies()
     ])
@@ -101,6 +101,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                         variants: product.variants,
                     }}
                     dict={dict.product}
+                    installments={parseInt(storeSettings[SETTINGS_KEYS.STORE_INSTALLMENTS] || '0')}
+                    installmentsMinValue={parseFloat(storeSettings[SETTINGS_KEYS.STORE_INSTALLMENTS_MIN_VALUE] || '0')}
                     relatedProducts={relatedProducts.map(rp => ({
                         id: rp.id,
                         name: translateDb(rp.name, currentLocale),

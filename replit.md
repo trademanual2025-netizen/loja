@@ -105,3 +105,8 @@ Loja online construída com Next.js 16, Prisma 7, PostgreSQL (Neon) e TailwindCS
 - Modo `auto`: detecta país do visitante via ipapi.co (fallback ip2c.org), Brasil→MercadoPago, internacional→Stripe
 - Configurado na aba Pagamentos do admin settings, seção "Modo de Gateway"
 - Produtos relacionados exibidos na página do produto: busca até 8 produtos da mesma categoria (ou recentes se sem categoria); renderizado como grid 4 colunas (2 em mobile) com hover effect
+- Paginação na loja: componente ProductFilter com controle de páginas, scroll suave, contador de produtos/páginas
+- Ordenação: 5 opções (mais recentes, menor preço, maior preço, A-Z, Z-A) — API `/api/products` aceita `sort` param
+- Produtos por página configurável no admin: setting `store_products_per_page` (12/16/20/24/32/48), padrão 24
+- Parcelas nos cards: setting `store_installments` (0/2/3/4/6/10/12x) e `store_installments_min_value` — exibe "ou 3x de R$ X,XX" nos cards e na página do produto
+- Configurações de exibição na aba Loja do admin: seção "Exibição de Produtos" com produtos por página, parcelas e valor mínimo

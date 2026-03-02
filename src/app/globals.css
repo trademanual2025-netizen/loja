@@ -465,6 +465,13 @@ body {
   text-decoration: line-through;
 }
 
+.product-card-installments {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  margin-top: -6px;
+}
+
 .product-card-btn {
   display: flex;
   align-items: center;

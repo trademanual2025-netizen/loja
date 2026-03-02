@@ -24,7 +24,7 @@ interface Product {
     variants?: ProductVariant[]
 }
 
-export function ProductPageClient({ product, dict, relatedProducts = [] }: { product: Product; dict: any; relatedProducts?: RelatedProduct[] }) {
+export function ProductPageClient({ product, dict, relatedProducts = [], installments = 0, installmentsMinValue = 0 }: { product: Product; dict: any; relatedProducts?: RelatedProduct[]; installments?: number; installmentsMinValue?: number }) {
     const [mainImage, setMainImage] = useState(0)
     const [locale, setLocale] = useState<Locale>(defaultLocale)
     const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
@@ -153,6 +153,13 @@ export function ProductPageClient({ product, dict, relatedProducts = [] }: { pro
                             </>
                         )}
                     </div>
+                    {installments > 1 && displayPrice >= installmentsMinValue && (
+                        <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: 8 }}>
+                            {locale === 'en' ? `or ${installments}x of` : locale === 'es' ? `o ${installments}x de` : `ou ${installments}x de`}{' '}
+                            <span style={{ fontWeight: 600, color: 'var(--text-body)' }}>R$ {(displayPrice / installments).toFixed(2).replace('.', ',')}</span>
+                            {' '}{locale === 'en' ? 'interest-free' : 'sem juros'}
+                        </p>
+                    )}
                 </div>
 
                 {/* Variações */}

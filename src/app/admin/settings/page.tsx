@@ -413,8 +413,44 @@ export default function AdminSettings() {
                             <ColorF label="Ícone de Carrinho (Sacola)" k="store_icon_cart" defaultColor="#f1f1f8" settings={settings} set={set} />
                         </div>
 
+                        <div style={{ background: 'var(--bg-card2)', padding: 16, borderRadius: 8, border: '1px solid var(--border)' }}>
+                            <p style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: 12 }}>🛒 Exibição de Produtos</p>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                                <div className="form-group" style={{ marginBottom: 0 }}>
+                                    <label className="form-label">Produtos por Página</label>
+                                    <select className="input" value={settings.store_products_per_page || '24'} onChange={e => set('store_products_per_page', e.target.value)}>
+                                        <option value="12">12</option>
+                                        <option value="16">16</option>
+                                        <option value="20">20</option>
+                                        <option value="24">24</option>
+                                        <option value="32">32</option>
+                                        <option value="48">48</option>
+                                    </select>
+                                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 4 }}>Quantidade de produtos exibidos por página na loja. O restante aparece via paginação.</p>
+                                </div>
+                                <div className="form-group" style={{ marginBottom: 0 }}>
+                                    <label className="form-label">Parcelas (Card do Produto)</label>
+                                    <select className="input" value={settings.store_installments || '0'} onChange={e => set('store_installments', e.target.value)}>
+                                        <option value="0">Não exibir parcelas</option>
+                                        <option value="2">2x sem juros</option>
+                                        <option value="3">3x sem juros</option>
+                                        <option value="4">4x sem juros</option>
+                                        <option value="6">6x sem juros</option>
+                                        <option value="10">10x sem juros</option>
+                                        <option value="12">12x sem juros</option>
+                                    </select>
+                                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 4 }}>Ex: "ou 3x de R$ 39,97". Aparece no card do produto na loja.</p>
+                                </div>
+                            </div>
+                            <div className="form-group" style={{ marginTop: 12, marginBottom: 0 }}>
+                                <label className="form-label">Valor Mínimo para Parcelas (R$)</label>
+                                <input className="input" type="number" step="0.01" placeholder="0.00" value={settings.store_installments_min_value || ''} onChange={e => set('store_installments_min_value', e.target.value)} style={{ maxWidth: 200 }} />
+                                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 4 }}>Produtos abaixo deste valor não exibirão parcelas. Deixe 0 para exibir em todos.</p>
+                            </div>
+                        </div>
+
                         <F settings={settings} set={set} label="Texto do Rodapé" k="store_footer_text" />
-                        <button className="btn btn-primary" onClick={() => save(['store_name', 'store_logo', 'store_favicon', 'store_primary_color', 'store_text_color', 'store_bg_color', 'store_bg_card_color', 'store_text_title', 'store_btn_buy', 'store_btn_header', 'store_icon_cart', 'store_footer_text'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
+                        <button className="btn btn-primary" onClick={() => save(['store_name', 'store_logo', 'store_favicon', 'store_primary_color', 'store_text_color', 'store_bg_color', 'store_bg_card_color', 'store_text_title', 'store_btn_buy', 'store_btn_header', 'store_icon_cart', 'store_footer_text', 'store_products_per_page', 'store_installments', 'store_installments_min_value'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
                     </div>
                 )}
 

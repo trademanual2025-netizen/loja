@@ -9,7 +9,7 @@ interface CartItemInput {
 
 export async function POST(req: NextRequest) {
     try {
-        const { state, subtotal, zipCode, items } = await req.json()
+        const { state, subtotal, zipCode, items, country, locale } = await req.json()
 
         let packageWeight: number | undefined
         let packageHeight: number | undefined
@@ -64,6 +64,8 @@ export async function POST(req: NextRequest) {
             packageHeight,
             packageWidth,
             packageLength,
+            country,
+            locale,
         )
         return NextResponse.json({ options })
     } catch (e) {

@@ -7,12 +7,14 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { fbTrackInitiateCheckout } from '@/components/tracking/FacebookPixel'
 import { gtagBeginCheckout } from '@/components/tracking/GoogleAds'
-import { MapPin, CreditCard, Truck } from 'lucide-react'
+import { MapPin, CreditCard, Truck, Globe } from 'lucide-react'
 import { MercadoPagoBrick } from '@/components/checkout/MercadoPagoBrick'
 import { StripeCheckoutForm } from '@/components/checkout/StripeCheckoutForm'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 import Cookies from 'js-cookie'
+import { COUNTRIES, getCountry, type Country } from '@/lib/countries'
+import { dictionaries, Locale, defaultLocale } from '@/lib/i18n'
 
 function getCepState(cep: string): string | null {
     const prefix = parseInt(cep.substring(0, 3), 10)
@@ -42,16 +44,98 @@ function getCepState(cep: string): string | null {
     if (prefix >= 1 && prefix <= 9) return 'SP'
     return null
 }
-import { dictionaries, Locale, defaultLocale } from '@/lib/i18n'
 
 type Step = 'address' | 'shipping' | 'payment'
 
 interface AddressForm {
-    zipCode: string; street: string; number: string; complement: string
-    neighborhood: string; city: string; state: string
+    zipCode: string
+    street: string
+    number: string
+    complement: string
+    neighborhood: string
+    city: string
+    state: string
 }
 
-interface ShippingOption { label: string; value: number; days?: number }
+interface ShippingOption { label: string; value: number; days?: number; daysText?: string }
+
+function CountrySelector({ value, onChange, searchPlaceholder }: { value: string; onChange: (code: string) => void; searchPlaceholder: string }) {
+    const [open, setOpen] = useState(false)
+    const [search, setSearch] = useState('')
+    const ref = useRef<HTMLDivElement>(null)
+    const current = getCountry(value)
+
+    useEffect(() => {
+        function handle(e: MouseEvent) {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+        }
+        document.addEventListener('mousedown', handle)
+        return () => document.removeEventListener('mousedown', handle)
+    }, [])
+
+    const filtered = COUNTRIES.filter(c =>
+        c.code !== 'OTHER' && (
+            c.namePT.toLowerCase().includes(search.toLowerCase()) ||
+            c.nameEN.toLowerCase().includes(search.toLowerCase()) ||
+            c.code.toLowerCase().includes(search.toLowerCase())
+        )
+    )
+
+    return (
+        <div ref={ref} style={{ position: 'relative' }}>
+            <button
+                type="button"
+                onClick={() => setOpen(o => !o)}
+                className="input"
+                style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', textAlign: 'left', width: '100%' }}
+            >
+                <span style={{ fontSize: '1.3rem' }}>{current.flag}</span>
+                <span style={{ flex: 1 }}>{current.namePT}</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>▼</span>
+            </button>
+
+            {open && (
+                <div style={{
+                    position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 999,
+                    background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8,
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.4)', marginTop: 4, overflow: 'hidden',
+                }}>
+                    <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--border)' }}>
+                        <input
+                            autoFocus
+                            className="input"
+                            placeholder={searchPlaceholder}
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            style={{ margin: 0 }}
+                        />
+                    </div>
+                    <div style={{ maxHeight: 240, overflowY: 'auto' }}>
+                        {filtered.map(c => (
+                            <button
+                                key={c.code}
+                                type="button"
+                                onClick={() => { onChange(c.code); setOpen(false); setSearch('') }}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                                    padding: '9px 14px', background: c.code === value ? 'rgba(200,160,80,0.1)' : 'transparent',
+                                    border: 'none', cursor: 'pointer', color: 'var(--text)', textAlign: 'left',
+                                    fontSize: '0.9rem',
+                                }}
+                                onMouseEnter={e => { if (c.code !== value) (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-card2)' }}
+                                onMouseLeave={e => { if (c.code !== value) (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+                            >
+                                <span style={{ fontSize: '1.15rem' }}>{c.flag}</span>
+                                <span>{c.namePT}</span>
+                                <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: 'var(--text-muted)' }}>{c.code}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
 
 export default function CheckoutPage() {
     const { items, total } = useCart()
@@ -60,12 +144,11 @@ export default function CheckoutPage() {
     const [shipping, setShipping] = useState<ShippingOption>({ label: '', value: 0 })
     const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([])
     const [paymentGateway, setPaymentGateway] = useState<'mp' | 'stripe'>('mp')
-    const [address, setAddress] = useState<AddressForm | null>(null)
+    const [address, setAddress] = useState<(AddressForm & { country: string }) | null>(null)
     const [loading, setLoading] = useState(false)
     const [configs, setConfigs] = useState<any>(null)
     const [adsConfig, setAdsConfig] = useState<{ adsId: string; adsLabel: string } | null>(null)
 
-    // Stripe State
     const [stripePromise, setStripePromise] = useState<any>(null)
     const [clientSecret, setClientSecret] = useState<string>('')
     const [stripeOrderId, setStripeOrderId] = useState<string>('')
@@ -73,15 +156,17 @@ export default function CheckoutPage() {
     const dict = dictionaries[locale]
 
     const [mounted, setMounted] = useState(false)
-    const [cepLoading, setCepLoading] = useState(false)
+    const [postalLoading, setPostalLoading] = useState(false)
     const [gatewayMode, setGatewayMode] = useState<string>('manual')
     const [detectedCountry, setDetectedCountry] = useState<string | null>(null)
-    const lastCepLookedUp = useRef('')
+    const [selectedCountry, setSelectedCountry] = useState<string>('BR')
+    const [locationDetecting, setLocationDetecting] = useState(true)
+    const lastPostalLookedUp = useRef('')
     const addressForm = useForm<AddressForm>()
 
-    useEffect(() => {
-        addressForm.register('zipCode', { required: true })
-    }, [addressForm])
+    const countryData = getCountry(selectedCountry)
+    const isBrazil = selectedCountry === 'BR'
+    const isInternational = !isBrazil
 
     useEffect(() => {
         setMounted(true)
@@ -104,13 +189,15 @@ export default function CheckoutPage() {
                 setStripePromise(loadStripe(s.stripe_public_key))
             }
 
-            if (mode === 'mp_only') {
-                setPaymentGateway('mp')
-            } else if (mode === 'stripe_only') {
-                setPaymentGateway('stripe')
-            } else if (mode === 'auto') {
-                detectCountry().then(country => {
-                    setDetectedCountry(country)
+            detectCountry().then(country => {
+                setDetectedCountry(country)
+                setSelectedCountry(country)
+                setLocationDetecting(false)
+                if (mode === 'mp_only') {
+                    setPaymentGateway('mp')
+                } else if (mode === 'stripe_only') {
+                    setPaymentGateway('stripe')
+                } else if (mode === 'auto' || country !== 'BR') {
                     if (country === 'BR' && s.mp_public_key) {
                         setPaymentGateway('mp')
                     } else if (s.stripe_public_key) {
@@ -118,24 +205,34 @@ export default function CheckoutPage() {
                     } else {
                         setPaymentGateway('mp')
                     }
-                })
-            } else {
-                if (!s.mp_public_key && s.stripe_public_key) setPaymentGateway('stripe')
-            }
-        }).catch(() => { })
+                } else {
+                    if (!s.mp_public_key && s.stripe_public_key) setPaymentGateway('stripe')
+                }
+            })
+        }).catch(() => { setLocationDetecting(false) })
     }, [])
+
+    function handleCountryChange(code: string) {
+        setSelectedCountry(code)
+        addressForm.reset()
+        lastPostalLookedUp.current = ''
+        if (code !== 'BR' && configs) {
+            if (configs.stripe_public_key) setPaymentGateway('stripe')
+        } else if (code === 'BR' && configs?.mp_public_key && gatewayMode !== 'stripe_only') {
+            setPaymentGateway('mp')
+        }
+    }
 
     async function detectCountry(): Promise<string> {
         try {
-            const res = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(4000) })
+            const res = await fetch('/api/geo', { signal: AbortSignal.timeout(5000) })
             const data = await res.json()
-            return data.country_code || 'BR'
+            return data.country || 'BR'
         } catch {
             try {
-                const res = await fetch('https://ip2c.org/s', { signal: AbortSignal.timeout(3000) })
-                const text = await res.text()
-                const parts = text.split(';')
-                return parts[1] || 'BR'
+                const res = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(4000) })
+                const data = await res.json()
+                return data.country_code || 'BR'
             } catch {
                 return 'BR'
             }
@@ -144,29 +241,44 @@ export default function CheckoutPage() {
 
     async function handleAddressSubmit(data: AddressForm) {
         setLoading(true)
-        const fallbackOptions: ShippingOption[] = [
-            { label: dict.checkout.pacLabel, value: 24.90, days: 8 },
-            { label: dict.checkout.sedexLabel, value: 42.90, days: 4 },
-        ]
+        const fallbackOptions: ShippingOption[] = isBrazil
+            ? [
+                { label: dict.checkout.pacLabel, value: 24.90, days: 8 },
+                { label: dict.checkout.sedexLabel, value: 42.90, days: 4 },
+            ]
+            : [
+                { label: dict.checkout.intlShipping, value: 150, daysText: '20–40 dias úteis' },
+            ]
+
+        const fullAddress = {
+            ...data,
+            country: selectedCountry,
+            neighborhood: data.neighborhood || '',
+            number: data.number || '',
+            state: data.state || '',
+        }
+
         try {
             const res = await fetch('/api/shipping', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    state: data.state,
+                    state: data.state || '',
                     subtotal: total(),
                     zipCode: data.zipCode.replace(/\D/g, ''),
                     items: items.map(i => ({ id: i.id, quantity: i.quantity })),
+                    country: selectedCountry,
+                    locale,
                 }),
             })
             const json = await res.json()
             const opts = json.options && json.options.length > 0 ? json.options : fallbackOptions
-            setAddress(data)
+            setAddress(fullAddress)
             setShippingOptions(opts)
             setShipping(opts[0])
             setStep('shipping')
         } catch {
-            setAddress(data)
+            setAddress(fullAddress)
             setShippingOptions(fallbackOptions)
             setShipping(fallbackOptions[0])
             setStep('shipping')
@@ -175,42 +287,69 @@ export default function CheckoutPage() {
         }
     }
 
-    const lookupCep = useCallback(async (raw: string) => {
+    const lookupPostal = useCallback(async (raw: string, countryCode: string) => {
         const clean = raw.replace(/\D/g, '')
-        if (clean.length !== 8) return
-        if (clean === lastCepLookedUp.current) return
-        lastCepLookedUp.current = clean
-        setCepLoading(true)
-        try {
-            const res = await fetch(`https://viacep.com.br/ws/${clean}/json/`)
-            const data = await res.json()
-            if (!data.erro) {
-                if (data.logradouro) addressForm.setValue('street', data.logradouro)
-                if (data.bairro) addressForm.setValue('neighborhood', data.bairro)
-                if (data.localidade) addressForm.setValue('city', data.localidade)
-                if (data.uf) addressForm.setValue('state', data.uf)
-                toast.success(dict.checkout.addressFound)
-            } else {
-                const stateFromCep = getCepState(clean)
-                if (stateFromCep) {
-                    addressForm.setValue('state', stateFromCep)
-                    toast.info(dict.checkout.genericCep)
+        if (clean === lastPostalLookedUp.current) return
+        const fmt = getCountry(countryCode).fmt
+
+        if (countryCode === 'BR') {
+            if (clean.length !== 8) return
+            lastPostalLookedUp.current = clean
+            setPostalLoading(true)
+            try {
+                const res = await fetch(`https://viacep.com.br/ws/${clean}/json/`)
+                const data = await res.json()
+                if (!data.erro) {
+                    if (data.logradouro) addressForm.setValue('street', data.logradouro)
+                    if (data.bairro) addressForm.setValue('neighborhood', data.bairro)
+                    if (data.localidade) addressForm.setValue('city', data.localidade)
+                    if (data.uf) addressForm.setValue('state', data.uf)
+                    toast.success(dict.checkout.addressFound)
                 } else {
-                    toast.warning(dict.checkout.cepNotFound)
+                    const stateFromCep = getCepState(clean)
+                    if (stateFromCep) {
+                        addressForm.setValue('state', stateFromCep)
+                        toast.info(dict.checkout.genericCep)
+                    } else {
+                        toast.warning(dict.checkout.cepNotFound)
+                    }
                 }
+            } catch {
+                const stateFromCep = getCepState(clean)
+                if (stateFromCep) addressForm.setValue('state', stateFromCep)
+                toast.warning(dict.checkout.cepError)
+            } finally {
+                setPostalLoading(false)
             }
-        } catch {
-            const stateFromCep = getCepState(clean)
-            if (stateFromCep) addressForm.setValue('state', stateFromCep)
-            toast.warning(dict.checkout.cepError)
-        } finally {
-            setCepLoading(false)
+            return
         }
-    }, [addressForm])
+
+        if (fmt.lookup === 'zippopotam' && fmt.zippopotamCode && fmt.postalCodeLen && clean.length >= fmt.postalCodeLen) {
+            lastPostalLookedUp.current = clean
+            setPostalLoading(true)
+            try {
+                const res = await fetch(`https://api.zippopotam.us/${fmt.zippopotamCode}/${encodeURIComponent(raw.trim())}`, {
+                    signal: AbortSignal.timeout(5000)
+                })
+                if (res.ok) {
+                    const data = await res.json()
+                    const place = data.places?.[0]
+                    if (place) {
+                        if (place['place name']) addressForm.setValue('city', place['place name'])
+                        if (place['state']) addressForm.setValue('state', place['state abbreviation'] || place['state'])
+                        toast.success(dict.checkout.postalLookupFound)
+                    }
+                }
+            } catch {
+                toast.info(dict.checkout.postalLookupError)
+            } finally {
+                setPostalLoading(false)
+            }
+        }
+    }, [addressForm, dict])
 
     async function continueToPayment() {
         setStep('payment')
-
         if (paymentGateway === 'stripe' && configs?.stripe_public_key) {
             initStripeIntent()
         }
@@ -228,10 +367,10 @@ export default function CheckoutPage() {
                     shippingCost: shipping.value,
                 }),
             })
-            const { clientSecret, orderId } = await res.json()
-            if (clientSecret) {
-                setClientSecret(clientSecret)
-                setStripeOrderId(orderId)
+            const json = await res.json()
+            if (json.clientSecret) {
+                setClientSecret(json.clientSecret)
+                setStripeOrderId(json.orderId || '')
             } else {
                 toast.error(dict.checkout.stripeError)
             }
@@ -280,65 +419,145 @@ export default function CheckoutPage() {
                 <div className="card fade-in">
                     <h2 style={{ fontWeight: 700, marginBottom: 20 }}>{dict.checkout.address}</h2>
                     <form onSubmit={addressForm.handleSubmit(handleAddressSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+                        {/* Seletor de País */}
                         <div className="form-group">
-                            <label className="form-label">{dict.checkout.cepPlaceholder} *</label>
-                            <div style={{ position: 'relative' }}>
-                                <input
-                                    className="input"
-                                    placeholder="00000-000"
-                                    maxLength={9}
-                                    value={addressForm.watch('zipCode') || ''}
-                                    onChange={(e) => {
-                                        const digits = e.target.value.replace(/\D/g, '').substring(0, 8)
-                                        const formatted = digits.length > 5 ? digits.substring(0, 5) + '-' + digits.substring(5) : digits
-                                        addressForm.setValue('zipCode', formatted, { shouldValidate: true })
-                                        if (digits.length === 8) lookupCep(digits)
-                                    }}
-                                    onPaste={(e) => {
-                                        e.preventDefault()
-                                        const pasted = e.clipboardData.getData('text')
-                                        const digits = pasted.replace(/\D/g, '').substring(0, 8)
-                                        const formatted = digits.length > 5 ? digits.substring(0, 5) + '-' + digits.substring(5) : digits
-                                        addressForm.setValue('zipCode', formatted, { shouldValidate: true })
-                                        if (digits.length === 8) lookupCep(digits)
-                                    }}
-                                    onBlur={(e) => lookupCep(e.target.value)}
-                                    style={{ paddingRight: cepLoading ? 40 : undefined }}
+                            <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <Globe size={14} /> {dict.checkout.countryLabel} *
+                            </label>
+                            {locationDetecting ? (
+                                <div className="input" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                                    <span className="spinner" style={{ width: 14, height: 14, flexShrink: 0 }} />
+                                    {dict.checkout.detectingLocation}
+                                </div>
+                            ) : (
+                                <CountrySelector
+                                    value={selectedCountry}
+                                    onChange={handleCountryChange}
+                                    searchPlaceholder={dict.checkout.searchCountry}
                                 />
-                                {cepLoading && (
+                            )}
+                        </div>
+
+                        {/* Aviso internacional */}
+                        {isInternational && (
+                            <div style={{ padding: '12px 16px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 8, fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                                🌍 {dict.checkout.intlNote}
+                                <br />
+                                <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{dict.checkout.brlNote}</span>
+                            </div>
+                        )}
+
+                        {/* Código Postal */}
+                        <div className="form-group">
+                            <label className="form-label">{countryData.fmt.postalCodeLabel} *</label>
+                            <div style={{ position: 'relative' }}>
+                                {isBrazil ? (
+                                    <input
+                                        className="input"
+                                        placeholder="00000-000"
+                                        maxLength={9}
+                                        value={addressForm.watch('zipCode') || ''}
+                                        onChange={(e) => {
+                                            const digits = e.target.value.replace(/\D/g, '').substring(0, 8)
+                                            const formatted = digits.length > 5 ? digits.substring(0, 5) + '-' + digits.substring(5) : digits
+                                            addressForm.setValue('zipCode', formatted, { shouldValidate: true })
+                                            if (digits.length === 8) lookupPostal(digits, 'BR')
+                                        }}
+                                        onPaste={(e) => {
+                                            e.preventDefault()
+                                            const pasted = e.clipboardData.getData('text')
+                                            const digits = pasted.replace(/\D/g, '').substring(0, 8)
+                                            const formatted = digits.length > 5 ? digits.substring(0, 5) + '-' + digits.substring(5) : digits
+                                            addressForm.setValue('zipCode', formatted, { shouldValidate: true })
+                                            if (digits.length === 8) lookupPostal(digits, 'BR')
+                                        }}
+                                        onBlur={(e) => lookupPostal(e.target.value, 'BR')}
+                                        style={{ paddingRight: postalLoading ? 40 : undefined }}
+                                    />
+                                ) : (
+                                    <input
+                                        className="input"
+                                        placeholder={countryData.fmt.postalCodeHint || ''}
+                                        {...addressForm.register('zipCode', { required: true })}
+                                        onBlur={(e) => lookupPostal(e.target.value, selectedCountry)}
+                                        style={{ paddingRight: postalLoading ? 40 : undefined }}
+                                    />
+                                )}
+                                {postalLoading && (
                                     <span className="spinner" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', width: 18, height: 18 }} />
                                 )}
                             </div>
                         </div>
+
+                        {/* Logradouro */}
                         <div className="form-group">
-                            <label className="form-label">{dict.checkout.address} *</label>
+                            <label className="form-label">
+                                {isBrazil ? dict.checkout.address : dict.checkout.streetLabel} *
+                            </label>
                             <input className="input" {...addressForm.register('street', { required: true })} />
                         </div>
-                        <div className="grid-2">
-                            <div className="form-group">
-                                <label className="form-label">{dict.checkout.number} *</label>
-                                <input className="input" {...addressForm.register('number', { required: true })} />
+
+                        {/* Número + Complemento (Brasil) ou só Complemento/Apto (internacional) */}
+                        {isBrazil ? (
+                            <div className="grid-2">
+                                <div className="form-group">
+                                    <label className="form-label">{dict.checkout.number} *</label>
+                                    <input className="input" {...addressForm.register('number', { required: true })} />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">{dict.checkout.complement}</label>
+                                    <input className="input" {...addressForm.register('complement')} />
+                                </div>
                             </div>
+                        ) : countryData.fmt.hasNumber ? (
+                            <div className="grid-2">
+                                <div className="form-group">
+                                    <label className="form-label">{dict.checkout.number}</label>
+                                    <input className="input" {...addressForm.register('number')} />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">{dict.checkout.aptLabel}</label>
+                                    <input className="input" {...addressForm.register('complement')} />
+                                </div>
+                            </div>
+                        ) : (
                             <div className="form-group">
-                                <label className="form-label">{dict.checkout.complement}</label>
+                                <label className="form-label">{dict.checkout.aptLabel}</label>
                                 <input className="input" {...addressForm.register('complement')} />
                             </div>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">{dict.checkout.neighborhood} *</label>
-                            <input className="input" {...addressForm.register('neighborhood', { required: true })} />
-                        </div>
+                        )}
+
+                        {/* Bairro (só Brasil) */}
+                        {countryData.fmt.hasNeighborhood && (
+                            <div className="form-group">
+                                <label className="form-label">{dict.checkout.neighborhood} *</label>
+                                <input className="input" {...addressForm.register('neighborhood', { required: isBrazil })} />
+                            </div>
+                        )}
+
+                        {/* Cidade + Estado/Região */}
                         <div className="grid-2">
                             <div className="form-group">
                                 <label className="form-label">{dict.checkout.city} *</label>
                                 <input className="input" {...addressForm.register('city', { required: true })} />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">{dict.checkout.state} *</label>
-                                <input className="input" maxLength={2} placeholder="SP" {...addressForm.register('state', { required: true })} />
-                            </div>
+                            {countryData.fmt.showState && (
+                                <div className="form-group">
+                                    <label className="form-label">
+                                        {isBrazil ? dict.checkout.state : (countryData.fmt.stateLabel || dict.checkout.regionLabel)} {isBrazil ? '*' : ''}
+                                    </label>
+                                    <input
+                                        className="input"
+                                        maxLength={isBrazil ? 2 : undefined}
+                                        placeholder={isBrazil ? 'SP' : ''}
+                                        {...addressForm.register('state', { required: isBrazil })}
+                                    />
+                                </div>
+                            )}
                         </div>
-                        <button className="btn btn-primary" disabled={loading}>
+
+                        <button className="btn btn-primary" disabled={loading} type="submit">
                             {loading ? <span className="spinner" /> : `${dict.checkout.calculateShipping} →`}
                         </button>
                     </form>
@@ -348,14 +567,23 @@ export default function CheckoutPage() {
             {/* Step 2: Frete */}
             {step === 'shipping' && (
                 <div className="card fade-in">
-                    <h2 style={{ fontWeight: 700, marginBottom: 20 }}>{dict.checkout.shipping}</h2>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
+                    <h2 style={{ fontWeight: 700, marginBottom: 4 }}>{dict.checkout.shipping}</h2>
+                    {isInternational && (
+                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 16 }}>
+                            🌍 {dict.checkout.intlNote}
+                        </p>
+                    )}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24, marginTop: 16 }}>
                         {shippingOptions.map((opt) => (
                             <label key={opt.label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 16, background: 'var(--bg-card2)', borderRadius: 8, border: `1px solid ${shipping.label === opt.label ? 'var(--primary)' : 'var(--border)'}`, cursor: 'pointer' }}>
                                 <input type="radio" name="shipping" checked={shipping.label === opt.label} onChange={() => setShipping(opt)} />
                                 <div style={{ flex: 1 }}>
                                     <p style={{ fontWeight: 600 }}>{opt.label}</p>
-                                    {opt.days ? <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 2 }}>{dict.checkout.deadline} {opt.days} {dict.checkout.businessDays}</p> : null}
+                                    {(opt.daysText || opt.days) && (
+                                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                                            {dict.checkout.deadline} {opt.daysText || `${opt.days} ${dict.checkout.businessDays}`}
+                                        </p>
+                                    )}
                                 </div>
                                 <span style={{ fontWeight: 700, color: opt.value === 0 ? '#22c55e' : 'var(--text)' }}>
                                     {opt.value === 0 ? dict.checkout.freeShipping : `R$ ${opt.value.toFixed(2).replace('.', ',')}`}
@@ -364,9 +592,7 @@ export default function CheckoutPage() {
                         ))}
                     </div>
                     <div style={{ display: 'flex', gap: 12 }}>
-                        <button onClick={() => setStep('address')} className="btn btn-secondary">
-                            ← {dict.checkout.back}
-                        </button>
+                        <button onClick={() => setStep('address')} className="btn btn-secondary">← {dict.checkout.back}</button>
                         <button onClick={continueToPayment} className="btn btn-primary" style={{ flex: 1 }}>
                             {dict.store.checkout} →
                         </button>
@@ -382,7 +608,8 @@ export default function CheckoutPage() {
                     {/* Resumo */}
                     <div style={{ background: 'var(--bg-card2)', padding: 16, borderRadius: 8, marginBottom: 24 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', marginBottom: 8 }}>
-                            <span>{dict.cart.subtotal}</span><span>R$ {total().toFixed(2).replace('.', ',')}</span>
+                            <span>{dict.cart.subtotal}</span>
+                            <span>R$ {total().toFixed(2).replace('.', ',')}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', marginBottom: 8 }}>
                             <span>{dict.checkout.shipping} ({shipping.label})</span>
@@ -390,16 +617,29 @@ export default function CheckoutPage() {
                         </div>
                         <hr className="divider" />
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '1.1rem' }}>
-                            <span>{dict.checkout.total}</span><span style={{ color: 'var(--primary)' }}>R$ {(total() + shipping.value).toFixed(2).replace('.', ',')}</span>
+                            <span>{dict.checkout.total}</span>
+                            <span style={{ color: 'var(--primary)' }}>R$ {(total() + shipping.value).toFixed(2).replace('.', ',')}</span>
                         </div>
+                        {isInternational && (
+                            <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 8 }}>{dict.checkout.brlNote}</p>
+                        )}
                     </div>
 
-                    {/* Gateway Selector */}
+                    {/* Aviso de localização / gateway */}
                     {gatewayMode === 'auto' && detectedCountry && (
                         <div style={{ padding: '10px 14px', background: 'rgba(99,102,241,0.08)', borderRadius: 8, border: '1px solid rgba(99,102,241,0.15)', marginBottom: 16, fontSize: '0.82rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 8 }}>
                             🌍 {detectedCountry === 'BR' ? dict.checkout.brazilDetected : dict.checkout.internationalDetected}
                         </div>
                     )}
+
+                    {/* Recomendação Stripe para internacional */}
+                    {isInternational && configs?.stripe_public_key && (
+                        <div style={{ padding: '10px 14px', background: 'rgba(99,102,241,0.06)', borderRadius: 8, border: '1px solid rgba(99,102,241,0.15)', marginBottom: 16, fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                            💳 {dict.checkout.stripeRecommended}
+                        </div>
+                    )}
+
+                    {/* Gateway Selector */}
                     {configs?.mp_public_key && configs?.stripe_public_key && (gatewayMode === 'manual' || !gatewayMode) && (
                         <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
                             <button className={`btn ${paymentGateway === 'mp' ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: 1 }} onClick={() => setPaymentGateway('mp')}>
@@ -439,10 +679,12 @@ export default function CheckoutPage() {
                     )}
 
                     {paymentGateway === 'stripe' && !clientSecret && (
-                        <div style={{ padding: 40, textAlign: 'center' }}><span className="spinner" style={{ borderColor: 'var(--primary)', borderRightColor: 'transparent' }} /> {dict.checkout.connectingSecure}</div>
+                        <div style={{ padding: 40, textAlign: 'center' }}>
+                            <span className="spinner" style={{ borderColor: 'var(--primary)', borderRightColor: 'transparent' }} />
+                            {' '}{dict.checkout.connectingSecure}
+                        </div>
                     )}
 
-                    {/* Voltar */}
                     <div style={{ marginTop: 24 }}>
                         <button onClick={() => setStep('shipping')} className="btn btn-secondary">← {dict.checkout.backToShipping}</button>
                     </div>

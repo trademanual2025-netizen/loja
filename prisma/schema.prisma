@@ -107,13 +107,14 @@ model Order {
   shippingCost    Float       @default(0)
   total           Float
   // Endereço de entrega (snapshot no momento da compra)
+  country         String   @default("BR")
   zipCode         String
   street          String
-  number          String
+  number          String?
   complement      String?
-  neighborhood    String
+  neighborhood    String?
   city            String
-  state           String
+  state           String?
   // Informações de envio (atualizadas pelo admin)
   trackingCode    String?
   trackingUrl     String?

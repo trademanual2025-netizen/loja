@@ -16,7 +16,7 @@ Loja online de joias artesanais da marca Giovana Dias. Construída com Next.js 1
   - `src/app/minha-conta/` - Área do usuário
   - `src/app/pedido/[id]/` - Detalhes do pedido
   - `src/app/produto/[slug]/` - Página de produto
-- `src/lib/` - Módulos utilitários (prisma, auth, admin-auth, config, cart, i18n, inventory, shipping, webhooks)
+- `src/lib/` - Módulos utilitários (prisma, auth, admin-auth, config, cart, i18n, inventory, shipping, webhooks, countries)
 - `src/components/` - Componentes React compartilhados
 - `src/proxy.ts` - Proxy/middleware do Next.js 16 (protege rotas admin e checkout)
 - `src/app/error.tsx` - Error boundary global

@@ -1,9 +1,11 @@
 import { getSetting, getSettings, SETTINGS_KEYS } from './config'
+import { getCountry, SHIPPING_RATES } from './countries'
 
 export interface ShippingOption {
     label: string
     value: number
     days?: number
+    daysText?: string
 }
 
 const SEDEX_CODE = '04014'
@@ -177,6 +179,17 @@ function cepToState(cep: string): string {
     return 'SP'
 }
 
+export function calculateInternationalShipping(country: string, locale?: string): ShippingOption[] {
+    const c = getCountry(country)
+    const rates = SHIPPING_RATES[c.continent]
+    const lang = locale || 'pt'
+    return rates.map(r => ({
+        label: lang === 'en' ? r.labelEN : lang === 'es' ? r.labelES : r.label,
+        value: r.value,
+        daysText: lang === 'en' ? r.daysEN : lang === 'es' ? r.daysES : r.days,
+    }))
+}
+
 export async function calculateShipping(
     state: string,
     subtotal: number,
@@ -185,7 +198,12 @@ export async function calculateShipping(
     pkgHeight?: number,
     pkgWidth?: number,
     pkgLength?: number,
+    country?: string,
+    locale?: string,
 ): Promise<ShippingOption[]> {
+    if (country && country !== 'BR') {
+        return calculateInternationalShipping(country, locale)
+    }
     try {
         const mode = (await getSetting(SETTINGS_KEYS.SHIPPING_MODE)) ?? 'free'
 

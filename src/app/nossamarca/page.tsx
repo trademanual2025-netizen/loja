@@ -12,7 +12,7 @@ export const metadata = {
 
 export default async function NossaMarcaPage() {
     const [storeSettings, user, cookieStore] = await Promise.all([
-        getSettings([SETTINGS_KEYS.STORE_NAME, SETTINGS_KEYS.STORE_LOGO]),
+        getSettings([SETTINGS_KEYS.STORE_NAME, SETTINGS_KEYS.STORE_LOGO, SETTINGS_KEYS.STORE_FOOTER_TEXT]),
         getAuthUser(),
         cookies(),
     ])
@@ -371,7 +371,7 @@ export default async function NossaMarcaPage() {
 
             </main>
 
-            <StoreFooter storeName={storeName} dict={dict} />
+            <StoreFooter storeName={storeName} dict={dict} footerText={storeSettings[SETTINGS_KEYS.STORE_FOOTER_TEXT] || undefined} />
         </>
     )
 }

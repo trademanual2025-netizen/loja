@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { ShoppingCart, User, LogOut } from 'lucide-react'
+import { ShoppingCart, User } from 'lucide-react'
 import { useCart } from '@/lib/cart'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { LanguageSelector } from '@/components/LanguageSelector'
@@ -16,12 +16,20 @@ interface Props {
     dict: Dictionary
 }
 
+const NAV_LINKS = [
+    { label: 'Loja', href: '/loja' },
+    { label: 'Nossa Marca', href: '/nossamarca' },
+]
+
 export function StoreHeader({ storeName, logoUrl, user, dict }: Props) {
     const itemCount = useCart((s) => s.itemCount())
     const clearCart = useCart((s) => s.clearCart)
     const router = useRouter()
+    const pathname = usePathname()
     const [mounted, setMounted] = useState(false)
     useEffect(() => { setMounted(true) }, [])
+
+    const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
 
     async function handleLogout() {
         await fetch('/api/auth/logout', { method: 'POST' })
@@ -46,17 +54,27 @@ export function StoreHeader({ storeName, logoUrl, user, dict }: Props) {
                     )}
                 </Link>
 
-                <nav className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-                    <Link href="/loja" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, transition: 'color 0.2s' }}
-                        onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
-                        onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}>
-                        Loja
-                    </Link>
-                    <Link href="/nossamarca" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, transition: 'color 0.2s' }}
-                        onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
-                        onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}>
-                        Nossa Marca
-                    </Link>
+                <nav className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+                    {NAV_LINKS.map(({ label, href }) => {
+                        const active = isActive(href)
+                        return (
+                            <Link
+                                key={href}
+                                href={href}
+                                style={{
+                                    color: active ? 'var(--text)' : 'var(--text-muted)',
+                                    textDecoration: 'none',
+                                    fontSize: '0.88rem',
+                                    fontWeight: active ? 600 : 500,
+                                    transition: 'color 0.2s',
+                                    paddingBottom: 4,
+                                    borderBottom: active ? '2px solid var(--primary)' : '2px solid transparent',
+                                }}
+                            >
+                                {label}
+                            </Link>
+                        )
+                    })}
                 </nav>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

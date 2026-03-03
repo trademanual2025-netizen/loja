@@ -41,7 +41,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 variants: { select: { id: true, name: true, price: true, stock: true, sku: true, image: true } },
             },
         }),
-        getSettings([SETTINGS_KEYS.STORE_NAME, SETTINGS_KEYS.STORE_LOGO, SETTINGS_KEYS.STORE_INSTALLMENTS, SETTINGS_KEYS.STORE_INSTALLMENTS_MIN_VALUE]),
+        getSettings([SETTINGS_KEYS.STORE_NAME, SETTINGS_KEYS.STORE_LOGO, SETTINGS_KEYS.STORE_INSTALLMENTS, SETTINGS_KEYS.STORE_INSTALLMENTS_MIN_VALUE, SETTINGS_KEYS.STORE_FOOTER_TEXT]),
         getAuthUser(),
         cookies()
     ])
@@ -113,7 +113,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     }))}
                 />
             </main>
-            <StoreFooter storeName={storeName} dict={dict} />
+            <StoreFooter storeName={storeName} dict={dict} footerText={storeSettings[SETTINGS_KEYS.STORE_FOOTER_TEXT] || undefined} />
         </>
     )
 }

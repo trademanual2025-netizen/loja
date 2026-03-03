@@ -59,6 +59,7 @@ export default async function LojaPage({
       SETTINGS_KEYS.STORE_PRODUCTS_PER_PAGE,
       SETTINGS_KEYS.STORE_INSTALLMENTS,
       SETTINGS_KEYS.STORE_INSTALLMENTS_MIN_VALUE,
+      SETTINGS_KEYS.STORE_FOOTER_TEXT,
     ]),
     getAuthUser(),
     cookies(),
@@ -115,7 +116,7 @@ export default async function LojaPage({
           installmentsMinValue={parseFloat(storeSettings[SETTINGS_KEYS.STORE_INSTALLMENTS_MIN_VALUE] || '0')}
         />
       </main>
-      <StoreFooter storeName={storeName} dict={dict} />
+      <StoreFooter storeName={storeName} dict={dict} footerText={storeSettings[SETTINGS_KEYS.STORE_FOOTER_TEXT] || undefined} />
     </>
   )
 }

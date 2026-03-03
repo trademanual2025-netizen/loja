@@ -45,9 +45,9 @@ export default async function LandingPage() {
       user={user}
       dict={dict}
       heroImage={landingSettings[SETTINGS_KEYS.LANDING_HERO_IMAGE] || ''}
-      heroTitle={landingSettings[SETTINGS_KEYS.LANDING_HERO_TITLE] || 'Joias autênticas para pessoas autênticas'}
-      heroSubtitle={landingSettings[SETTINGS_KEYS.LANDING_HERO_SUBTITLE] || 'Honrada em enfeitar você!'}
-      ctaText={landingSettings[SETTINGS_KEYS.LANDING_CTA_TEXT] || 'Acessar Loja'}
+      heroTitle={landingSettings[SETTINGS_KEYS.LANDING_HERO_TITLE] || dict.landing.heroTitle}
+      heroSubtitle={landingSettings[SETTINGS_KEYS.LANDING_HERO_SUBTITLE] || dict.landing.heroSubtitle}
+      ctaText={landingSettings[SETTINGS_KEYS.LANDING_CTA_TEXT] || dict.landing.ctaText}
       whatsapp={landingSettings[SETTINGS_KEYS.LANDING_WHATSAPP] || ''}
       instagram={landingSettings[SETTINGS_KEYS.LANDING_INSTAGRAM] || ''}
       email={landingSettings[SETTINGS_KEYS.LANDING_EMAIL] || ''}

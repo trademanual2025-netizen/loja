@@ -5,9 +5,15 @@ import { StoreFooter } from '@/components/store/StoreFooter'
 import { cookies } from 'next/headers'
 import { dictionaries, defaultLocale, Locale } from '@/lib/i18n'
 
-export const metadata = {
-    title: 'Guia de Tamanhos de Anel',
-    description: 'Descubra seu tamanho de anel com o guia oficial da Giovana Dias. Medição simples por circunferência do dedo.',
+export async function generateMetadata() {
+    const cookieStore = await cookies()
+    const localeCookie = cookieStore.get('NEXT_LOCALE')?.value as Locale
+    const currentLocale = (localeCookie && dictionaries[localeCookie]) ? localeCookie : defaultLocale
+    const dict = dictionaries[currentLocale]
+    return {
+        title: `${dict.ringsize.pageTitle} — Giovana Dias`,
+        description: dict.ringsize.subtitle,
+    }
 }
 
 const SIZES = [
@@ -46,9 +52,17 @@ export default async function RingSizePage() {
     const localeCookie = cookieStore.get('NEXT_LOCALE')?.value as Locale
     const currentLocale = (localeCookie && dictionaries[localeCookie]) ? localeCookie : defaultLocale
     const dict = dictionaries[currentLocale]
+    const r = dict.ringsize
 
     const storeName = storeSettings[SETTINGS_KEYS.STORE_NAME] || 'Giovana Dias'
     const logoUrl = storeSettings[SETTINGS_KEYS.STORE_LOGO] || null
+
+    const steps = [
+        { step: '01', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(200,160,80,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C8.5 2 7 4.5 7 7v6l-2 2v2h14v-2l-2-2V7c0-2.5-1.5-5-5-5z" /><circle cx="12" cy="20" r="2" /></svg>, title: r.step1Title, desc: r.step1Desc },
+        { step: '02', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(200,160,80,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></svg>, title: r.step2Title, desc: r.step2Desc },
+        { step: '03', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(200,160,80,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h18M3 6h18M3 18h12" /></svg>, title: r.step3Title, desc: r.step3Desc },
+        { step: '04', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(200,160,80,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M8 12l3 3 5-5" /></svg>, title: r.step4Title, desc: r.step4Desc },
+    ]
 
     return (
         <>
@@ -67,14 +81,14 @@ export default async function RingSizePage() {
                     <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 0%, rgba(200,160,80,0.08) 0%, transparent 65%)' }} />
                     <div style={{ position: 'relative', zIndex: 1 }}>
                         <p style={{ fontSize: '0.7rem', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.7)', marginBottom: 16, fontWeight: 600 }}>
-                            ✦ Giovana Dias Joias ✦
+                            {r.tagline}
                         </p>
                         <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 200, color: '#fff', letterSpacing: '0.06em', margin: '0 0 16px', textTransform: 'uppercase' }}>
-                            Guia de Tamanhos
+                            {r.title}
                         </h1>
                         <div style={{ width: 40, height: 1, background: 'rgba(200,160,80,0.6)', margin: '0 auto 20px' }} />
                         <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '1rem', fontWeight: 300, maxWidth: 480, margin: '0 auto', lineHeight: 1.7 }}>
-                            Encontre o tamanho perfeito para os seus anéis antes de finalizar sua compra.
+                            {r.subtitle}
                         </p>
                     </div>
                 </div>
@@ -83,55 +97,11 @@ export default async function RingSizePage() {
 
                     <section style={{ marginBottom: 64 }}>
                         <h2 style={{ fontSize: '0.7rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.8)', marginBottom: 32, fontWeight: 600 }}>
-                            Como medir seu dedo
+                            {r.howToTitle}
                         </h2>
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20, marginBottom: 32 }}>
-                            {[
-                                {
-                                    step: '01',
-                                    icon: (
-                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(200,160,80,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="M12 2C8.5 2 7 4.5 7 7v6l-2 2v2h14v-2l-2-2V7c0-2.5-1.5-5-5-5z" />
-                                            <circle cx="12" cy="20" r="2" />
-                                        </svg>
-                                    ),
-                                    title: 'Prepare um fio',
-                                    desc: 'Use um barbante fino, linha ou tira de papel estreita.',
-                                },
-                                {
-                                    step: '02',
-                                    icon: (
-                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(200,160,80,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                            <circle cx="12" cy="12" r="9" />
-                                            <path d="M12 7v5l3 3" />
-                                        </svg>
-                                    ),
-                                    title: 'Envolva o dedo',
-                                    desc: 'Dê uma volta completa no dedo — nem apertado, nem folgado.',
-                                },
-                                {
-                                    step: '03',
-                                    icon: (
-                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(200,160,80,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="M3 12h18M3 6h18M3 18h12" />
-                                        </svg>
-                                    ),
-                                    title: 'Meça na régua',
-                                    desc: 'Estenda o fio sobre uma régua e anote o comprimento em centímetros.',
-                                },
-                                {
-                                    step: '04',
-                                    icon: (
-                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(200,160,80,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                            <rect x="3" y="3" width="18" height="18" rx="2" />
-                                            <path d="M8 12l3 3 5-5" />
-                                        </svg>
-                                    ),
-                                    title: 'Consulte a tabela',
-                                    desc: 'Localize a medida correspondente na tabela abaixo para encontrar seu número.',
-                                },
-                            ].map(({ step, icon, title, desc }) => (
+                            {steps.map(({ step, icon, title, desc }) => (
                                 <div key={step} style={{
                                     background: 'var(--bg-card)',
                                     border: '1px solid rgba(200,160,80,0.12)',
@@ -157,13 +127,13 @@ export default async function RingSizePage() {
                             color: 'rgba(255,255,255,0.6)',
                             lineHeight: 1.7,
                         }}>
-                            💡 <strong style={{ color: 'rgba(200,160,80,0.9)' }}>Dica:</strong> Meça ao final do dia, quando os dedos tendem a estar um pouco maiores. Para anéis mais largos, recomendamos escolher meio número acima.
+                            💡 <strong style={{ color: 'rgba(200,160,80,0.9)' }}>{r.tip}</strong> {r.tipText}
                         </div>
                     </section>
 
                     <section>
                         <h2 style={{ fontSize: '0.7rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.8)', marginBottom: 24, fontWeight: 600 }}>
-                            Tabela de tamanhos — circunferência
+                            {r.tableTitle}
                         </h2>
 
                         <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(200,160,80,0.14)' }}>
@@ -173,8 +143,8 @@ export default async function RingSizePage() {
                                 borderBottom: '1px solid rgba(200,160,80,0.2)',
                                 padding: '14px 32px',
                             }}>
-                                <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.9)' }}>Circunferência (cm)</span>
-                                <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.9)', textAlign: 'center' }}>Tamanho do anel</span>
+                                <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.9)' }}>{r.circumference}</span>
+                                <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.9)', textAlign: 'center' }}>{r.ringSizeCol}</span>
                             </div>
 
                             {SIZES.map(({ cm, size }, i) => (
@@ -183,7 +153,6 @@ export default async function RingSizePage() {
                                     padding: '13px 32px',
                                     background: i % 2 === 0 ? 'var(--bg-card)' : 'var(--bg-card2)',
                                     borderBottom: i < SIZES.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
-                                    transition: 'background 0.15s',
                                 }}>
                                     <span style={{ color: 'var(--text-body)', fontSize: '0.9rem', fontVariantNumeric: 'tabular-nums', fontWeight: 400 }}>{cm}</span>
                                     <span style={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem', textAlign: 'center', letterSpacing: '0.05em' }}>{size}</span>
@@ -192,7 +161,7 @@ export default async function RingSizePage() {
                         </div>
 
                         <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: 20, lineHeight: 1.6 }}>
-                            Dúvidas? Entre em contato conosco antes de finalizar seu pedido.
+                            {r.footnote}
                         </p>
                     </section>
                 </div>
@@ -204,9 +173,6 @@ export default async function RingSizePage() {
                 @media (max-width: 600px) {
                     div[style*="repeat(auto-fit, minmax(220px"] {
                         grid-template-columns: 1fr 1fr !important;
-                    }
-                    div[style*="padding: '13px 32px'"] {
-                        padding: 12px 16px !important;
                     }
                 }
             `}</style>

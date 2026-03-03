@@ -217,10 +217,10 @@ export function LandingPageClient({
                                     lineHeight: 1.2,
                                     textShadow: '0 2px 16px rgba(0,0,0,0.6)',
                                 }}>
-                                    {customBannerTitle || 'Joias Customizadas'}
+                                    {customBannerTitle || t.customBannerTitle}
                                 </h3>
                                 <p style={{ color: 'rgba(200,160,80,0.75)', fontSize: '0.75rem', marginTop: 8, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500 }}>
-                                    {customBannerText || 'Entre em contato para joias personalizadas.'}
+                                    {customBannerText || t.customBannerText}
                                 </p>
                             </div>
 

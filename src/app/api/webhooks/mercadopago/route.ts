@@ -103,11 +103,11 @@ export async function POST(req: NextRequest) {
         const updated = await prisma.order.update({
             where: { id: order.id },
             data: {
-                status: newStatus,
+                status: newStatus as any,
                 gatewayData: JSON.stringify(updatedGw),
             },
             include: { user: true, items: { include: { product: true } } },
-        })
+        }) as any
 
         if (newStatus === 'PAID') {
             decreaseStock(updated.items).catch((err) => { console.error('[MP Webhook] Erro estoque:', err) })

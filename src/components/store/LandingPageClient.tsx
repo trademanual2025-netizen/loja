@@ -319,7 +319,7 @@ export function LandingPageClient({
                             <h4 style={{ color: 'rgba(200,160,80,0.8)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>{t.account}</h4>
                             <Link href="/minha-conta" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{t.myData}</Link>
                             <Link href="/minha-conta#pedidos" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{t.myOrders}</Link>
-                            <Link href="/carrinho" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{dict.nav?.cart}</Link>
+                            <Link href="/carrinho" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{dict.store.cart}</Link>
                         </div>
                     </div>
 

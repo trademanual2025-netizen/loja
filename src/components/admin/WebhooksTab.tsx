@@ -160,7 +160,7 @@ export default function WebhooksTab({ settings, set, save, saving, testWebhook }
     set: (k: string, v: string) => void
     save: (keys: string[]) => Promise<void>
     saving: boolean
-    testWebhook: (type: string) => void
+    testWebhook: (type: 'lead' | 'buyer') => void | Promise<void>
 }) {
     const [leadMapping, setLeadMapping] = useState<FieldMapping>(() => {
         try {

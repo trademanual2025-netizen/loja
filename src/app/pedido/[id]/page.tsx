@@ -149,9 +149,9 @@ export default async function PedidoPage({ params }: { params: Promise<{ id: str
             <div className="card" style={{ textAlign: 'left', marginBottom: 32 }}>
                 <h3 style={{ fontWeight: 700, marginBottom: 12 }}>{dict.order.shippingAddress}</h3>
                 <p style={{ color: 'var(--text-muted)', lineHeight: 1.7 }}>
-                    {order.street}, {order.number}{order.complement ? `, ${order.complement}` : ''}<br />
-                    {order.neighborhood} – {order.city}/{order.state}<br />
-                    CEP: {order.zipCode}
+                    {order.street}{order.number ? `, ${order.number}` : ''}{order.complement ? `, ${order.complement}` : ''}<br />
+                    {order.neighborhood ? `${order.neighborhood} – ` : ''}{order.city}{order.state ? `/${order.state}` : ''}<br />
+                    {order.zipCode}
                 </p>
                 {order.trackingCode && (
                     <div style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(34,197,94,0.08)', borderRadius: 8, border: '1px solid rgba(34,197,94,0.2)' }}>

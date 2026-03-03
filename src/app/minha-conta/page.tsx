@@ -163,7 +163,7 @@ export default function MinhaContaPage() {
                     <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
                         <span style={{ color: 'var(--text-muted)', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: 5 }}><Mail size={13} /> {profile.email}</span>
                         {profile.phone && <span style={{ color: 'var(--text-muted)', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: 5 }}><Phone size={13} /> {profile.phone}</span>}
-                        {profile.city && <span style={{ color: 'var(--text-muted)', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: 5 }}><MapPin size={13} /> {profile.city}/{profile.state}</span>}
+                        {profile.city && <span style={{ color: 'var(--text-muted)', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: 5 }}><MapPin size={13} /> {profile.city}{profile.state ? `/${profile.state}` : ''}</span>}
                     </div>
                 </div>
                 <button onClick={handleLogout} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem' }}>

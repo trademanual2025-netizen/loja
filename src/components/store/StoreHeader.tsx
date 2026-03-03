@@ -46,6 +46,19 @@ export function StoreHeader({ storeName, logoUrl, user, dict }: Props) {
                     )}
                 </Link>
 
+                <nav className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+                    <Link href="/loja" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, transition: 'color 0.2s' }}
+                        onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
+                        onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}>
+                        Loja
+                    </Link>
+                    <Link href="/nossamarca" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 500, transition: 'color 0.2s' }}
+                        onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
+                        onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}>
+                        Nossa Marca
+                    </Link>
+                </nav>
+
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <LanguageSelector />

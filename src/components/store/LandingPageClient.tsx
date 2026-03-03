@@ -52,6 +52,7 @@ export function LandingPageClient({
     const navLinks = [
         { label: 'Início', href: '/' },
         { label: 'Loja', href: '/loja' },
+        { label: 'Nossa Marca', href: '/nossamarca' },
         ...(aboutText ? [{ label: 'Sobre', href: '#sobre' }] : []),
         ...(whatsapp || email ? [{ label: 'Contato', href: '#contato' }] : []),
     ]

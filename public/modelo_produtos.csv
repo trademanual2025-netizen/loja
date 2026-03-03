@@ -1,0 +1,4 @@
+nome,descricao,preco,preco_comparativo,categoria,estoque,imagem1,imagem2,imagem3,peso_gramas,altura_cm,largura_cm,comprimento_cm,opcao_nome,opcao_valores
+"Anel Exemplo","Anel feito artesanalmente em prata 925 maciço.",650.00,800.00,"Metal Power",5,"https://url-da-foto1.jpg","https://url-da-foto2.jpg","","20","3","3","3","Tamanho","14,16,18,20,22"
+"Colar Exemplo","Colar em prata 950 com pedra natural.",480.00,,"Tribal",1,"https://url-da-foto1.jpg","","","35","5","10","15","",""
+"Brinco Exemplo","Brinco em prata 925 com semente.",250.00,300.00,"Metal Power",2,"https://url-da-foto1.jpg","https://url-da-foto2.jpg","","8","2","2","2","Tipo","Argola P,Argola G"

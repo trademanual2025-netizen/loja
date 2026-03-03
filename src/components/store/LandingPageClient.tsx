@@ -204,6 +204,21 @@ export function LandingPageClient({
                     box-shadow: 0 8px 32px rgba(200,160,80,0.3);
                     border-color: rgba(200,160,80,0.8);
                 }
+                .hero-section {
+                    position: relative;
+                    min-height: clamp(480px, 75vh, 780px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    overflow: hidden;
+                }
+                @media (max-width: 640px) {
+                    .hero-section {
+                        min-height: 0;
+                        height: 92svh;
+                        max-height: 620px;
+                    }
+                }
                 .hero-title {
                     font-size: clamp(2rem, 6vw, 4rem);
                     font-weight: 300;
@@ -215,7 +230,7 @@ export function LandingPageClient({
                 }
             `}</style>
 
-            <section style={{ position: 'relative', minHeight: 'clamp(480px, 75vh, 780px)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+            <section className="hero-section">
                 <div className="hero-img-wrap">
                     <img src={heroImage || '/hero-ring.jpg'} alt={heroTitle} />
                 </div>

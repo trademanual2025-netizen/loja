@@ -234,7 +234,7 @@ export function LandingPageClient({
                 <span className="hero-sparkle" style={{ top: '14%', left: '55%', animationDuration: '3.8s', animationDelay: '1.2s', width: 3, height: 3 }} />
 
                 <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '40px 20px', maxWidth: 820 }}>
-                    <div style={{ marginBottom: 12, fontSize: '0.75rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.9)', fontWeight: 500 }}>
+                    <div style={{ marginBottom: 12, fontSize: '0.75rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#fff', fontWeight: 600, textShadow: '0 0 12px rgba(200,160,80,0.8), 0 1px 4px rgba(0,0,0,0.6)' }}>
                         ✦ Coleção Exclusiva ✦
                     </div>
                     <h1 className="hero-title">

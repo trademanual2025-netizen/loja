@@ -20,6 +20,7 @@ export default async function NossaMarcaPage() {
     const localeCookie = cookieStore.get('NEXT_LOCALE')?.value as Locale
     const currentLocale = (localeCookie && dictionaries[localeCookie]) ? localeCookie : defaultLocale
     const dict = dictionaries[currentLocale]
+    const b = dict.brand
 
     const storeName = storeSettings[SETTINGS_KEYS.STORE_NAME] || 'Velour'
     const logoUrl = storeSettings[SETTINGS_KEYS.STORE_LOGO] || null
@@ -177,7 +178,7 @@ export default async function NossaMarcaPage() {
                             fontWeight: 600,
                             marginBottom: 28,
                         }}>
-                            ✦ Artesã &amp; Ouriveira
+                            {b.tagline}
                         </p>
 
                         <h1 style={{
@@ -221,7 +222,7 @@ export default async function NossaMarcaPage() {
                             fontWeight: 300,
                             maxWidth: 380,
                         }}>
-                            Criadora de joias autorais desde a primeira faísca até o brilho final.
+                            {b.subtitle}
                         </p>
                     </div>
 
@@ -250,7 +251,7 @@ export default async function NossaMarcaPage() {
                                 color: 'var(--text-muted)',
                                 fontWeight: 600,
                             }}>
-                                Nossa História
+                                {b.historyLabel}
                             </span>
                         </div>
 
@@ -260,14 +261,14 @@ export default async function NossaMarcaPage() {
                             color: 'var(--text)',
                             marginBottom: 18,
                         }}>
-                            Giovana Dias é o meu nome, sou eu quem cria todas as peças dessa marca, do início ao fim do processo, sou apaixonada por todas as etapas da ourivesaria, amo começar um desenho para um projeto novo...
+                            {b.historyP1}
                         </p>
                         <p style={{
                             fontSize: 'clamp(0.95rem, 1.4vw, 1.06rem)',
                             lineHeight: 1.95,
                             color: 'var(--text)',
                         }}>
-                            Me inspiro nas texturas da natureza, da terra, das profundezas do oceano, na pele dos animais, na textura dos ossos... Amo criar novas coleções pois normalmente significam uma nova fase da minha vida, momentos marcantes em que me reconectei com meu eu interior e com a natureza divina e senti de ressignificar isso através de jóias autorais.
+                            {b.historyP2}
                         </p>
                     </div>
                 </section>
@@ -289,7 +290,7 @@ export default async function NossaMarcaPage() {
                                 color: 'var(--text-muted)',
                                 fontWeight: 600,
                             }}>
-                                O processo
+                                {b.processLabel}
                             </span>
                             <div style={{ width: 28, height: 1, background: 'rgba(200,160,80,0.45)' }} />
                         </div>
@@ -299,9 +300,9 @@ export default async function NossaMarcaPage() {
                             lineHeight: 2,
                             color: 'var(--text)',
                         }}>
-                            O trabalho com metais preciosos, pedras, cristais, pérolas... todos juntos, vai muito além de criar uma jóia, é um processo de alquimia entre o fogo, a terra e o ar. Quando feito com muito amor e autenticidade tem como resultado uma{' '}
-                            <em style={{ color: 'var(--primary)', fontStyle: 'italic' }}>joia rara</em>.
-                            {' '}Espero passar isso através da minha marca para você!
+                            {b.processText}{' '}
+                            <em style={{ color: 'var(--primary)', fontStyle: 'italic' }}>{b.processHighlight}</em>
+                            {b.processSuffix}
                         </p>
                     </div>
                 </section>
@@ -336,7 +337,7 @@ export default async function NossaMarcaPage() {
                             fontFamily: 'Georgia, serif',
                             userSelect: 'none',
                         }}>
-                            "
+                            &ldquo;
                         </div>
                         <blockquote style={{
                             fontSize: 'clamp(1rem, 2vw, 1.25rem)',
@@ -346,7 +347,7 @@ export default async function NossaMarcaPage() {
                             lineHeight: 2,
                             margin: 0,
                         }}>
-                            Assim como os cristais, a prata e o ouro espero que você brilhe cada dia mais e se reconecte com sua força interior e lembre-se sempre que até o cristal mais lindo, mais brilhante vem de um processo longo e necessário.
+                            {b.quoteText}
                         </blockquote>
                         <div style={{
                             marginTop: 40,

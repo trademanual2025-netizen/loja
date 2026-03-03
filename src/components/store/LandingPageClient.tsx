@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ShoppingCart, Instagram, MessageCircle, ChevronRight, Phone } from 'lucide-react'
+import { ShoppingCart, Instagram, MessageCircle, ChevronRight } from 'lucide-react'
 import { Dictionary } from '@/lib/i18n'
 import { StoreHeader } from '@/components/store/StoreHeader'
 
@@ -33,6 +33,7 @@ export function LandingPageClient({
 }: Props) {
     const whatsappLink = whatsapp ? `https://wa.me/${whatsapp.replace(/\D/g, '')}` : ''
     const instagramLink = instagram ? (instagram.startsWith('http') ? instagram : `https://instagram.com/${instagram.replace('@', '')}`) : ''
+    const t = dict.landing
 
     return (
         <>
@@ -150,7 +151,7 @@ export function LandingPageClient({
 
                     <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '40px 20px', maxWidth: 820 }}>
                         <div style={{ marginBottom: 12, fontSize: '0.75rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#fff', fontWeight: 600, textShadow: '0 0 12px rgba(200,160,80,0.8), 0 1px 4px rgba(0,0,0,0.6)' }}>
-                            ✦ Coleção Exclusiva ✦
+                            {t.exclusiveCollection}
                         </div>
                         <h1 className="hero-title">
                             {heroTitle}
@@ -220,9 +221,9 @@ export function LandingPageClient({
                                 <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                                     <ShoppingCart size={24} color="#fff" />
                                 </div>
-                                <h3 style={{ color: '#fff', fontSize: '1.3rem', fontWeight: 700, marginBottom: 8 }}>Loja</h3>
+                                <h3 style={{ color: '#fff', fontSize: '1.3rem', fontWeight: 700, marginBottom: 8 }}>{t.storeCard}</h3>
                                 <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center' }}>
-                                    Acesse aqui <ChevronRight size={14} />
+                                    {t.accessHere} <ChevronRight size={14} />
                                 </p>
                             </div>
                         </Link>
@@ -232,7 +233,7 @@ export function LandingPageClient({
                 {aboutText && (
                     <section id="sobre" style={{ maxWidth: 800, margin: '0 auto', padding: '40px 20px 60px', textAlign: 'center' }}>
                         <h2 style={{ fontSize: '1.6rem', fontWeight: 300, color: '#fff', marginBottom: 20, fontStyle: 'italic' }}>
-                            História da Marca
+                            {t.brandHistory}
                         </h2>
                         <div style={{ color: 'rgba(255,255,255,0.65)', lineHeight: 1.8, fontSize: '0.95rem' }}
                             dangerouslySetInnerHTML={{ __html: aboutText }} />
@@ -243,10 +244,10 @@ export function LandingPageClient({
                     <div style={{ maxWidth: 1000, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 40, marginBottom: 40 }}>
                         {(phone || whatsapp || email) && (
                             <div>
-                                <h4 style={{ color: '#c0392b', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Atendimento</h4>
+                                <h4 style={{ color: '#c0392b', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>{t.contact}</h4>
                                 {(phone || whatsapp) && (
                                     <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', marginBottom: 6 }}>
-                                        Telefone/WhatsApp: {phone || whatsapp}
+                                        {t.phoneWhatsapp}: {phone || whatsapp}
                                     </p>
                                 )}
                                 {email && (
@@ -255,23 +256,23 @@ export function LandingPageClient({
                                 {whatsappLink && (
                                     <a href={whatsappLink} target="_blank" rel="noopener noreferrer"
                                         style={{ color: '#c0392b', fontSize: '0.85rem', textDecoration: 'none' }}>
-                                        Fale Conosco
+                                        {t.talkToUs}
                                     </a>
                                 )}
                             </div>
                         )}
 
                         <div>
-                            <h4 style={{ color: '#c0392b', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Institucional</h4>
+                            <h4 style={{ color: '#c0392b', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>{t.institutional}</h4>
                             {aboutText && (
-                                <a href="#sobre" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>Quem Somos</a>
+                                <a href="#sobre" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{t.whoWeAre}</a>
                             )}
-                            <Link href="/loja" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block' }}>Loja Virtual</Link>
+                            <Link href="/loja" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block' }}>{t.virtualStore}</Link>
                         </div>
 
                         {(instagramLink || whatsappLink) && (
                             <div>
-                                <h4 style={{ color: '#c0392b', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Redes Sociais</h4>
+                                <h4 style={{ color: '#c0392b', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>{t.socialMedia}</h4>
                                 <div style={{ display: 'flex', gap: 12 }}>
                                     {instagramLink && (
                                         <a href={instagramLink} target="_blank" rel="noopener noreferrer"
@@ -294,9 +295,9 @@ export function LandingPageClient({
                         )}
 
                         <div>
-                            <h4 style={{ color: '#c0392b', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Acesse sua Conta</h4>
-                            <Link href="/minha-conta" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>Meus Dados</Link>
-                            <Link href="/minha-conta" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>Meus Pedidos</Link>
+                            <h4 style={{ color: '#c0392b', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>{t.account}</h4>
+                            <Link href="/minha-conta" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{t.myData}</Link>
+                            <Link href="/minha-conta" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{t.myOrders}</Link>
                         </div>
                     </div>
 
@@ -305,7 +306,7 @@ export function LandingPageClient({
                             <img src={logoUrl} alt={storeName} style={{ height: 40, margin: '0 auto 16px', opacity: 0.7, display: 'block' }} />
                         )}
                         <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.8rem' }}>
-                            &copy; {new Date().getFullYear()} {storeName}. Todos os direitos reservados.
+                            &copy; {new Date().getFullYear()} {storeName}. {dict.footer?.rights}
                         </p>
                     </div>
                 </footer>

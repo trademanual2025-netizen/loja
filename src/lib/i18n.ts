@@ -3,6 +3,10 @@ export const defaultLocale: Locale = 'pt'
 
 export const dictionaries = {
     pt: {
+        nav: {
+            store: 'Loja',
+            ourBrand: 'Nossa Marca',
+        },
         store: {
             search: 'Buscar...',
             cart: 'Carrinho',
@@ -110,9 +114,42 @@ export const dictionaries = {
         settings: {
             language: 'Idioma',
             theme: 'Tema'
-        }
+        },
+        landing: {
+            exclusiveCollection: '✦ Coleção Exclusiva ✦',
+            storeCard: 'Loja',
+            accessHere: 'Acesse aqui',
+            brandHistory: 'História da Marca',
+            contact: 'Atendimento',
+            phoneWhatsapp: 'Telefone/WhatsApp',
+            talkToUs: 'Fale Conosco',
+            institutional: 'Institucional',
+            whoWeAre: 'Quem Somos',
+            virtualStore: 'Loja Virtual',
+            socialMedia: 'Redes Sociais',
+            account: 'Acesse sua Conta',
+            myData: 'Meus Dados',
+            myOrders: 'Meus Pedidos',
+            shipsTo: 'Enviamos para todo Brasil.',
+        },
+        brand: {
+            tagline: '✦ Artesã & Ouriveira',
+            subtitle: 'Criadora de joias autorais desde a primeira faísca até o brilho final.',
+            historyLabel: 'Nossa História',
+            historyP1: 'Giovana Dias é o meu nome, sou eu quem cria todas as peças dessa marca, do início ao fim do processo, sou apaixonada por todas as etapas da ourivesaria, amo começar um desenho para um projeto novo...',
+            historyP2: 'Me inspiro nas texturas da natureza, da terra, das profundezas do oceano, na pele dos animais, na textura dos ossos... Amo criar novas coleções pois normalmente significam uma nova fase da minha vida, momentos marcantes em que me reconectei com meu eu interior e com a natureza divina e senti de ressignificar isso através de jóias autorais.',
+            processLabel: 'O processo',
+            processText: 'O trabalho com metais preciosos, pedras, cristais, pérolas... todos juntos, vai muito além de criar uma jóia, é um processo de alquimia entre o fogo, a terra e o ar. Quando feito com muito amor e autenticidade tem como resultado uma',
+            processHighlight: 'joia rara',
+            processSuffix: '. Espero passar isso através da minha marca para você!',
+            quoteText: 'Assim como os cristais, a prata e o ouro espero que você brilhe cada dia mais e se reconecte com sua força interior e lembre-se sempre que até o cristal mais lindo, mais brilhante vem de um processo longo e necessário.',
+        },
     },
     en: {
+        nav: {
+            store: 'Store',
+            ourBrand: 'Our Brand',
+        },
         store: {
             search: 'Search...',
             cart: 'Cart',
@@ -220,9 +257,42 @@ export const dictionaries = {
         settings: {
             language: 'Language',
             theme: 'Theme'
-        }
+        },
+        landing: {
+            exclusiveCollection: '✦ Exclusive Collection ✦',
+            storeCard: 'Store',
+            accessHere: 'Visit store',
+            brandHistory: 'Brand Story',
+            contact: 'Contact',
+            phoneWhatsapp: 'Phone/WhatsApp',
+            talkToUs: 'Talk to Us',
+            institutional: 'About',
+            whoWeAre: 'About Us',
+            virtualStore: 'Online Store',
+            socialMedia: 'Social Media',
+            account: 'My Account',
+            myData: 'My Profile',
+            myOrders: 'My Orders',
+            shipsTo: 'We ship across Brazil.',
+        },
+        brand: {
+            tagline: '✦ Artisan & Goldsmith',
+            subtitle: 'Creator of original jewelry from the first spark to the final shine.',
+            historyLabel: 'Our Story',
+            historyP1: 'My name is Giovana Dias — I am the one who creates every piece in this brand, from start to finish. I am passionate about every stage of goldsmithing, and I love beginning a sketch for a brand-new project...',
+            historyP2: 'I draw inspiration from the textures of nature, the earth, the depths of the ocean, animal skins, the texture of bones... I love creating new collections because they usually mark a new chapter in my life — meaningful moments when I reconnected with my inner self and with divine nature, and felt the urge to reimagine that through original jewelry.',
+            processLabel: 'The Process',
+            processText: 'Working with precious metals, stones, crystals, pearls... all together goes far beyond creating jewelry — it is an alchemical process between fire, earth, and air. When crafted with deep love and authenticity, the result is a',
+            processHighlight: 'rare jewel',
+            processSuffix: '. I hope to share this feeling with you through my brand!',
+            quoteText: 'Just like crystals, silver, and gold — I hope you shine brighter every day, reconnect with your inner strength, and always remember that even the most beautiful, most brilliant crystal comes from a long and necessary process.',
+        },
     },
     es: {
+        nav: {
+            store: 'Tienda',
+            ourBrand: 'Nuestra Marca',
+        },
         store: {
             search: 'Buscar...',
             cart: 'Carrito',
@@ -330,7 +400,36 @@ export const dictionaries = {
         settings: {
             language: 'Idioma',
             theme: 'Tema'
-        }
+        },
+        landing: {
+            exclusiveCollection: '✦ Colección Exclusiva ✦',
+            storeCard: 'Tienda',
+            accessHere: 'Visitar tienda',
+            brandHistory: 'Historia de la Marca',
+            contact: 'Atención',
+            phoneWhatsapp: 'Teléfono/WhatsApp',
+            talkToUs: 'Háblenos',
+            institutional: 'Institucional',
+            whoWeAre: 'Quiénes Somos',
+            virtualStore: 'Tienda Virtual',
+            socialMedia: 'Redes Sociales',
+            account: 'Mi Cuenta',
+            myData: 'Mi Perfil',
+            myOrders: 'Mis Pedidos',
+            shipsTo: 'Enviamos a todo Brasil.',
+        },
+        brand: {
+            tagline: '✦ Artesana & Orfebre',
+            subtitle: 'Creadora de joyas originales desde la primera chispa hasta el brillo final.',
+            historyLabel: 'Nuestra Historia',
+            historyP1: 'Me llamo Giovana Dias — soy yo quien crea cada pieza de esta marca, de principio a fin del proceso. Soy apasionada por cada etapa de la orfebrería y me encanta comenzar un boceto para un nuevo proyecto...',
+            historyP2: 'Me inspiro en las texturas de la naturaleza, la tierra, las profundidades del océano, la piel de los animales, la textura de los huesos... Me encanta crear nuevas colecciones porque generalmente significan una nueva etapa en mi vida, momentos especiales en los que me reconecté con mi yo interior y con la naturaleza divina, y sentí la necesidad de resignificar eso a través de joyas originales.',
+            processLabel: 'El Proceso',
+            processText: 'El trabajo con metales preciosos, piedras, cristales, perlas... todos juntos va mucho más allá de crear una joya, es un proceso de alquimia entre el fuego, la tierra y el aire. Cuando se hace con mucho amor y autenticidad, el resultado es una',
+            processHighlight: 'joya rara',
+            processSuffix: '. ¡Espero transmitirte esto a través de mi marca!',
+            quoteText: 'Así como los cristales, la plata y el oro, espero que brilles cada día más y te reconectes con tu fuerza interior, y recuerdes siempre que incluso el cristal más bello y brillante proviene de un proceso largo y necesario.',
+        },
     }
 }
 

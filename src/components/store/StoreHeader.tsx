@@ -17,12 +17,11 @@ interface Props {
     dict: Dictionary
 }
 
-const NAV_LINKS = [
-    { label: 'Loja', href: '/loja' },
-    { label: 'Nossa Marca', href: '/nossamarca' },
-]
-
 export function StoreHeader({ storeName, logoUrl, user, dict }: Props) {
+    const NAV_LINKS = [
+        { label: dict.nav?.store || 'Loja', href: '/loja' },
+        { label: dict.nav?.ourBrand || 'Nossa Marca', href: '/nossamarca' },
+    ]
     const itemCount = useCart((s) => s.itemCount())
     const clearCart = useCart((s) => s.clearCart)
     const router = useRouter()

@@ -8,6 +8,7 @@ export const dictionaries = {
             store: 'Loja',
             ourBrand: 'Nossa Marca',
             ringSize: 'Guia de Anel',
+            contact: 'Contato',
         },
         store: {
             search: 'Buscar...',
@@ -205,6 +206,7 @@ export const dictionaries = {
             store: 'Store',
             ourBrand: 'Our Brand',
             ringSize: 'Ring Size Guide',
+            contact: 'Contact',
         },
         store: {
             search: 'Search...',
@@ -402,6 +404,7 @@ export const dictionaries = {
             store: 'Tienda',
             ourBrand: 'Nuestra Marca',
             ringSize: 'Guía de Talla',
+            contact: 'Contacto',
         },
         store: {
             search: 'Buscar...',

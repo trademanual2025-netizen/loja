@@ -23,6 +23,7 @@ export function StoreHeader({ storeName, logoUrl, user, dict }: Props) {
         { label: dict.nav?.store || 'Loja', href: '/loja' },
         { label: dict.nav?.ourBrand || 'Nossa Marca', href: '/nossamarca' },
         { label: dict.nav?.ringSize || 'Guia de Anel', href: '/ringsize' },
+        { label: dict.nav?.contact || 'Contato', href: '/contato' },
     ]
     const itemCount = useCart((s) => s.itemCount())
     const clearCart = useCart((s) => s.clearCart)

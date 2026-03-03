@@ -116,7 +116,7 @@ export default async function NossaMarcaPage() {
                     content: '';
                     position: absolute;
                     inset: 0;
-                    background: linear-gradient(to right, var(--bg) 0%, transparent 20%);
+                    background: linear-gradient(to left, var(--bg) 0%, transparent 20%);
                     z-index: 1;
                     pointer-events: none;
                 }
@@ -246,6 +246,9 @@ export default async function NossaMarcaPage() {
 
                 {/* ── ABOUT ── */}
                 <section className="marca-about">
+                    <div className="marca-about-photo">
+                        <img src="/marca-joias.jpg" alt="Joias autorais" />
+                    </div>
                     <div className="marca-about-text">
                         <div style={{
                             display: 'flex',
@@ -280,10 +283,6 @@ export default async function NossaMarcaPage() {
                         }}>
                             Me inspiro nas texturas da natureza, da terra, das profundezas do oceano, na pele dos animais, na textura dos ossos... Amo criar novas coleções pois normalmente significam uma nova fase da minha vida, momentos marcantes em que me reconectei com meu eu interior e com a natureza divina e senti de ressignificar isso através de jóias autorais.
                         </p>
-                    </div>
-
-                    <div className="marca-about-photo">
-                        <img src="/marca-joias.jpg" alt="Joias autorais" />
                     </div>
                 </section>
 

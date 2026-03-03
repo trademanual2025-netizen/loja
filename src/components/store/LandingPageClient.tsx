@@ -139,51 +139,118 @@ export function LandingPageClient({
                 )}
             </header>
 
-            <section style={{ position: 'relative', minHeight: 'clamp(400px, 70vh, 700px)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                {heroImage && (
-                    <img src={heroImage} alt={heroTitle}
-                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
-                )}
-                <div style={{ position: 'absolute', inset: 0, background: heroImage ? 'rgba(0,0,0,0.45)' : 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }} />
-                <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '40px 20px', maxWidth: 800 }}>
-                    <h1 style={{
-                        fontSize: 'clamp(2rem, 6vw, 4rem)',
-                        fontWeight: 300,
-                        color: '#fff',
-                        lineHeight: 1.2,
-                        marginBottom: 24,
-                        fontStyle: 'italic',
-                        textShadow: '0 2px 20px rgba(0,0,0,0.4)',
-                    }}>
+            <style>{`
+                @keyframes heroKenBurns {
+                    0%   { transform: scale(1)    translateX(0)     translateY(0); }
+                    50%  { transform: scale(1.06) translateX(-1%)   translateY(-1%); }
+                    100% { transform: scale(1)    translateX(0)     translateY(0); }
+                }
+                @keyframes heroShimmer {
+                    0%   { transform: translateX(-120%) skewX(-20deg); opacity: 0; }
+                    10%  { opacity: 1; }
+                    90%  { opacity: 1; }
+                    100% { transform: translateX(220%)  skewX(-20deg); opacity: 0; }
+                }
+                @keyframes heroGoldPulse {
+                    0%, 100% { text-shadow: 0 2px 24px rgba(0,0,0,0.5), 0 0 40px rgba(200,160,80,0.18); }
+                    50%      { text-shadow: 0 2px 24px rgba(0,0,0,0.5), 0 0 70px rgba(200,160,80,0.38); }
+                }
+                @keyframes heroSparkle {
+                    0%, 100% { opacity: 0; transform: scale(0.6); }
+                    50%      { opacity: 1; transform: scale(1.2); }
+                }
+                @keyframes heroBorderGlow {
+                    0%, 100% { box-shadow: 0 0 0 0 rgba(200,160,80,0); border-color: rgba(255,255,255,0.3); }
+                    50%      { box-shadow: 0 0 20px 4px rgba(200,160,80,0.25); border-color: rgba(200,160,80,0.7); }
+                }
+                .hero-img-wrap { position: absolute; inset: 0; overflow: hidden; }
+                .hero-img-wrap img { width: 100%; height: 100%; object-fit: cover; object-position: center; animation: heroKenBurns 14s ease-in-out infinite; transform-origin: center center; }
+                .hero-shimmer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+                .hero-shimmer::after {
+                    content: '';
+                    position: absolute;
+                    top: -50%; left: 0;
+                    width: 40%; height: 200%;
+                    background: linear-gradient(90deg, transparent 0%, rgba(255,230,150,0.09) 50%, transparent 100%);
+                    animation: heroShimmer 5s ease-in-out infinite;
+                    animation-delay: 2s;
+                }
+                .hero-sparkle {
+                    position: absolute;
+                    width: 5px; height: 5px;
+                    border-radius: 50%;
+                    background: radial-gradient(circle, rgba(255,230,160,0.9) 0%, transparent 70%);
+                    animation: heroSparkle ease-in-out infinite;
+                }
+                .hero-cta-btn {
+                    display: inline-flex; align-items: center; gap: 8px;
+                    background: rgba(200,160,60,0.15);
+                    border: 1px solid rgba(255,255,255,0.3);
+                    color: #fff;
+                    padding: 14px 40px;
+                    border-radius: 6px;
+                    text-decoration: none;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                    transition: all 0.35s;
+                    backdrop-filter: blur(10px);
+                    animation: heroBorderGlow 3s ease-in-out infinite;
+                }
+                .hero-cta-btn:hover {
+                    background: rgba(200,160,60,0.32);
+                    transform: translateY(-3px);
+                    box-shadow: 0 8px 32px rgba(200,160,80,0.3);
+                    border-color: rgba(200,160,80,0.8);
+                }
+                .hero-title {
+                    font-size: clamp(2rem, 6vw, 4rem);
+                    font-weight: 300;
+                    color: #fff;
+                    line-height: 1.2;
+                    margin-bottom: 24px;
+                    font-style: italic;
+                    animation: heroGoldPulse 4s ease-in-out infinite;
+                }
+            `}</style>
+
+            <section style={{ position: 'relative', minHeight: 'clamp(480px, 75vh, 780px)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                <div className="hero-img-wrap">
+                    <img src={heroImage || '/hero-ring.jpg'} alt={heroTitle} />
+                </div>
+
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(10,6,2,0.38) 0%, rgba(30,18,8,0.62) 60%, rgba(10,6,2,0.82) 100%)' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 70% 40%, rgba(180,110,30,0.18) 0%, transparent 65%)' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 0% 100%, rgba(0,0,0,0.6) 0%, transparent 50%), radial-gradient(ellipse at 100% 0%, rgba(0,0,0,0.4) 0%, transparent 50%)' }} />
+
+                <div className="hero-shimmer" />
+
+                <span className="hero-sparkle" style={{ top: '22%', left: '18%', animationDuration: '2.8s', animationDelay: '0s' }} />
+                <span className="hero-sparkle" style={{ top: '35%', left: '75%', animationDuration: '3.5s', animationDelay: '0.9s' }} />
+                <span className="hero-sparkle" style={{ top: '65%', left: '30%', animationDuration: '2.4s', animationDelay: '1.6s' }} />
+                <span className="hero-sparkle" style={{ top: '55%', left: '62%', animationDuration: '3.1s', animationDelay: '0.4s' }} />
+                <span className="hero-sparkle" style={{ top: '78%', left: '82%', animationDuration: '2.6s', animationDelay: '2.1s', width: 3, height: 3 }} />
+                <span className="hero-sparkle" style={{ top: '14%', left: '55%', animationDuration: '3.8s', animationDelay: '1.2s', width: 3, height: 3 }} />
+
+                <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '40px 20px', maxWidth: 820 }}>
+                    <div style={{ marginBottom: 12, fontSize: '0.75rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.9)', fontWeight: 500 }}>
+                        ✦ Coleção Exclusiva ✦
+                    </div>
+                    <h1 className="hero-title">
                         {heroTitle}
                     </h1>
                     <p style={{
-                        fontSize: 'clamp(1rem, 2.5vw, 1.4rem)',
-                        color: 'rgba(255,255,255,0.8)',
-                        marginBottom: 40,
+                        fontSize: 'clamp(1rem, 2.5vw, 1.3rem)',
+                        color: 'rgba(255,240,200,0.82)',
+                        marginBottom: 44,
                         fontStyle: 'italic',
                         fontWeight: 300,
+                        letterSpacing: '0.03em',
                     }}>
                         {heroSubtitle}
                     </p>
-                    <Link href="/loja" style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 8,
-                        background: 'rgba(255,255,255,0.12)',
-                        border: '1px solid rgba(255,255,255,0.25)',
-                        color: '#fff',
-                        padding: '14px 36px',
-                        borderRadius: 6,
-                        textDecoration: 'none',
-                        fontSize: '1rem',
-                        fontWeight: 600,
-                        letterSpacing: '0.05em',
-                        textTransform: 'uppercase',
-                        transition: 'all 0.3s',
-                        backdropFilter: 'blur(8px)',
-                    }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; e.currentTarget.style.transform = 'translateY(0)' }}
-                    >
+                    <Link href="/loja" className="hero-cta-btn">
                         {ctaText} <ChevronRight size={18} />
                     </Link>
                 </div>

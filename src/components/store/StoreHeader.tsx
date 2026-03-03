@@ -48,7 +48,7 @@ export function StoreHeader({ storeName, logoUrl, user, dict }: Props) {
             <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
                 <Link href="/loja" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', gap: 8 }}>
                     {logoUrl ? (
-                        <img src={logoUrl} alt={storeName} style={{ height: 40, maxWidth: 160, objectFit: 'contain' }} />
+                        <img src={logoUrl} alt={storeName} className="store-logo-img" style={{ height: 40, maxWidth: 160, objectFit: 'contain' }} />
                     ) : (
                         <span style={{ fontWeight: 800, fontSize: '1.2rem', color: 'var(--primary)' }}>{storeName}</span>
                     )}

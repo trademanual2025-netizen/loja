@@ -124,7 +124,7 @@ export default async function RingSizePage() {
                             borderRadius: '0 8px 8px 0',
                             padding: '16px 20px',
                             fontSize: '0.83rem',
-                            color: 'rgba(255,255,255,0.6)',
+                            color: 'var(--text-muted)',
                             lineHeight: 1.7,
                         }}>
                             💡 <strong style={{ color: 'rgba(200,160,80,0.9)' }}>{r.tip}</strong> {r.tipText}
@@ -136,28 +136,39 @@ export default async function RingSizePage() {
                             {r.tableTitle}
                         </h2>
 
-                        <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(200,160,80,0.14)' }}>
-                            <div style={{
-                                display: 'grid', gridTemplateColumns: '1fr 1fr',
-                                background: 'rgba(200,160,80,0.1)',
-                                borderBottom: '1px solid rgba(200,160,80,0.2)',
-                                padding: '14px 32px',
-                            }}>
-                                <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.9)' }}>{r.circumference}</span>
-                                <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.9)', textAlign: 'center' }}>{r.ringSizeCol}</span>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40, alignItems: 'start' }}>
+
+                            <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(200,160,80,0.14)' }}>
+                                <div style={{
+                                    display: 'grid', gridTemplateColumns: '1fr 1fr',
+                                    background: 'rgba(200,160,80,0.1)',
+                                    borderBottom: '1px solid rgba(200,160,80,0.2)',
+                                    padding: '14px 32px',
+                                }}>
+                                    <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.9)' }}>{r.circumference}</span>
+                                    <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.9)', textAlign: 'center' }}>{r.ringSizeCol}</span>
+                                </div>
+
+                                {SIZES.map(({ cm, size }, i) => (
+                                    <div key={size} style={{
+                                        display: 'grid', gridTemplateColumns: '1fr 1fr',
+                                        padding: '13px 32px',
+                                        background: i % 2 === 0 ? 'var(--bg-card)' : 'var(--bg-card2)',
+                                        borderBottom: i < SIZES.length - 1 ? '1px solid var(--border)' : 'none',
+                                    }}>
+                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontVariantNumeric: 'tabular-nums', fontWeight: 400 }}>{cm}</span>
+                                        <span style={{ color: 'var(--text-title)', fontWeight: 700, fontSize: '0.95rem', textAlign: 'center', letterSpacing: '0.05em' }}>{size}</span>
+                                    </div>
+                                ))}
                             </div>
 
-                            {SIZES.map(({ cm, size }, i) => (
-                                <div key={size} style={{
-                                    display: 'grid', gridTemplateColumns: '1fr 1fr',
-                                    padding: '13px 32px',
-                                    background: i % 2 === 0 ? 'var(--bg-card)' : 'var(--bg-card2)',
-                                    borderBottom: i < SIZES.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
-                                }}>
-                                    <span style={{ color: 'var(--text-body)', fontSize: '0.9rem', fontVariantNumeric: 'tabular-nums', fontWeight: 400 }}>{cm}</span>
-                                    <span style={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem', textAlign: 'center', letterSpacing: '0.05em' }}>{size}</span>
-                                </div>
-                            ))}
+                            <div style={{ position: 'sticky', top: 100 }}>
+                                <img
+                                    src="/ringsize-guide.png"
+                                    alt="Guia de tamanhos Giovana Dias"
+                                    style={{ width: '100%', borderRadius: 12, border: '1px solid rgba(200,160,80,0.14)', display: 'block' }}
+                                />
+                            </div>
                         </div>
 
                         <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: 20, lineHeight: 1.6 }}>
@@ -170,9 +181,12 @@ export default async function RingSizePage() {
             <StoreFooter storeName={storeName} dict={dict} footerText={storeSettings[SETTINGS_KEYS.STORE_FOOTER_TEXT] || undefined} />
 
             <style>{`
-                @media (max-width: 600px) {
+                @media (max-width: 700px) {
                     div[style*="repeat(auto-fit, minmax(220px"] {
                         grid-template-columns: 1fr 1fr !important;
+                    }
+                    .ringsize-grid {
+                        grid-template-columns: 1fr !important;
                     }
                 }
             `}</style>

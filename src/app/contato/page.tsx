@@ -51,6 +51,7 @@ export default async function ContatoPage() {
 
             <main style={{ background: 'var(--bg)', minHeight: '100vh', paddingBottom: 80 }}>
 
+                {/* Hero — fundo escuro fixo sobre foto */}
                 <div style={{
                     position: 'relative',
                     height: 340,
@@ -80,6 +81,7 @@ export default async function ContatoPage() {
                     </div>
                 </div>
 
+                {/* Conteúdo — adapta ao tema */}
                 <div style={{ maxWidth: 1040, margin: '0 auto', padding: '64px 20px 0' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 64, alignItems: 'start' }}>
 
@@ -87,10 +89,10 @@ export default async function ContatoPage() {
                             <h2 style={{ fontSize: '0.68rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.8)', marginBottom: 24, fontWeight: 600 }}>
                                 {c.sectionTitle}
                             </h2>
-                            <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '1.05rem', fontWeight: 300, lineHeight: 1.8, marginBottom: 20 }}>
+                            <p style={{ color: 'var(--text-title)', fontSize: '1.05rem', fontWeight: 400, lineHeight: 1.8, marginBottom: 20 }}>
                                 {c.intro1}
                             </p>
-                            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', fontWeight: 300, lineHeight: 1.8, marginBottom: 36 }}>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 400, lineHeight: 1.8, marginBottom: 36 }}>
                                 {c.intro2}
                             </p>
 
@@ -98,20 +100,20 @@ export default async function ContatoPage() {
                                 {features.map((text) => (
                                     <div key={text} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
                                         <span style={{ color: 'rgba(200,160,80,0.7)', fontSize: '0.7rem', marginTop: 4, flexShrink: 0 }}>✦</span>
-                                        <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.88rem', lineHeight: 1.6 }}>{text}</span>
+                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6 }}>{text}</span>
                                     </div>
                                 ))}
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingTop: 32, borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingTop: 32, borderTop: '1px solid var(--border)' }}>
                                 {(phone || whatsapp) && (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                                         <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(200,160,80,0.08)', border: '1px solid rgba(200,160,80,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(200,160,80,0.8)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.27 2.18 2 2 0 012.24 0h3a2 2 0 012 1.72c.13 1.01.36 2 .71 2.94a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.18 6.18l1.14-1.14a2 2 0 012.11-.45c.94.35 1.93.58 2.94.71A2 2 0 0122 16.92z" /></svg>
                                         </div>
                                         <div>
-                                            <p style={{ fontSize: '0.68rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.6)', marginBottom: 2 }}>{c.phoneLabel}</p>
-                                            <p style={{ color: '#fff', fontWeight: 500, fontSize: '0.95rem' }}>{phone || whatsapp}</p>
+                                            <p style={{ fontSize: '0.68rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.7)', marginBottom: 2 }}>{c.phoneLabel}</p>
+                                            <p style={{ color: 'var(--text-title)', fontWeight: 500, fontSize: '0.95rem' }}>{phone || whatsapp}</p>
                                         </div>
                                     </div>
                                 )}
@@ -122,8 +124,8 @@ export default async function ContatoPage() {
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(200,160,80,0.8)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
                                         </div>
                                         <div>
-                                            <p style={{ fontSize: '0.68rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.6)', marginBottom: 2 }}>{c.emailLabel}</p>
-                                            <p style={{ color: '#fff', fontWeight: 500, fontSize: '0.95rem' }}>{email}</p>
+                                            <p style={{ fontSize: '0.68rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.7)', marginBottom: 2 }}>{c.emailLabel}</p>
+                                            <p style={{ color: 'var(--text-title)', fontWeight: 500, fontSize: '0.95rem' }}>{email}</p>
                                         </div>
                                     </div>
                                 )}
@@ -136,7 +138,7 @@ export default async function ContatoPage() {
                                         style={{
                                             display: 'inline-flex', alignItems: 'center', gap: 10, marginTop: 8,
                                             background: 'rgba(37,211,102,0.08)', border: '1px solid rgba(37,211,102,0.25)',
-                                            borderRadius: 8, padding: '12px 20px', color: '#fff', textDecoration: 'none', fontSize: '0.83rem', fontWeight: 600,
+                                            borderRadius: 8, padding: '12px 20px', color: '#25D366', textDecoration: 'none', fontSize: '0.83rem', fontWeight: 600,
                                             transition: 'background 0.2s',
                                         }}
                                     >
@@ -149,14 +151,14 @@ export default async function ContatoPage() {
 
                         <div style={{
                             background: 'var(--bg-card)',
-                            border: '1px solid rgba(200,160,80,0.12)',
+                            border: '1px solid var(--border)',
                             borderRadius: 16,
                             padding: '40px 36px',
                         }}>
                             <h3 style={{ fontSize: '0.68rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.8)', marginBottom: 8, fontWeight: 600 }}>
                                 {c.formTitle}
                             </h3>
-                            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.82rem', marginBottom: 28 }}>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginBottom: 28 }}>
                                 {c.formSubtitle}
                             </p>
                             <ContactFormClient whatsappLink={whatsappLink} phone={phone} email={email} dict={dict} />
@@ -175,11 +177,6 @@ export default async function ContatoPage() {
                     }
                     div[style*="padding: '0 40px 44px'"] {
                         padding: 0 20px 36px !important;
-                    }
-                }
-                @media (max-width: 480px) {
-                    div[style*="grid-template-columns: 1fr 1fr"] {
-                        grid-template-columns: 1fr !important;
                     }
                 }
             `}</style>

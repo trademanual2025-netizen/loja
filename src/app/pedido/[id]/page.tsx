@@ -168,7 +168,7 @@ export default async function PedidoPage({ params }: { params: Promise<{ id: str
                 )}
             </div>
 
-            <a href="/" className="btn btn-primary">{dict.store.continueShopping}</a>
+            <a href="/loja" className="btn btn-primary">{dict.store.continueShopping}</a>
         </div>
     )
 }

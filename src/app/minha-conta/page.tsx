@@ -246,7 +246,7 @@ export default function MinhaContaPage() {
                         <div className="card" style={{ textAlign: 'center', padding: '60px 20px' }}>
                             <ShoppingBag size={48} color="var(--text-muted)" style={{ margin: '0 auto 16px' }} />
                             <p style={{ color: 'var(--text-muted)', marginBottom: 16 }}>{dict.profile.emptyOrders}</p>
-                            <Link href="/" className="btn btn-primary">{dict.profile.exploreBtn}</Link>
+                            <Link href="/loja" className="btn btn-primary">{dict.profile.exploreBtn}</Link>
                         </div>
                     ) : profile.orders.map(order => {
                         const statusLevelKey = order.status === 'PENDING' ? 'statusPending' : order.status === 'PAID' ? 'statusPaid' : order.status === 'CANCELLED' ? 'statusCancelled' : 'statusRefunded'

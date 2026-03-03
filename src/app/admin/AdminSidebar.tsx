@@ -109,7 +109,7 @@ export function AdminSidebar({ isOpen }: Props) {
                         <Moon size={14} /> Escuro
                     </button>
                 </div>
-                <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8, color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.88rem', marginBottom: 4 }}>
+                <Link href="/loja" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8, color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.88rem', marginBottom: 4 }}>
                     <Package size={18} /> Ver Loja
                 </Link>
                 <button onClick={handleLogout} type="button" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8, color: 'var(--error)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.88rem', width: '100%' }}>

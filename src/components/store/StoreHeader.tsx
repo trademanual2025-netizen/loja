@@ -38,7 +38,7 @@ export function StoreHeader({ storeName, logoUrl, user, dict }: Props) {
             WebkitBackdropFilter: 'blur(16px)',
         }}>
             <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
-                <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', gap: 8 }}>
+                <Link href="/loja" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', gap: 8 }}>
                     {logoUrl ? (
                         <img src={logoUrl} alt={storeName} style={{ height: 40, maxWidth: 160, objectFit: 'contain' }} />
                     ) : (

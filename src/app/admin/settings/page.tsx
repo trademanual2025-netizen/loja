@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { Save, TestTube2 } from 'lucide-react'
 import WebhooksTab from '@/components/admin/WebhooksTab'
 
-const TABS = ['Banco de Dados', 'Pagamentos', 'Tracking', 'Webhooks', 'Frete', 'Loja', 'SEO', 'Banner']
+const TABS = ['Banco de Dados', 'Pagamentos', 'Tracking', 'Webhooks', 'Frete', 'Loja', 'SEO', 'Banner', 'Landing Page']
 
 const ImageF = ({ label, k, help = '', settings, uploadFile }: { label: string; k: string; help?: string; settings: any; uploadFile: any }) => (
     <div className="form-group">
@@ -472,13 +472,64 @@ export default function AdminSettings() {
                 {tab === 'Banner' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                         <div style={{ padding: 16, background: 'rgba(99,102,241,0.1)', borderRadius: 8, border: '1px solid rgba(99,102,241,0.3)', marginBottom: 4 }}>
-                            <p style={{ fontWeight: 700, marginBottom: 6 }}>🖼️ Banner Principal (Home)</p>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Se um banner for enviado, a página principal mostrará um Hero Cinema com a imagem de fundo, título e descrição por cima.</p>
+                            <p style={{ fontWeight: 700, marginBottom: 6 }}>🖼️ Banner Principal (Loja)</p>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Se um banner for enviado, a página da loja (<code>/loja</code>) mostrará um Hero Cinema com a imagem de fundo, título e descrição por cima.</p>
                         </div>
                         <F settings={settings} set={set} label="Título do Banner" k="store_banner_title" placeholder="Nova Coleção Primavera" />
                         <F settings={settings} set={set} label="Subtítulo do Banner" k="store_banner_subtitle" type="textarea" placeholder="Descubra a nova linha..." />
                         <ImageF label="Imagem de Fundo (Banner)" k="store_banner_url" help="Recomendado: 1920x600 pixels, alta qualidade." settings={settings} uploadFile={uploadFile} />
                         <button className="btn btn-primary" onClick={() => save(['store_banner_title', 'store_banner_subtitle', 'store_banner_url'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
+                    </div>
+                )}
+
+                {/* Landing Page */}
+                {tab === 'Landing Page' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                        <div style={{ padding: 16, background: 'rgba(99,102,241,0.1)', borderRadius: 8, border: '1px solid rgba(99,102,241,0.3)', marginBottom: 4 }}>
+                            <p style={{ fontWeight: 700, marginBottom: 6 }}>🏠 Página Inicial (Landing Page)</p>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Configure a página institucional que aparece como página principal do site. A loja de produtos está disponível em <code>/loja</code>.</p>
+                        </div>
+
+                        <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8 }}>
+                            <p style={{ fontWeight: 700, marginBottom: 12 }}>Hero (Seção Principal)</p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                <F settings={settings} set={set} label="Título Principal" k="landing_hero_title" placeholder="Joias autênticas para pessoas autênticas" />
+                                <F settings={settings} set={set} label="Subtítulo" k="landing_hero_subtitle" placeholder="Honrada em enfeitar você!" />
+                                <ImageF label="Imagem de Fundo (Hero)" k="landing_hero_image" help="Recomendado: 1920x900 pixels, alta qualidade." settings={settings} uploadFile={uploadFile} />
+                                <F settings={settings} set={set} label="Texto do Botão CTA" k="landing_cta_text" placeholder="Acessar Loja" help="Texto do botão que leva para a loja." />
+                            </div>
+                        </div>
+
+                        <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8 }}>
+                            <p style={{ fontWeight: 700, marginBottom: 12 }}>Banner Personalizado (WhatsApp)</p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                <ImageF label="Imagem do Banner" k="landing_custom_banner_image" help="Imagem de fundo do card personalizado." settings={settings} uploadFile={uploadFile} />
+                                <F settings={settings} set={set} label="Título do Banner" k="landing_custom_banner_title" placeholder="Joias Customizadas" />
+                                <F settings={settings} set={set} label="Texto do Banner" k="landing_custom_banner_text" placeholder="Entre em contato para discutir joias personalizadas." />
+                            </div>
+                        </div>
+
+                        <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8 }}>
+                            <p style={{ fontWeight: 700, marginBottom: 12 }}>Sobre / História da Marca</p>
+                            <F settings={settings} set={set} label="Texto Sobre (aceita HTML)" k="landing_about_text" type="textarea" placeholder="Conte a história da sua marca..." help="Aparece na seção 'Sobre' da landing page. Pode usar HTML para formatação." />
+                        </div>
+
+                        <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8 }}>
+                            <p style={{ fontWeight: 700, marginBottom: 12 }}>Contato e Redes Sociais</p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                <F settings={settings} set={set} label="WhatsApp (com DDD e DDI)" k="landing_whatsapp" placeholder="5511991371234" help="Número completo com código do país. Ex: 5511991371234" />
+                                <F settings={settings} set={set} label="Telefone (exibição)" k="landing_phone" placeholder="(11) 91371-5454" help="Formato que será exibido no site." />
+                                <F settings={settings} set={set} label="Instagram" k="landing_instagram" placeholder="@giovanadiasjewelry" help="Username ou URL completa do Instagram." />
+                                <F settings={settings} set={set} label="E-mail" k="landing_email" placeholder="contato@loja.com" />
+                            </div>
+                        </div>
+
+                        <button className="btn btn-primary" onClick={() => save([
+                            'landing_hero_image', 'landing_hero_title', 'landing_hero_subtitle', 'landing_cta_text',
+                            'landing_whatsapp', 'landing_instagram', 'landing_email', 'landing_phone',
+                            'landing_custom_banner_image', 'landing_custom_banner_title', 'landing_custom_banner_text',
+                            'landing_about_text',
+                        ])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar Landing Page'}</button>
                     </div>
                 )}
             </div>

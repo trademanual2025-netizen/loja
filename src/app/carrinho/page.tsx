@@ -41,7 +41,7 @@ export default function CarrinhoPage() {
                          locale === 'en' ? 'Looks like you haven\'t picked anything yet. Explore our collection and find something special.' :
                          'Parece que aún no has elegido nada. Explora nuestra colección y encuentra algo especial.'}
                     </p>
-                    <Link href="/" className="product-card-btn" style={{ display: 'inline-flex', padding: '14px 40px', fontSize: '1rem', borderRadius: 10, textDecoration: 'none' }}>
+                    <Link href="/loja" className="product-card-btn" style={{ display: 'inline-flex', padding: '14px 40px', fontSize: '1rem', borderRadius: 10, textDecoration: 'none' }}>
                         <ShoppingBag size={18} />
                         {locale === 'pt' ? 'Explorar Produtos' :
                          locale === 'en' ? 'Explore Products' :
@@ -98,7 +98,7 @@ export default function CarrinhoPage() {
                     <Link href="/checkout" className="btn btn-primary btn-full" style={{ justifyContent: 'center' }}>
                         {dict.cart.checkoutBtn}
                     </Link>
-                    <Link href="/" className="btn btn-secondary btn-full" style={{ marginTop: 8, justifyContent: 'center' }}>
+                    <Link href="/loja" className="btn btn-secondary btn-full" style={{ marginTop: 8, justifyContent: 'center' }}>
                         {dict.cart.continueShopping}
                     </Link>
                 </div>

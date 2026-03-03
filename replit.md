@@ -5,6 +5,8 @@ Loja online construída com Next.js 16, Prisma 7, PostgreSQL (Neon) e TailwindCS
 
 ## Estrutura
 - `src/app/` - Páginas e rotas da aplicação (Next.js App Router)
+  - `src/app/page.tsx` - Landing page institucional (página principal `/`)
+  - `src/app/loja/` - Loja de produtos (`/loja`)
   - `src/app/api/` - Rotas de API (auth, admin, checkout, webhooks)
   - `src/app/admin/` - Painel administrativo
   - `src/app/auth/` - Login/cadastro de usuários
@@ -110,3 +112,8 @@ Loja online construída com Next.js 16, Prisma 7, PostgreSQL (Neon) e TailwindCS
 - Produtos por página configurável no admin: setting `store_products_per_page` (12/16/20/24/32/48), padrão 24
 - Parcelas nos cards: setting `store_installments` (0/2/3/4/6/10/12x) e `store_installments_min_value` — exibe "ou 3x de R$ X,XX" nos cards e na página do produto
 - Configurações de exibição na aba Loja do admin: seção "Exibição de Produtos" com produtos por página, parcelas e valor mínimo
+- Landing page institucional em `/`: hero com imagem, título, subtítulo, botão CTA; seção de banners (WhatsApp/Loja); seção Sobre; footer com contato e redes sociais
+- Loja movida de `/` para `/loja`; StoreHeader logo linka para `/loja`
+- Configurações da landing page na aba "Landing Page" do admin: hero (imagem/título/subtítulo/CTA), banner customizado, texto sobre, contato (WhatsApp/telefone/Instagram/e-mail)
+- Settings keys: `landing_hero_image`, `landing_hero_title`, `landing_hero_subtitle`, `landing_cta_text`, `landing_whatsapp`, `landing_instagram`, `landing_email`, `landing_phone`, `landing_custom_banner_image`, `landing_custom_banner_title`, `landing_custom_banner_text`, `landing_about_text`
+- Componente: `src/components/store/LandingPageClient.tsx`

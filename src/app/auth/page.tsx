@@ -138,7 +138,7 @@ function AuthContent() {
                 )}
 
                 <div style={{ textAlign: 'center', marginTop: 16 }}>
-                    <Link href="/" style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>← Voltar à Loja</Link>
+                    <Link href="/loja" style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>← Voltar à Loja</Link>
                 </div>
             </div>
         </div>

@@ -53,9 +53,6 @@
   --badge-blue-text: #4338ca;
 }
 
-[data-theme='light'] .store-logo-img {
-  filter: brightness(0);
-}
 
 [data-theme='dark'] {
   /* Dark Mode Colors */

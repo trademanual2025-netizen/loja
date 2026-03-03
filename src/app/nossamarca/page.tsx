@@ -29,44 +29,54 @@ export default async function NossaMarcaPage() {
             <StoreHeader storeName={storeName} logoUrl={logoUrl} user={user} dict={dict} />
 
             <style>{`
-                /* ── Hero: foto full-width com overlay de texto à esquerda ── */
+                /* ── Hero split ── */
                 .marca-hero {
-                    position: relative;
-                    width: 100%;
+                    display: grid;
+                    grid-template-columns: 44% 56%;
                     height: calc(100svh - 64px);
                     min-height: 520px;
-                    max-height: 900px;
+                    max-height: 860px;
+                    background: #0d0a06;
+                }
+                .marca-hero-left {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    padding: 64px clamp(32px, 5vw, 72px);
+                    position: relative;
+                    z-index: 1;
+                }
+                .marca-hero-right {
+                    position: relative;
+                    background: #0d0a06;
                     overflow: hidden;
                     display: flex;
-                    align-items: flex-start;
+                    align-items: center;
+                    justify-content: center;
                 }
-                .marca-hero-bg {
-                    position: absolute;
-                    inset: 0;
+                .marca-hero-right img {
                     width: 100%;
                     height: 100%;
-                    object-fit: cover;
-                    object-position: 72% 12%;
+                    object-fit: contain;
+                    object-position: center bottom;
+                    display: block;
                 }
-                .marca-hero-overlay {
+                /* fade da foto para o painel de texto */
+                .marca-hero-right::before {
+                    content: '';
                     position: absolute;
-                    inset: 0;
-                    background:
-                        linear-gradient(to right, rgba(5,3,1,0.97) 0%, rgba(5,3,1,0.88) 30%, rgba(5,3,1,0.45) 52%, transparent 72%),
-                        linear-gradient(to top, rgba(5,3,1,0.55) 0%, transparent 35%);
-                }
-                .marca-hero-content {
-                    position: relative;
+                    top: 0; left: 0; bottom: 0;
+                    width: 120px;
+                    background: linear-gradient(to right, #0d0a06, transparent);
                     z-index: 2;
-                    padding: clamp(48px, 8vh, 100px) clamp(28px, 6vw, 96px) 0;
-                    max-width: 560px;
+                    pointer-events: none;
                 }
 
-                /* ── About: dois painéis lado a lado ── */
+                /* ── About: joias à esquerda, texto à direita ── */
                 .marca-about {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
-                    min-height: 560px;
+                    min-height: 500px;
                     background: var(--bg);
                 }
                 .marca-about-img {
@@ -77,64 +87,77 @@ export default async function NossaMarcaPage() {
                     width: 100%;
                     height: 100%;
                     object-fit: cover;
-                    object-position: center 30%;
+                    object-position: center 35%;
                     display: block;
                 }
+                /* fade da foto para o painel de texto */
                 .marca-about-img::after {
                     content: '';
                     position: absolute;
-                    inset: 0;
-                    background: linear-gradient(to left, var(--bg) 0%, transparent 25%);
+                    top: 0; right: 0; bottom: 0;
+                    width: 100px;
+                    background: linear-gradient(to left, var(--bg), transparent);
                     pointer-events: none;
                 }
                 .marca-about-text {
                     display: flex;
                     flex-direction: column;
                     justify-content: center;
-                    padding: clamp(48px, 6vw, 88px) clamp(32px, 5vw, 72px);
+                    padding: clamp(48px, 6vw, 80px) clamp(32px, 5vw, 72px);
                 }
 
-                /* ── Process ── */
+                /* ── Processo ── */
                 .marca-process {
                     background: var(--bg-card);
                     border-top: 1px solid var(--border);
                     border-bottom: 1px solid var(--border);
-                    padding: clamp(64px, 9vw, 112px) clamp(24px, 5vw, 80px);
+                    padding: clamp(64px, 9vw, 104px) clamp(24px, 5vw, 80px);
+                    text-align: center;
                 }
 
-                /* ── Quote ── */
+                /* ── Citação ── */
                 .marca-quote {
                     background: #080604;
-                    padding: clamp(80px, 11vw, 140px) clamp(24px, 6vw, 80px);
+                    padding: clamp(80px, 10vw, 130px) clamp(24px, 6vw, 80px);
                     text-align: center;
                     position: relative;
-                    overflow: hidden;
                 }
 
                 /* ── Mobile ── */
                 @media (max-width: 768px) {
-                    .marca-hero-bg {
-                        object-position: 80% center;
+                    .marca-hero {
+                        grid-template-columns: 1fr;
+                        height: auto;
+                        min-height: unset;
+                        max-height: unset;
                     }
-                    .marca-hero-overlay {
-                        background:
-                            linear-gradient(to top, rgba(5,3,1,0.92) 0%, rgba(5,3,1,0.6) 40%, rgba(5,3,1,0.2) 70%, transparent 100%),
-                            linear-gradient(to bottom, rgba(5,3,1,0.5) 0%, transparent 30%);
+                    .marca-hero-right {
+                        height: 55svh;
+                        order: -1;
                     }
-                    .marca-hero-content {
-                        padding: clamp(36px, 6vh, 64px) 24px 0;
-                        max-width: 100%;
+                    .marca-hero-right img {
+                        object-fit: cover;
+                        object-position: center 15%;
+                    }
+                    .marca-hero-right::before {
+                        width: unset;
+                        height: 80px;
+                        top: unset;
+                        right: 0;
+                        bottom: 0;
+                        background: linear-gradient(to top, #0d0a06, transparent);
+                    }
+                    .marca-hero-left {
+                        padding: 36px 24px 48px;
                     }
                     .marca-about {
                         grid-template-columns: 1fr;
                         min-height: unset;
                     }
                     .marca-about-img {
-                        height: 320px;
+                        height: 300px;
                     }
-                    .marca-about-img::after {
-                        background: linear-gradient(to top, var(--bg) 0%, transparent 30%);
-                    }
+                    .marca-about-img::after { display: none; }
                     .marca-about-text {
                         padding: 36px 24px 48px;
                     }
@@ -145,41 +168,34 @@ export default async function NossaMarcaPage() {
 
                 {/* ── HERO ── */}
                 <section className="marca-hero">
-                    <img
-                        className="marca-hero-bg"
-                        src="/marca-giovana.jpg"
-                        alt="Giovana Dias"
-                    />
-                    <div className="marca-hero-overlay" />
-
-                    <div className="marca-hero-content">
+                    <div className="marca-hero-left">
                         <p style={{
                             fontSize: '0.65rem',
-                            letterSpacing: '0.32em',
+                            letterSpacing: '0.3em',
                             textTransform: 'uppercase',
                             color: 'rgba(200,160,80,0.9)',
                             fontWeight: 600,
-                            marginBottom: 24,
+                            marginBottom: 28,
                         }}>
                             ✦ Artesã &amp; Ouriveira
                         </p>
 
                         <h1 style={{
-                            fontSize: 'clamp(3.2rem, 6vw, 7rem)',
+                            fontSize: 'clamp(2.8rem, 4.5vw, 5.5rem)',
                             fontWeight: 200,
                             fontStyle: 'italic',
                             color: '#fff',
                             lineHeight: 0.95,
                             letterSpacing: '-0.02em',
-                            marginBottom: 4,
+                            marginBottom: 0,
                         }}>
                             Giovana
                         </h1>
                         <h1 style={{
-                            fontSize: 'clamp(3.2rem, 6vw, 7rem)',
+                            fontSize: 'clamp(2.8rem, 4.5vw, 5.5rem)',
                             fontWeight: 700,
                             color: '#fff',
-                            lineHeight: 1.05,
+                            lineHeight: 1.1,
                             letterSpacing: '-0.02em',
                             marginBottom: 28,
                         }}>
@@ -192,20 +208,25 @@ export default async function NossaMarcaPage() {
                             gap: 10,
                             marginBottom: 28,
                         }}>
-                            <div style={{ width: 36, height: 1, background: 'rgba(200,160,80,0.6)' }} />
+                            <div style={{ width: 36, height: 1, background: 'rgba(200,160,80,0.55)' }} />
                             <div style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgba(200,160,80,0.7)', flexShrink: 0 }} />
-                            <div style={{ width: 36, height: 1, background: 'rgba(200,160,80,0.6)' }} />
+                            <div style={{ width: 36, height: 1, background: 'rgba(200,160,80,0.55)' }} />
                         </div>
 
                         <p style={{
                             fontSize: 'clamp(0.9rem, 1.3vw, 1.05rem)',
-                            lineHeight: 1.8,
-                            color: 'rgba(255,240,210,0.7)',
+                            lineHeight: 1.85,
+                            color: 'rgba(255,240,210,0.65)',
                             fontStyle: 'italic',
                             fontWeight: 300,
+                            maxWidth: 380,
                         }}>
                             Criadora de joias autorais desde a primeira faísca até o brilho final.
                         </p>
+                    </div>
+
+                    <div className="marca-hero-right">
+                        <img src="/marca-giovana.jpg" alt="Giovana Dias" />
                     </div>
                 </section>
 
@@ -251,9 +272,9 @@ export default async function NossaMarcaPage() {
                     </div>
                 </section>
 
-                {/* ── PROCESS ── */}
+                {/* ── PROCESSO ── */}
                 <section className="marca-process">
-                    <div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center' }}>
+                    <div style={{ maxWidth: 680, margin: '0 auto' }}>
                         <div style={{
                             display: 'inline-flex',
                             alignItems: 'center',
@@ -285,7 +306,7 @@ export default async function NossaMarcaPage() {
                     </div>
                 </section>
 
-                {/* ── QUOTE ── */}
+                {/* ── CITAÇÃO ── */}
                 <section className="marca-quote">
                     <div style={{
                         position: 'absolute',
@@ -297,19 +318,19 @@ export default async function NossaMarcaPage() {
                         position: 'absolute',
                         top: 0, left: '50%', transform: 'translateX(-50%)',
                         width: '50%', height: 1,
-                        background: 'linear-gradient(to right, transparent, rgba(200,160,80,0.3), transparent)',
+                        background: 'linear-gradient(to right, transparent, rgba(200,160,80,0.28), transparent)',
                     }} />
                     <div style={{
                         position: 'absolute',
                         bottom: 0, left: '50%', transform: 'translateX(-50%)',
                         width: '50%', height: 1,
-                        background: 'linear-gradient(to right, transparent, rgba(200,160,80,0.3), transparent)',
+                        background: 'linear-gradient(to right, transparent, rgba(200,160,80,0.28), transparent)',
                     }} />
 
                     <div style={{ position: 'relative', zIndex: 1, maxWidth: 680, margin: '0 auto' }}>
                         <div style={{
                             fontSize: 'clamp(4rem, 8vw, 7rem)',
-                            color: 'rgba(200,160,80,0.2)',
+                            color: 'rgba(200,160,80,0.18)',
                             lineHeight: 0.7,
                             marginBottom: 20,
                             fontFamily: 'Georgia, serif',
@@ -333,17 +354,17 @@ export default async function NossaMarcaPage() {
                             alignItems: 'center',
                             gap: 16,
                         }}>
-                            <span style={{ width: 36, height: 1, background: 'rgba(200,160,80,0.4)', display: 'block' }} />
+                            <span style={{ width: 36, height: 1, background: 'rgba(200,160,80,0.38)', display: 'block' }} />
                             <span style={{
                                 fontSize: '0.68rem',
                                 letterSpacing: '0.24em',
-                                color: 'rgba(200,160,80,0.7)',
+                                color: 'rgba(200,160,80,0.65)',
                                 textTransform: 'uppercase',
                                 fontWeight: 500,
                             }}>
                                 Giovana Dias
                             </span>
-                            <span style={{ width: 36, height: 1, background: 'rgba(200,160,80,0.4)', display: 'block' }} />
+                            <span style={{ width: 36, height: 1, background: 'rgba(200,160,80,0.38)', display: 'block' }} />
                         </div>
                     </div>
                 </section>

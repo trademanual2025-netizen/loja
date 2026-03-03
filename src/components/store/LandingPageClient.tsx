@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { ShoppingCart, User, Instagram, Mail, Phone, MessageCircle, ChevronRight, Menu, X } from 'lucide-react'
 import { useCart } from '@/lib/cart'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Dictionary } from '@/lib/i18n'
 
@@ -36,9 +36,15 @@ export function LandingPageClient({
     const itemCount = useCart((s) => s.itemCount())
     const clearCart = useCart((s) => s.clearCart)
     const router = useRouter()
+    const pathname = usePathname()
     const [mounted, setMounted] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false)
     useEffect(() => { setMounted(true) }, [])
+
+    const isActive = (href: string) => {
+        if (href === '/') return pathname === '/'
+        return pathname === href || pathname.startsWith(href + '/')
+    }
 
     async function handleLogout() {
         await fetch('/api/auth/logout', { method: 'POST' })
@@ -75,13 +81,26 @@ export function LandingPageClient({
                     </Link>
 
                     <nav className="landing-nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
-                        {navLinks.map((link) => (
-                            <Link key={link.href} href={link.href} style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', fontSize: '0.9rem', fontWeight: 500, transition: 'color 0.2s' }}
-                                onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
-                                onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}>
-                                {link.label}
-                            </Link>
-                        ))}
+                        {navLinks.map((link) => {
+                            const active = isActive(link.href)
+                            return (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    style={{
+                                        color: active ? '#fff' : 'rgba(255,255,255,0.6)',
+                                        textDecoration: 'none',
+                                        fontSize: '0.9rem',
+                                        fontWeight: active ? 600 : 500,
+                                        transition: 'color 0.2s',
+                                        paddingBottom: 4,
+                                        borderBottom: active ? '2px solid rgba(200,160,80,0.8)' : '2px solid transparent',
+                                    }}
+                                >
+                                    {link.label}
+                                </Link>
+                            )
+                        })}
                     </nav>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

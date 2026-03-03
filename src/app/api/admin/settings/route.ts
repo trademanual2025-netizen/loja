@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { clearSettingsCache } from '@/lib/config'
+import { revalidatePath } from 'next/cache'
 
-// GET /api/admin/settings — retorna todas as configurações
 export async function GET() {
     const settings = await prisma.settings.findMany()
     const map: Record<string, string> = {}
@@ -9,7 +10,6 @@ export async function GET() {
     return NextResponse.json(map)
 }
 
-// POST /api/admin/settings — atualiza múltiplas configurações
 export async function POST(req: NextRequest) {
     const body: Record<string, string> = await req.json()
 
@@ -22,6 +22,12 @@ export async function POST(req: NextRequest) {
             })
         )
     )
+
+    clearSettingsCache(Object.keys(body))
+
+    revalidatePath('/', 'layout')
+    revalidatePath('/loja', 'page')
+    revalidatePath('/nossamarca', 'page')
 
     return NextResponse.json({ ok: true })
 }

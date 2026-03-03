@@ -25,6 +25,14 @@ export async function setSetting(key: string, value: string): Promise<void> {
     cache.set(key, { value, ts: Date.now() })
 }
 
+export function clearSettingsCache(keys?: string[]): void {
+    if (keys && keys.length > 0) {
+        keys.forEach(k => cache.delete(k))
+    } else {
+        cache.clear()
+    }
+}
+
 export async function getSettings(keys: string[]): Promise<Record<string, string>> {
     const now = Date.now()
     const missing = keys.filter(k => {

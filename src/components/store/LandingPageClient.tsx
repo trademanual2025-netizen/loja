@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ShoppingCart, Instagram, MessageCircle, ChevronRight } from 'lucide-react'
+import { Instagram, MessageCircle, ChevronRight } from 'lucide-react'
 import { Dictionary } from '@/lib/i18n'
 import { StoreHeader } from '@/components/store/StoreHeader'
 
@@ -172,63 +172,76 @@ export function LandingPageClient({
                     </div>
                 </section>
 
-                <section style={{ maxWidth: 1000, margin: '0 auto', padding: '60px 20px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
-                        {whatsappLink && (
-                            <a href={whatsappLink} target="_blank" rel="noopener noreferrer"
-                                style={{
-                                    position: 'relative', borderRadius: 12, overflow: 'hidden', textDecoration: 'none',
-                                    background: customBannerImage ? 'transparent' : 'linear-gradient(135deg, #1a1a2e, #2d2d44)',
-                                    border: '1px solid rgba(255,255,255,0.08)',
-                                    minHeight: 180, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    transition: 'transform 0.3s, box-shadow 0.3s',
-                                }}
-                                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.4)' }}
-                                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}
-                            >
-                                {customBannerImage && (
-                                    <>
-                                        <img src={customBannerImage} alt={customBannerTitle || 'Joias Customizadas'} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)' }} />
-                                    </>
-                                )}
-                                <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: 24 }}>
-                                    <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#25D366', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-                                        <MessageCircle size={24} color="#fff" />
-                                    </div>
-                                    <h3 style={{ color: '#fff', fontSize: '1.3rem', fontWeight: 700, marginBottom: 8 }}>
-                                        {customBannerTitle || 'Joias Customizadas'}
-                                    </h3>
-                                    <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
-                                        {customBannerText || 'Entre em contato para discutir joias personalizadas.'}
-                                    </p>
-                                </div>
-                            </a>
-                        )}
-
-                        <Link href="/loja"
+                {whatsappLink && (
+                    <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 20px 60px' }}>
+                        <a
+                            href={whatsappLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             style={{
-                                position: 'relative', borderRadius: 12, overflow: 'hidden', textDecoration: 'none',
-                                background: 'linear-gradient(135deg, #2d2d44, #1a1a2e)',
-                                border: '1px solid rgba(255,255,255,0.08)',
-                                minHeight: 180, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                transition: 'transform 0.3s, box-shadow 0.3s',
+                                position: 'relative',
+                                display: 'flex',
+                                alignItems: 'stretch',
+                                borderRadius: 14,
+                                overflow: 'hidden',
+                                textDecoration: 'none',
+                                height: 200,
+                                background: '#0d0a06',
+                                border: '1px solid rgba(200,160,80,0.18)',
+                                boxShadow: '0 4px 32px rgba(0,0,0,0.5)',
+                                transition: 'box-shadow 0.35s, transform 0.35s',
                             }}
-                            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.4)' }}
-                            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}
+                            onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 48px rgba(0,0,0,0.7)'; e.currentTarget.style.transform = 'translateY(-3px)' }}
+                            onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 4px 32px rgba(0,0,0,0.5)'; e.currentTarget.style.transform = 'translateY(0)' }}
                         >
-                            <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: 24 }}>
-                                <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-                                    <ShoppingCart size={24} color="#fff" />
-                                </div>
-                                <h3 style={{ color: '#fff', fontSize: '1.3rem', fontWeight: 700, marginBottom: 8 }}>{t.storeCard}</h3>
-                                <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center' }}>
-                                    {t.accessHere} <ChevronRight size={14} />
+                            {customBannerImage && (
+                                <img
+                                    src={customBannerImage}
+                                    alt={customBannerTitle || 'Joias Customizadas'}
+                                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+                                />
+                            )}
+
+                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(8,5,2,0.88) 0%, rgba(8,5,2,0.6) 45%, rgba(8,5,2,0.15) 100%)' }} />
+                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(0deg, rgba(0,0,0,0.45) 0%, transparent 60%)' }} />
+
+                            <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '28px 36px', flex: 1 }}>
+                                <div style={{ width: 28, height: 1, background: 'rgba(200,160,80,0.7)', marginBottom: 12 }} />
+                                <h3 style={{
+                                    color: '#fff',
+                                    fontSize: 'clamp(1.5rem, 4vw, 2.1rem)',
+                                    fontWeight: 200,
+                                    letterSpacing: '0.08em',
+                                    textTransform: 'uppercase',
+                                    margin: 0,
+                                    lineHeight: 1.2,
+                                    textShadow: '0 2px 16px rgba(0,0,0,0.6)',
+                                }}>
+                                    {customBannerTitle || 'Joias Customizadas'}
+                                </h3>
+                                <p style={{ color: 'rgba(200,160,80,0.75)', fontSize: '0.75rem', marginTop: 8, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500 }}>
+                                    {customBannerText || 'Entre em contato para joias personalizadas.'}
                                 </p>
                             </div>
-                        </Link>
-                    </div>
-                </section>
+
+                            <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '28px 36px', flexShrink: 0 }}>
+                                <div style={{
+                                    display: 'flex', alignItems: 'center', gap: 10,
+                                    background: 'rgba(37,211,102,0.12)',
+                                    border: '1px solid rgba(37,211,102,0.35)',
+                                    borderRadius: 50,
+                                    padding: '10px 22px',
+                                    backdropFilter: 'blur(8px)',
+                                }}>
+                                    <MessageCircle size={18} color="#25D366" />
+                                    <span style={{ color: '#fff', fontSize: '0.82rem', fontWeight: 600, letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
+                                        {t.talkToUs}
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                    </section>
+                )}
 
                 {aboutText && (
                     <section id="sobre" style={{ maxWidth: 800, margin: '0 auto', padding: '40px 20px 60px', textAlign: 'center' }}>

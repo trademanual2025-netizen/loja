@@ -260,7 +260,7 @@ export function LandingPageClient({
                     <div style={{ maxWidth: 1000, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 40, marginBottom: 40 }}>
                         {(phone || whatsapp || email) && (
                             <div>
-                                <h4 style={{ color: '#c0392b', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>{t.contact}</h4>
+                                <h4 style={{ color: 'rgba(200,160,80,0.8)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>{t.contact}</h4>
                                 {(phone || whatsapp) && (
                                     <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', marginBottom: 6 }}>
                                         {t.phoneWhatsapp}: {phone || whatsapp}
@@ -271,7 +271,7 @@ export function LandingPageClient({
                                 )}
                                 {whatsappLink && (
                                     <a href={whatsappLink} target="_blank" rel="noopener noreferrer"
-                                        style={{ color: '#c0392b', fontSize: '0.85rem', textDecoration: 'none' }}>
+                                        style={{ color: 'rgba(200,160,80,0.8)', fontSize: '0.85rem', textDecoration: 'none' }}>
                                         {t.talkToUs}
                                     </a>
                                 )}
@@ -279,16 +279,19 @@ export function LandingPageClient({
                         )}
 
                         <div>
-                            <h4 style={{ color: '#c0392b', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>{t.institutional}</h4>
+                            <h4 style={{ color: 'rgba(200,160,80,0.8)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>{t.institutional}</h4>
+                            <Link href="/loja" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{t.virtualStore}</Link>
+                            <Link href="/nossamarca" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{dict.nav?.ourBrand}</Link>
+                            <Link href="/ringsize" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{dict.nav?.ringSize}</Link>
+                            <Link href="/contato" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{dict.nav?.contact}</Link>
                             {aboutText && (
-                                <a href="#sobre" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{t.whoWeAre}</a>
+                                <a href="#sobre" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block' }}>{t.whoWeAre}</a>
                             )}
-                            <Link href="/loja" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block' }}>{t.virtualStore}</Link>
                         </div>
 
                         {(instagramLink || whatsappLink) && (
                             <div>
-                                <h4 style={{ color: '#c0392b', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>{t.socialMedia}</h4>
+                                <h4 style={{ color: 'rgba(200,160,80,0.8)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>{t.socialMedia}</h4>
                                 <div style={{ display: 'flex', gap: 12 }}>
                                     {instagramLink && (
                                         <a href={instagramLink} target="_blank" rel="noopener noreferrer"
@@ -313,9 +316,10 @@ export function LandingPageClient({
                         )}
 
                         <div>
-                            <h4 style={{ color: '#c0392b', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>{t.account}</h4>
+                            <h4 style={{ color: 'rgba(200,160,80,0.8)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>{t.account}</h4>
                             <Link href="/minha-conta" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{t.myData}</Link>
-                            <Link href="/minha-conta" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{t.myOrders}</Link>
+                            <Link href="/minha-conta#pedidos" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{t.myOrders}</Link>
+                            <Link href="/carrinho" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{dict.nav?.cart}</Link>
                         </div>
                     </div>
 

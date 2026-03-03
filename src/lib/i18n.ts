@@ -4,6 +4,7 @@ export const defaultLocale: Locale = 'pt'
 export const dictionaries = {
     pt: {
         nav: {
+            home: 'Início',
             store: 'Loja',
             ourBrand: 'Nossa Marca',
         },
@@ -199,6 +200,7 @@ export const dictionaries = {
     },
     en: {
         nav: {
+            home: 'Home',
             store: 'Store',
             ourBrand: 'Our Brand',
         },
@@ -394,6 +396,7 @@ export const dictionaries = {
     },
     es: {
         nav: {
+            home: 'Inicio',
             store: 'Tienda',
             ourBrand: 'Nuestra Marca',
         },

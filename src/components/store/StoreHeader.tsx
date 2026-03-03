@@ -19,6 +19,7 @@ interface Props {
 
 export function StoreHeader({ storeName, logoUrl, user, dict }: Props) {
     const NAV_LINKS = [
+        { label: dict.nav?.home || 'Início', href: '/' },
         { label: dict.nav?.store || 'Loja', href: '/loja' },
         { label: dict.nav?.ourBrand || 'Nossa Marca', href: '/nossamarca' },
     ]

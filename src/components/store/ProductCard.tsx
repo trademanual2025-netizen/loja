@@ -23,9 +23,9 @@ interface Product {
 }
 
 const labels = {
-    pt: { buy: 'Comprar', sold: 'Esgotado', added: 'adicionado ao carrinho!', select: 'Selecione as opções do produto' },
-    en: { buy: 'Buy Now', sold: 'Sold Out', added: 'added to cart!', select: 'Select product options' },
-    es: { buy: 'Comprar', sold: 'Agotado', added: 'agregado al carrito!', select: 'Seleccione las opciones' },
+    pt: { buy: 'Comprar', sold: 'Esgotado', added: 'adicionado ao carrinho!', select: 'Selecione as opções do produto', noImage: 'Sem imagem', installmentPrefix: 'ou', installmentOf: 'x de', interestFree: 'sem juros' },
+    en: { buy: 'Buy Now', sold: 'Sold Out', added: 'added to cart!', select: 'Select product options', noImage: 'No image', installmentPrefix: 'or', installmentOf: 'x of', interestFree: 'interest-free' },
+    es: { buy: 'Comprar', sold: 'Agotado', added: 'agregado al carrito!', select: 'Seleccione las opciones', noImage: 'Sin imagen', installmentPrefix: 'o', installmentOf: 'x de', interestFree: 'sin intereses' },
 }
 
 export function ProductCard({ product, dict, locale = 'pt', installments = 0, installmentsMinValue = 0 }: { product: Product, dict?: any, locale?: Locale, installments?: number, installmentsMinValue?: number }) {
@@ -74,7 +74,7 @@ export function ProductCard({ product, dict, locale = 'pt', installments = 0, in
                         <Image src={product.images[0]} alt={translateDb(product.name, locale)} fill sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw" style={{ objectFit: 'cover', transition: 'transform 0.4s ease' }} />
                     ) : (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                            Sem imagem
+                            {l.noImage}
                         </div>
                     )}
                     {discount > 0 && (
@@ -103,7 +103,7 @@ export function ProductCard({ product, dict, locale = 'pt', installments = 0, in
                     </div>
                     {installments > 1 && product.price >= installmentsMinValue && (
                         <p className="product-card-installments">
-                            {locale === 'en' ? `or ${installments}x of` : locale === 'es' ? `o ${installments}x de` : `ou ${installments}x de`} R$ {(product.price / installments).toFixed(2).replace('.', ',')}
+                            {l.installmentPrefix} {installments}{l.installmentOf} R$ {(product.price / installments).toFixed(2).replace('.', ',')}
                         </p>
                     )}
                     <button

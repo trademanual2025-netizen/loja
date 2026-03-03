@@ -82,13 +82,13 @@ export default function MinhaContaPage() {
             body: JSON.stringify(form),
         })
         setSaving(false)
-        if (r.ok) { toast.success('Perfil atualizado!'); loadProfile() }
+        if (r.ok) { toast.success(dict.profile.updated); loadProfile() }
         else { const d = await r.json(); toast.error(d.error) }
     }
 
     async function handleSavePwd(e: React.FormEvent) {
         e.preventDefault()
-        if (pwdForm.newPassword !== pwdForm.confirm) { toast.error('Senhas não conferem.'); return }
+        if (pwdForm.newPassword !== pwdForm.confirm) { toast.error(dict.profile.passwordMismatch); return }
         setSaving(true)
         const r = await fetch('/api/user/profile', {
             method: 'PATCH',
@@ -96,7 +96,7 @@ export default function MinhaContaPage() {
             body: JSON.stringify({ currentPassword: pwdForm.currentPassword, newPassword: pwdForm.newPassword }),
         })
         setSaving(false)
-        if (r.ok) { toast.success('Senha alterada!'); setPwdForm({ currentPassword: '', newPassword: '', confirm: '' }) }
+        if (r.ok) { toast.success(dict.profile.passwordChanged); setPwdForm({ currentPassword: '', newPassword: '', confirm: '' }) }
         else { const d = await r.json(); toast.error(d.error) }
     }
 
@@ -116,7 +116,7 @@ export default function MinhaContaPage() {
             body: JSON.stringify({ avatarUrl: d.url }),
         })
         setUploadingAvatar(false)
-        toast.success('Foto atualizada!')
+        toast.success(dict.profile.photoUpdated)
         loadProfile()
     }
 
@@ -260,11 +260,11 @@ export default function MinhaContaPage() {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
                                     <div>
                                         <p style={{ fontWeight: 700, fontSize: '0.95rem' }}>{dict.profile.orderId} #{order.id.slice(-8).toUpperCase()}</p>
-                                        <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>{new Date(order.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                                        <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>{new Date(order.createdAt).toLocaleDateString(locale === 'pt' ? 'pt-BR' : locale === 'es' ? 'es-ES' : 'en-US', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                                         {wasPmChange ? (
-                                            <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.8rem', fontWeight: 700, background: 'rgba(139,92,246,0.12)', color: '#8b5cf6' }}>Alterou pagamento</span>
+                                            <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.8rem', fontWeight: 700, background: 'rgba(139,92,246,0.12)', color: '#8b5cf6' }}>{dict.profile.changedPayment}</span>
                                         ) : (
                                             <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.8rem', fontWeight: 700, background: `${statusObj.color}22`, color: statusObj.color }}>{dict.profile[statusLevelKey] || statusObj.label}</span>
                                         )}
@@ -297,16 +297,16 @@ export default function MinhaContaPage() {
                                             <div style={{ padding: '10px 14px', background: 'rgba(234,179,8,0.08)', borderRadius: 8, border: '1px solid rgba(234,179,8,0.2)', fontSize: '0.82rem', color: '#d97706' }}>
                                                 {(isPix || isBoleto) && (
                                                     <>
-                                                        <strong>{isPix ? '⏳ Aguardando Pix' : '⏳ Aguardando Boleto'}</strong>
+                                                        <strong>{isPix ? dict.profile.awaitingPix : dict.profile.awaitingBoleto}</strong>
                                                         <span style={{ margin: '0 6px' }}>·</span>
                                                     </>
                                                 )}
                                                 <Link href={`/pedido/${order.id}`} style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>
-                                                    {(isPix || isBoleto) ? 'Ver dados de pagamento' : 'Ver pedido'} →
+                                                    {(isPix || isBoleto) ? dict.profile.viewPaymentData : dict.profile.viewOrder} →
                                                 </Link>
                                                 <span style={{ margin: '0 6px' }}>·</span>
                                                 <Link href={`/pedido/${order.id}`} style={{ color: 'var(--text-muted)', fontWeight: 500, textDecoration: 'none', fontSize: '0.8rem' }}>
-                                                    Alterar forma de pagamento
+                                                    {dict.profile.changePaymentMethod}
                                                 </Link>
                                             </div>
                                         )
@@ -314,16 +314,16 @@ export default function MinhaContaPage() {
                                     {(order.trackingCode || order.shippingNote) && (
                                         <div style={{ padding: '12px 14px', background: 'rgba(34,197,94,0.08)', borderRadius: 10, border: '1px solid rgba(34,197,94,0.2)' }}>
                                             <p style={{ fontSize: '0.78rem', fontWeight: 700, color: '#22c55e', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
-                                                <Truck size={13} /> Informações de Envio
+                                                <Truck size={13} /> {dict.profile.shippingInfo}
                                             </p>
                                             {order.trackingCode && (
                                                 <div style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                                                    <span style={{ color: 'var(--text-muted)' }}>Código:</span>
+                                                    <span style={{ color: 'var(--text-muted)' }}>{dict.profile.trackingCode}</span>
                                                     <strong style={{ fontFamily: 'monospace' }}>{order.trackingCode}</strong>
                                                     {order.trackingUrl && (
                                                         <a href={order.trackingUrl} target="_blank" rel="noopener noreferrer"
                                                             style={{ color: 'var(--primary)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: 3, textDecoration: 'none' }}>
-                                                            <ExternalLink size={12} /> Rastrear
+                                                            <ExternalLink size={12} /> {dict.profile.track}
                                                         </a>
                                                     )}
                                                 </div>

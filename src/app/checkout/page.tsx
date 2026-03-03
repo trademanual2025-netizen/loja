@@ -145,8 +145,8 @@ export default function CheckoutPage() {
     async function handleAddressSubmit(data: AddressForm) {
         setLoading(true)
         const fallbackOptions: ShippingOption[] = [
-            { label: 'PAC (8 dias úteis)', value: 24.90, days: 8 },
-            { label: 'SEDEX (4 dias úteis)', value: 42.90, days: 4 },
+            { label: dict.checkout.pacLabel, value: 24.90, days: 8 },
+            { label: dict.checkout.sedexLabel, value: 42.90, days: 4 },
         ]
         try {
             const res = await fetch('/api/shipping', {
@@ -189,20 +189,20 @@ export default function CheckoutPage() {
                 if (data.bairro) addressForm.setValue('neighborhood', data.bairro)
                 if (data.localidade) addressForm.setValue('city', data.localidade)
                 if (data.uf) addressForm.setValue('state', data.uf)
-                toast.success('Endereço encontrado!')
+                toast.success(dict.checkout.addressFound)
             } else {
                 const stateFromCep = getCepState(clean)
                 if (stateFromCep) {
                     addressForm.setValue('state', stateFromCep)
-                    toast.info('CEP genérico — estado preenchido. Preencha os demais campos.')
+                    toast.info(dict.checkout.genericCep)
                 } else {
-                    toast.warning('CEP não encontrado. Preencha o endereço manualmente.')
+                    toast.warning(dict.checkout.cepNotFound)
                 }
             }
         } catch {
             const stateFromCep = getCepState(clean)
             if (stateFromCep) addressForm.setValue('state', stateFromCep)
-            toast.warning('Não foi possível buscar o CEP. Preencha o endereço manualmente.')
+            toast.warning(dict.checkout.cepError)
         } finally {
             setCepLoading(false)
         }
@@ -233,10 +233,10 @@ export default function CheckoutPage() {
                 setClientSecret(clientSecret)
                 setStripeOrderId(orderId)
             } else {
-                toast.error('Erro ao iniciar Stripe')
+                toast.error(dict.checkout.stripeError)
             }
         } catch {
-            toast.error('Erro de conexão com Checkout Stripe')
+            toast.error(dict.checkout.stripeConnError)
         }
     }
 
@@ -355,17 +355,17 @@ export default function CheckoutPage() {
                                 <input type="radio" name="shipping" checked={shipping.label === opt.label} onChange={() => setShipping(opt)} />
                                 <div style={{ flex: 1 }}>
                                     <p style={{ fontWeight: 600 }}>{opt.label}</p>
-                                    {opt.days ? <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 2 }}>Prazo: {opt.days} dias úteis</p> : null}
+                                    {opt.days ? <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 2 }}>{dict.checkout.deadline} {opt.days} {dict.checkout.businessDays}</p> : null}
                                 </div>
                                 <span style={{ fontWeight: 700, color: opt.value === 0 ? '#22c55e' : 'var(--text)' }}>
-                                    {opt.value === 0 ? 'GRÁTIS' : `R$ ${opt.value.toFixed(2).replace('.', ',')}`}
+                                    {opt.value === 0 ? dict.checkout.freeShipping : `R$ ${opt.value.toFixed(2).replace('.', ',')}`}
                                 </span>
                             </label>
                         ))}
                     </div>
                     <div style={{ display: 'flex', gap: 12 }}>
                         <button onClick={() => setStep('address')} className="btn btn-secondary">
-                            ← {dict.cart.continueShopping === 'Continuar Comprando' ? 'Voltar' : 'Back'}
+                            ← {dict.checkout.back}
                         </button>
                         <button onClick={continueToPayment} className="btn btn-primary" style={{ flex: 1 }}>
                             {dict.store.checkout} →
@@ -386,20 +386,18 @@ export default function CheckoutPage() {
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', marginBottom: 8 }}>
                             <span>{dict.checkout.shipping} ({shipping.label})</span>
-                            <span>{shipping.value === 0 ? 'GRÁTIS' : `R$ ${shipping.value.toFixed(2).replace('.', ',')}`}</span>
+                            <span>{shipping.value === 0 ? dict.checkout.freeShipping : `R$ ${shipping.value.toFixed(2).replace('.', ',')}`}</span>
                         </div>
                         <hr className="divider" />
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '1.1rem' }}>
-                            <span>Total</span><span style={{ color: 'var(--primary)' }}>R$ {(total() + shipping.value).toFixed(2).replace('.', ',')}</span>
+                            <span>{dict.checkout.total}</span><span style={{ color: 'var(--primary)' }}>R$ {(total() + shipping.value).toFixed(2).replace('.', ',')}</span>
                         </div>
                     </div>
 
                     {/* Gateway Selector */}
                     {gatewayMode === 'auto' && detectedCountry && (
                         <div style={{ padding: '10px 14px', background: 'rgba(99,102,241,0.08)', borderRadius: 8, border: '1px solid rgba(99,102,241,0.15)', marginBottom: 16, fontSize: '0.82rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                            🌍 {detectedCountry === 'BR'
-                                ? 'Pagamento via MercadoPago (Brasil detectado)'
-                                : `Pagamento via Stripe (região internacional detectada)`}
+                            🌍 {detectedCountry === 'BR' ? dict.checkout.brazilDetected : dict.checkout.internationalDetected}
                         </div>
                     )}
                     {configs?.mp_public_key && configs?.stripe_public_key && (gatewayMode === 'manual' || !gatewayMode) && (
@@ -441,12 +439,12 @@ export default function CheckoutPage() {
                     )}
 
                     {paymentGateway === 'stripe' && !clientSecret && (
-                        <div style={{ padding: 40, textAlign: 'center' }}><span className="spinner" style={{ borderColor: 'var(--primary)', borderRightColor: 'transparent' }} /> Iniciando conexão segura...</div>
+                        <div style={{ padding: 40, textAlign: 'center' }}><span className="spinner" style={{ borderColor: 'var(--primary)', borderRightColor: 'transparent' }} /> {dict.checkout.connectingSecure}</div>
                     )}
 
                     {/* Voltar */}
                     <div style={{ marginTop: 24 }}>
-                        <button onClick={() => setStep('shipping')} className="btn btn-secondary">← {dict.cart.continueShopping === 'Continuar Comprando' ? 'Voltar para Frete' : 'Back to Shipping'}</button>
+                        <button onClick={() => setStep('shipping')} className="btn btn-secondary">← {dict.checkout.backToShipping}</button>
                     </div>
                 </div>
             )}

@@ -121,7 +121,7 @@ export function ProductPageClient({ product, dict, relatedProducts = [], install
                             )}
                         </>
                     ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)' }}>Sem imagem</div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)' }}>{dict.noImage}</div>
                     )}
                 </div>
                 {allImages.length > 1 && (
@@ -155,9 +155,9 @@ export function ProductPageClient({ product, dict, relatedProducts = [], install
                     </div>
                     {installments > 1 && displayPrice >= installmentsMinValue && (
                         <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: 8 }}>
-                            {locale === 'en' ? `or ${installments}x of` : locale === 'es' ? `o ${installments}x de` : `ou ${installments}x de`}{' '}
+                            {dict.installmentPrefix} {installments}{dict.installmentOf}{' '}
                             <span style={{ fontWeight: 600, color: 'var(--text-body)' }}>R$ {(displayPrice / installments).toFixed(2).replace('.', ',')}</span>
-                            {' '}{locale === 'en' ? 'interest-free' : 'sem juros'}
+                            {' '}{dict.interestFree}
                         </p>
                     )}
                 </div>
@@ -204,12 +204,10 @@ export function ProductPageClient({ product, dict, relatedProducts = [], install
                         disabled={displayStock === 0}
                     >
                         <ShoppingCart size={20} />
-                        {displayStock === 0
-                            ? (locale === 'pt' ? 'Produto Esgotado' : locale === 'en' ? 'Out of Stock' : 'Agotado')
-                            : dict.addToCart}
+                        {displayStock === 0 ? dict.outOfStock : dict.addToCart}
                     </button>
                     {displayStock > 0 && displayStock <= 5 && (
-                        <p style={{ color: '#eab308', fontSize: '0.85rem' }}>⚠️ Apenas {displayStock} em estoque!</p>
+                        <p style={{ color: '#eab308', fontSize: '0.85rem' }}>⚠️ {dict.onlyLeft} {displayStock} {dict.stockWarning}!</p>
                     )}
                 </div>
             </div>
@@ -219,7 +217,7 @@ export function ProductPageClient({ product, dict, relatedProducts = [], install
             {relatedProducts.length > 0 && (
                 <div style={{ gridColumn: '1 / -1', marginTop: 48, borderTop: '1px solid var(--border)', paddingTop: 40 }}>
                     <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: 24, color: 'var(--text-title)' }}>
-                        {locale === 'en' ? 'You may also like' : locale === 'es' ? 'También te puede gustar' : 'Você também pode gostar'}
+                        {dict.relatedTitle}
                     </h2>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
                         {relatedProducts.slice(0, 8).map(rp => {
@@ -234,7 +232,7 @@ export function ProductPageClient({ product, dict, relatedProducts = [], install
                                             {rp.image ? (
                                                 <Image src={rp.image} alt={rp.name} fill sizes="(max-width: 768px) 50vw, 25vw" style={{ objectFit: 'cover' }} />
                                             ) : (
-                                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>Sem imagem</div>
+                                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>{dict.noImage}</div>
                                             )}
                                             {rpDiscount > 0 && (
                                                 <span style={{ position: 'absolute', top: 8, left: 8, background: 'var(--error)', color: 'white', padding: '2px 8px', borderRadius: 6, fontSize: '0.75rem', fontWeight: 700 }}>-{rpDiscount}%</span>

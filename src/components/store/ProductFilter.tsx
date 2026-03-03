@@ -178,8 +178,8 @@ export function ProductFilter({ initialProducts, initialTotal, initialPages, cat
 
             {totalProducts > 0 && (
                 <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 16 }}>
-                    {totalProducts} {totalProducts === 1 ? (locale === 'en' ? 'product' : 'produto') : (locale === 'en' ? 'products' : 'produtos')}
-                    {totalPages > 1 && ` — ${locale === 'en' ? 'page' : locale === 'es' ? 'página' : 'página'} ${page} ${locale === 'en' ? 'of' : 'de'} ${totalPages}`}
+                    {totalProducts} {totalProducts === 1 ? dict.store.products : dict.store.productsPlural}
+                    {totalPages > 1 && ` — ${dict.store.page} ${page} ${dict.store.of} ${totalPages}`}
                 </p>
             )}
 

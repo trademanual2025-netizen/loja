@@ -44,13 +44,13 @@ function AuthContent() {
         const json = await res.json()
         setLoading(false)
         if (!res.ok) { toast.error(json.error); return }
-        toast.success('Bem-vindo!')
+        toast.success(dict.auth.welcome)
         router.push(redirect)
         router.refresh()
     }
 
     async function handleRegister(data: RegisterForm) {
-        if (data.password !== data.confirm) { toast.error('Senhas não conferem.'); return }
+        if (data.password !== data.confirm) { toast.error(dict.auth.passwordMismatch); return }
         setLoading(true)
         const res = await fetch('/api/auth/register', {
             method: 'POST',
@@ -65,7 +65,7 @@ function AuthContent() {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: data.email, password: data.password }),
         })
-        toast.success('Cadastro realizado! Bem-vindo.')
+        toast.success(dict.auth.registered)
         router.push(redirect)
         router.refresh()
     }
@@ -113,11 +113,11 @@ function AuthContent() {
                         </div>
                         <div className="grid-2">
                             <div className="form-group">
-                                <label className="form-label">Telefone</label>
+                                <label className="form-label">{dict.auth.phone}</label>
                                 <input className="input" placeholder="(11) 99999-0000" {...registerForm.register('phone')} />
                             </div>
                             <div className="form-group">
-                                <label className="form-label">CPF</label>
+                                <label className="form-label">{dict.auth.cpf}</label>
                                 <input className="input" placeholder="000.000.000-00" {...registerForm.register('cpf')} />
                             </div>
                         </div>
@@ -138,7 +138,7 @@ function AuthContent() {
                 )}
 
                 <div style={{ textAlign: 'center', marginTop: 16 }}>
-                    <Link href="/loja" style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>← Voltar à Loja</Link>
+                    <Link href="/loja" style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{dict.auth.backToStore}</Link>
                 </div>
             </div>
         </div>

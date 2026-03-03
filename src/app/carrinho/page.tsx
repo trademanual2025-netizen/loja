@@ -37,15 +37,11 @@ export default function CarrinhoPage() {
                         {dict.cart.empty}
                     </h2>
                     <p style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.6, marginBottom: 32 }}>
-                        {locale === 'pt' ? 'Parece que você ainda não escolheu nada. Explore nossa coleção e encontre algo especial para você.' :
-                         locale === 'en' ? 'Looks like you haven\'t picked anything yet. Explore our collection and find something special.' :
-                         'Parece que aún no has elegido nada. Explora nuestra colección y encuentra algo especial.'}
+                        {dict.cart.emptyDescription}
                     </p>
                     <Link href="/loja" className="product-card-btn" style={{ display: 'inline-flex', padding: '14px 40px', fontSize: '1rem', borderRadius: 10, textDecoration: 'none' }}>
                         <ShoppingBag size={18} />
-                        {locale === 'pt' ? 'Explorar Produtos' :
-                         locale === 'en' ? 'Explore Products' :
-                         'Explorar Productos'}
+                        {dict.cart.exploreProducts}
                     </Link>
                 </div>
             </div>
@@ -87,12 +83,12 @@ export default function CarrinhoPage() {
                         <span>R$ {total().toFixed(2).replace('.', ',')}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                        <span>{dict.checkout.shipping || 'Frete'}</span>
-                        <span>{dict.cart.subtotal === 'Subtotal' ? 'Calculado no checkout' : 'Calculated at checkout'}</span>
+                        <span>{dict.checkout.shipping}</span>
+                        <span>{dict.cart.calculatedAtCheckout}</span>
                     </div>
                     <hr className="divider" />
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '1.2rem', marginBottom: 20 }}>
-                        <span>Total</span>
+                        <span>{dict.cart.total}</span>
                         <span style={{ color: 'var(--primary)' }}>R$ {total().toFixed(2).replace('.', ',')}</span>
                     </div>
                     <Link href="/checkout" className="btn btn-primary btn-full" style={{ justifyContent: 'center' }}>

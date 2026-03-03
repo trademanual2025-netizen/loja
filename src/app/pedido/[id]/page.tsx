@@ -138,7 +138,7 @@ export default async function PedidoPage({ params }: { params: Promise<{ id: str
                 <hr className="divider" />
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, color: 'var(--text-muted)' }}>
                     <span>{dict.order.shipping}</span>
-                    <span>{order.shippingCost === 0 ? 'GRÁTIS' : `R$ ${order.shippingCost.toFixed(2).replace('.', ',')}`}</span>
+                    <span>{order.shippingCost === 0 ? dict.checkout.freeShipping : `R$ ${order.shippingCost.toFixed(2).replace('.', ',')}`}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '1.1rem' }}>
                     <span>{dict.order.total}</span>

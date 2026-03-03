@@ -28,133 +28,192 @@ export default async function NossaMarcaPage() {
         <>
             <StoreHeader storeName={storeName} logoUrl={logoUrl} user={user} dict={dict} />
 
+            <style>{`
+                .marca-hero {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    min-height: calc(100svh - 64px);
+                }
+                .marca-hero-text {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    padding: clamp(40px, 6vw, 96px) clamp(28px, 5vw, 72px);
+                    background: #0d0a06;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .marca-hero-text::before {
+                    content: '';
+                    position: absolute;
+                    top: -20%;
+                    right: -10%;
+                    width: 60%;
+                    height: 60%;
+                    background: radial-gradient(ellipse, rgba(180,120,30,0.1) 0%, transparent 70%);
+                    pointer-events: none;
+                }
+                .marca-hero-img {
+                    position: relative;
+                    overflow: hidden;
+                }
+                .marca-hero-img img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    object-position: center top;
+                    display: block;
+                }
+                .marca-story {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 0;
+                    align-items: stretch;
+                }
+                .marca-story-text {
+                    padding: clamp(48px, 7vw, 96px) clamp(28px, 5vw, 72px);
+                    background: var(--bg);
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                }
+                .marca-story-img {
+                    position: relative;
+                    min-height: 460px;
+                    overflow: hidden;
+                }
+                .marca-story-img img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    object-position: center;
+                    display: block;
+                }
+                @media (max-width: 768px) {
+                    .marca-hero {
+                        grid-template-columns: 1fr;
+                        min-height: unset;
+                    }
+                    .marca-hero-img {
+                        height: 60svh;
+                        order: -1;
+                    }
+                    .marca-hero-text {
+                        padding: 40px 24px;
+                    }
+                    .marca-story {
+                        grid-template-columns: 1fr;
+                    }
+                    .marca-story-img {
+                        min-height: 320px;
+                        order: -1;
+                    }
+                    .marca-story-text {
+                        padding: 40px 24px;
+                    }
+                }
+            `}</style>
+
             <main style={{ background: 'var(--bg)', color: 'var(--text)' }}>
 
-                <section style={{
-                    position: 'relative',
-                    height: 'clamp(420px, 70vh, 680px)',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    alignItems: 'flex-end',
-                }}>
-                    <img
-                        src="/marca-giovana.jpg"
-                        alt="Giovana Dias"
-                        style={{
-                            position: 'absolute',
-                            inset: 0,
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            objectPosition: 'center 15%',
-                        }}
-                    />
-                    <div style={{
-                        position: 'absolute',
-                        inset: 0,
-                        background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%)',
-                    }} />
-                    <div style={{
-                        position: 'relative',
-                        zIndex: 1,
-                        padding: 'clamp(24px, 6vw, 60px)',
-                        maxWidth: 800,
-                    }}>
+                <section className="marca-hero">
+                    <div className="marca-hero-text">
                         <p style={{
-                            fontSize: '0.72rem',
-                            letterSpacing: '0.28em',
+                            fontSize: '0.68rem',
+                            letterSpacing: '0.3em',
                             textTransform: 'uppercase',
-                            color: 'rgba(200,160,80,0.95)',
+                            color: 'rgba(200,160,80,0.9)',
                             fontWeight: 600,
-                            marginBottom: 12,
-                            textShadow: '0 1px 4px rgba(0,0,0,0.6)',
+                            marginBottom: 20,
                         }}>
-                            ✦ Artesã & Ouriveira
+                            ✦ Artesã &amp; Ouriveira
                         </p>
                         <h1 style={{
-                            fontSize: 'clamp(2.4rem, 7vw, 5rem)',
-                            fontWeight: 300,
+                            fontSize: 'clamp(2.8rem, 5vw, 5.5rem)',
+                            fontWeight: 200,
                             fontStyle: 'italic',
                             color: '#fff',
-                            lineHeight: 1.1,
-                            textShadow: '0 2px 24px rgba(0,0,0,0.5)',
-                            marginBottom: 8,
+                            lineHeight: 1.05,
+                            marginBottom: 20,
+                            letterSpacing: '-0.01em',
                         }}>
-                            Giovana Dias
+                            Giovana<br />Dias
                         </h1>
+                        <div style={{
+                            width: 48,
+                            height: 1,
+                            background: 'rgba(200,160,80,0.6)',
+                            marginBottom: 24,
+                        }} />
                         <p style={{
-                            fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
-                            color: 'rgba(255,245,220,0.8)',
+                            fontSize: 'clamp(0.95rem, 1.4vw, 1.1rem)',
+                            lineHeight: 1.8,
+                            color: 'rgba(255,240,210,0.72)',
                             fontStyle: 'italic',
                             fontWeight: 300,
+                            maxWidth: 440,
                         }}>
                             Criadora de joias autorais desde a primeira faísca até o brilho final.
                         </p>
+                        <p style={{
+                            marginTop: 'auto',
+                            paddingTop: 40,
+                            fontSize: '0.72rem',
+                            letterSpacing: '0.15em',
+                            color: 'rgba(255,255,255,0.2)',
+                            textTransform: 'uppercase',
+                        }}>
+                            Nossa História
+                        </p>
+                    </div>
+                    <div className="marca-hero-img">
+                        <img src="/marca-giovana.jpg" alt="Giovana Dias" />
+                        <div style={{
+                            position: 'absolute',
+                            inset: 0,
+                            background: 'linear-gradient(to right, rgba(13,10,6,0.3) 0%, transparent 40%)',
+                            pointerEvents: 'none',
+                        }} />
                     </div>
                 </section>
 
-                <section style={{
-                    maxWidth: 1100,
-                    margin: '0 auto',
-                    padding: 'clamp(48px, 8vw, 100px) clamp(20px, 5vw, 48px)',
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                    gap: 'clamp(32px, 6vw, 72px)',
-                    alignItems: 'center',
-                }}>
-                    <div>
+                <section className="marca-story">
+                    <div className="marca-story-text">
                         <span style={{
-                            display: 'inline-block',
-                            fontSize: '0.7rem',
+                            fontSize: '0.68rem',
                             letterSpacing: '0.22em',
                             textTransform: 'uppercase',
                             color: 'var(--primary)',
                             fontWeight: 600,
-                            marginBottom: 20,
+                            display: 'block',
+                            marginBottom: 24,
                         }}>
-                            Nossa História
+                            A criadora
                         </span>
                         <p style={{
-                            fontSize: 'clamp(1rem, 1.8vw, 1.15rem)',
-                            lineHeight: 1.85,
+                            fontSize: 'clamp(0.98rem, 1.6vw, 1.12rem)',
+                            lineHeight: 1.9,
                             color: 'var(--text)',
-                            marginBottom: 24,
+                            marginBottom: 22,
                         }}>
                             Giovana Dias é o meu nome, sou eu quem cria todas as peças dessa marca, do início ao fim do processo, sou apaixonada por todas as etapas da ourivesaria, amo começar um desenho para um projeto novo...
                         </p>
                         <p style={{
-                            fontSize: 'clamp(1rem, 1.8vw, 1.15rem)',
-                            lineHeight: 1.85,
+                            fontSize: 'clamp(0.98rem, 1.6vw, 1.12rem)',
+                            lineHeight: 1.9,
                             color: 'var(--text)',
                         }}>
                             Me inspiro nas texturas da natureza, da terra, das profundezas do oceano, na pele dos animais, na textura dos ossos... Amo criar novas coleções pois normalmente significam uma nova fase da minha vida, momentos marcantes em que me reconectei com meu eu interior e com a natureza divina e senti de ressignificar isso através de jóias autorais.
                         </p>
                     </div>
-
-                    <div style={{ position: 'relative' }}>
+                    <div className="marca-story-img">
+                        <img src="/marca-joias.jpg" alt="Joias autorais Giovana Dias" />
                         <div style={{
                             position: 'absolute',
-                            inset: '-12px -12px 12px 12px',
-                            borderRadius: 20,
-                            border: '1px solid',
-                            borderColor: 'var(--border)',
-                            opacity: 0.5,
-                            zIndex: 0,
+                            inset: 0,
+                            background: 'linear-gradient(to left, transparent 60%, var(--bg) 100%)',
+                            pointerEvents: 'none',
                         }} />
-                        <img
-                            src="/marca-joias.jpg"
-                            alt="Joias autorais Giovana Dias"
-                            style={{
-                                position: 'relative',
-                                zIndex: 1,
-                                width: '100%',
-                                borderRadius: 16,
-                                objectFit: 'cover',
-                                aspectRatio: '4/5',
-                                display: 'block',
-                                boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
-                            }}
-                        />
                     </div>
                 </section>
 
@@ -164,16 +223,26 @@ export default async function NossaMarcaPage() {
                     borderBottom: '1px solid var(--border)',
                 }}>
                     <div style={{
-                        maxWidth: 860,
+                        maxWidth: 760,
                         margin: '0 auto',
-                        padding: 'clamp(48px, 8vw, 96px) clamp(20px, 5vw, 48px)',
+                        padding: 'clamp(48px, 8vw, 96px) clamp(24px, 5vw, 48px)',
                         textAlign: 'center',
                     }}>
+                        <span style={{
+                            fontSize: '0.68rem',
+                            letterSpacing: '0.22em',
+                            textTransform: 'uppercase',
+                            color: 'var(--primary)',
+                            fontWeight: 600,
+                            display: 'block',
+                            marginBottom: 24,
+                        }}>
+                            O processo
+                        </span>
                         <p style={{
-                            fontSize: 'clamp(1rem, 2vw, 1.25rem)',
-                            lineHeight: 1.9,
+                            fontSize: 'clamp(1rem, 2vw, 1.2rem)',
+                            lineHeight: 1.95,
                             color: 'var(--text)',
-                            marginBottom: 0,
                         }}>
                             O trabalho com metais preciosos, pedras, cristais, pérolas... todos juntos, vai muito além de criar uma jóia, é um processo de alquimia entre o fogo, a terra e o ar. Quando feito com muito amor e autenticidade tem como resultado uma <strong>joia rara</strong>. Espero passar isso através da minha marca para você!
                         </p>
@@ -181,25 +250,26 @@ export default async function NossaMarcaPage() {
                 </section>
 
                 <section style={{
+                    background: '#0d0a06',
+                    padding: 'clamp(72px, 10vw, 128px) clamp(24px, 6vw, 80px)',
+                    textAlign: 'center',
                     position: 'relative',
                     overflow: 'hidden',
-                    background: '#0d0a06',
-                    padding: 'clamp(64px, 10vw, 120px) clamp(20px, 6vw, 80px)',
-                    textAlign: 'center',
                 }}>
                     <div style={{
                         position: 'absolute',
                         inset: 0,
-                        background: 'radial-gradient(ellipse at 50% 50%, rgba(180,130,40,0.12) 0%, transparent 65%)',
+                        background: 'radial-gradient(ellipse at 50% 50%, rgba(180,130,40,0.1) 0%, transparent 65%)',
                         pointerEvents: 'none',
                     }} />
-                    <div style={{ position: 'relative', zIndex: 1, maxWidth: 760, margin: '0 auto' }}>
+                    <div style={{ position: 'relative', zIndex: 1, maxWidth: 720, margin: '0 auto' }}>
                         <div style={{
-                            fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-                            color: 'rgba(200,160,80,0.4)',
-                            lineHeight: 1,
-                            marginBottom: 16,
+                            fontSize: 'clamp(3rem, 6vw, 5rem)',
+                            color: 'rgba(200,160,80,0.35)',
+                            lineHeight: 0.8,
+                            marginBottom: 24,
                             fontFamily: 'Georgia, serif',
+                            userSelect: 'none',
                         }}>
                             "
                         </div>
@@ -207,22 +277,21 @@ export default async function NossaMarcaPage() {
                             fontSize: 'clamp(1rem, 2.2vw, 1.3rem)',
                             fontStyle: 'italic',
                             fontWeight: 300,
-                            color: 'rgba(255,245,220,0.9)',
-                            lineHeight: 1.9,
+                            color: 'rgba(255,245,220,0.88)',
+                            lineHeight: 1.95,
                             margin: 0,
-                            textShadow: '0 1px 6px rgba(0,0,0,0.4)',
                         }}>
                             Assim como os cristais, a prata e o ouro espero que você brilhe cada dia mais e se reconecte com sua força interior e lembre-se sempre que até o cristal mais lindo, mais brilhante vem de um processo longo e necessário.
                         </blockquote>
                         <div style={{
-                            marginTop: 32,
+                            marginTop: 36,
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: 10,
+                            gap: 14,
                         }}>
-                            <span style={{ width: 32, height: 1, background: 'rgba(200,160,80,0.5)', display: 'block' }} />
-                            <span style={{ fontSize: '0.8rem', letterSpacing: '0.18em', color: 'rgba(200,160,80,0.8)', textTransform: 'uppercase' }}>Giovana Dias</span>
-                            <span style={{ width: 32, height: 1, background: 'rgba(200,160,80,0.5)', display: 'block' }} />
+                            <span style={{ width: 36, height: 1, background: 'rgba(200,160,80,0.4)', display: 'block' }} />
+                            <span style={{ fontSize: '0.72rem', letterSpacing: '0.22em', color: 'rgba(200,160,80,0.75)', textTransform: 'uppercase', fontWeight: 500 }}>Giovana Dias</span>
+                            <span style={{ width: 36, height: 1, background: 'rgba(200,160,80,0.4)', display: 'block' }} />
                         </div>
                     </div>
                 </section>

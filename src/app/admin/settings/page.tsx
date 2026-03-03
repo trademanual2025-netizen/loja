@@ -10,17 +10,32 @@ const TABS = ['Banco de Dados', 'Pagamentos', 'Tracking', 'Webhooks', 'Frete', '
 const ImageF = ({ label, k, help = '', settings, uploadFile }: { label: string; k: string; help?: string; settings: any; uploadFile: any }) => (
     <div className="form-group">
         <label className="form-label">{label}</label>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center', background: 'var(--bg-card2)', padding: 12, borderRadius: 8, border: '1px border var(--border)' }}>
+        <div style={{ display: 'flex', gap: 14, alignItems: 'center', background: 'var(--bg-card2)', padding: 12, borderRadius: 8, border: '1px solid var(--border)' }}>
             {settings[k] ? (
-                <img src={settings[k]} alt="Preview" style={{ height: 48, width: 48, objectFit: 'contain', background: '#fff', borderRadius: 6 }} />
+                <img src={settings[k]} alt="Preview" style={{ height: 52, width: 52, objectFit: 'contain', background: '#fff', borderRadius: 6, flexShrink: 0, border: '1px solid var(--border)' }} />
             ) : (
-                <div style={{ height: 48, width: 48, background: 'var(--bg)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center' }}>Sem img</div>
+                <div style={{ height: 52, width: 52, background: 'var(--bg)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', color: 'var(--text-muted)', textAlign: 'center', flexShrink: 0, border: '1px solid var(--border)' }}>Sem imagem</div>
             )}
-            <div style={{ flex: 1 }}>
-                <input type="file" accept="image/*" className="input" onChange={e => {
-                    if (e.target.files?.[0]) uploadFile(e.target.files[0], k)
-                }} />
-                {settings[k] && <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 4, wordBreak: 'break-all' }}>URL: {settings[k].substring(0, 40)}...</p>}
+            <div style={{ flex: 1, minWidth: 0 }}>
+                <label style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    padding: '7px 14px',
+                    background: 'var(--primary)', color: '#fff',
+                    borderRadius: 7, cursor: 'pointer',
+                    fontSize: '0.82rem', fontWeight: 600,
+                    userSelect: 'none',
+                    transition: 'opacity 0.2s',
+                }}>
+                    ↑ Enviar imagem
+                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => {
+                        if (e.target.files?.[0]) uploadFile(e.target.files[0], k)
+                    }} />
+                </label>
+                {settings[k] && (
+                    <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 6, wordBreak: 'break-all' }}>
+                        {settings[k].startsWith('data:') ? 'Imagem carregada (base64)' : settings[k].substring(0, 50) + '...'}
+                    </p>
+                )}
             </div>
         </div>
         {help && <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 6 }}>{help}</p>}

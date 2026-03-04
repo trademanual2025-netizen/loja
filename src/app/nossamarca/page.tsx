@@ -61,6 +61,14 @@ export default async function NossaMarcaPage() {
                     object-fit: contain;
                     object-position: center bottom;
                     display: block;
+                    -webkit-mask-image:
+                        linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%),
+                        linear-gradient(to right, transparent 0%, black 12%, black 68%, transparent 100%);
+                    -webkit-mask-composite: intersect;
+                    mask-image:
+                        linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%),
+                        linear-gradient(to right, transparent 0%, black 12%, black 68%, transparent 100%);
+                    mask-composite: intersect;
                 }
                 /* fade da foto para o painel de texto */
                 .marca-hero-right::before {
@@ -90,16 +98,16 @@ export default async function NossaMarcaPage() {
                     object-fit: cover;
                     object-position: center 35%;
                     display: block;
+                    -webkit-mask-image:
+                        linear-gradient(to bottom, transparent 0%, black 14%, black 78%, transparent 100%),
+                        linear-gradient(to right, transparent 0%, black 8%, black 62%, transparent 100%);
+                    -webkit-mask-composite: intersect;
+                    mask-image:
+                        linear-gradient(to bottom, transparent 0%, black 14%, black 78%, transparent 100%),
+                        linear-gradient(to right, transparent 0%, black 8%, black 62%, transparent 100%);
+                    mask-composite: intersect;
                 }
-                /* fade da foto para o painel de texto */
-                .marca-about-img::after {
-                    content: '';
-                    position: absolute;
-                    top: 0; right: 0; bottom: 0;
-                    width: 100px;
-                    background: linear-gradient(to left, var(--bg), transparent);
-                    pointer-events: none;
-                }
+                .marca-about-img::after { display: none; }
                 .marca-about-text {
                     display: flex;
                     flex-direction: column;

@@ -83,9 +83,11 @@
   padding: 0;
 }
 
-/* Logo adapts to theme via CSS — avoids hydration flash */
-.store-logo-img { filter: none; transition: filter 0.3s; }
-[data-theme='light'] .store-logo-img { filter: brightness(0); }
+/* Logo adapts to theme via CSS variable — avoids hydration flash */
+:root { --logo-filter: brightness(0); }
+[data-theme='light'] { --logo-filter: brightness(0); }
+[data-theme='dark'] { --logo-filter: none; }
+.store-logo-img { filter: var(--logo-filter); transition: filter 0.3s; }
 
 html {
   scroll-behavior: smooth;

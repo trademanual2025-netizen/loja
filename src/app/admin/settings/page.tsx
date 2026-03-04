@@ -94,6 +94,8 @@ const LANDING_DEFAULTS: Record<string, string> = {
     landing_hero_title: 'Joias autênticas para pessoas autênticas',
     landing_hero_subtitle: 'Honrada em enfeitar você!',
     landing_cta_text: 'Acessar Loja',
+    landing_hero_image: '/hero-ring.jpg',
+    landing_custom_banner_image: '/custom-jewelry-banner.png',
     landing_custom_banner_title: 'Joias Customizadas',
     landing_custom_banner_text: 'Entre em contato para joias personalizadas.',
 }

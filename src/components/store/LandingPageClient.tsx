@@ -61,8 +61,12 @@ export function LandingPageClient({
                     50%      { opacity: 1; transform: scale(1.2); }
                 }
                 @keyframes heroBorderGlow {
-                    0%, 100% { box-shadow: 0 0 0 0 rgba(200,160,80,0); border-color: rgba(255,255,255,0.3); }
-                    50%      { box-shadow: 0 0 20px 4px rgba(200,160,80,0.25); border-color: rgba(200,160,80,0.7); }
+                    0%, 100% { box-shadow: 0 0 0 0 rgba(200,160,80,0); border-color: rgba(200,160,80,0.35); }
+                    50%      { box-shadow: 0 0 24px 6px rgba(200,160,80,0.22); border-color: rgba(200,160,80,0.8); }
+                }
+                @keyframes heroLineExpand {
+                    from { width: 0; opacity: 0; }
+                    to   { width: 48px; opacity: 1; }
                 }
                 .hero-img-wrap { position: absolute; inset: 0; overflow: hidden; }
                 .hero-img-wrap img { width: 100%; height: 100%; object-fit: cover; object-position: center; animation: heroKenBurns 14s ease-in-out infinite; transform-origin: center center; }
@@ -72,9 +76,14 @@ export function LandingPageClient({
                     position: absolute;
                     top: -50%; left: 0;
                     width: 40%; height: 200%;
-                    background: linear-gradient(90deg, transparent 0%, rgba(255,230,150,0.09) 50%, transparent 100%);
-                    animation: heroShimmer 5s ease-in-out infinite;
+                    background: linear-gradient(90deg, transparent 0%, rgba(255,230,150,0.07) 50%, transparent 100%);
+                    animation: heroShimmer 6s ease-in-out infinite;
                     animation-delay: 2s;
+                }
+                .hero-grain {
+                    position: absolute; inset: 0; pointer-events: none; opacity: 0.04;
+                    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+                    background-size: 200px 200px;
                 }
                 .hero-sparkle {
                     position: absolute;
@@ -83,51 +92,88 @@ export function LandingPageClient({
                     background: radial-gradient(circle, rgba(255,230,160,0.9) 0%, transparent 70%);
                     animation: heroSparkle ease-in-out infinite;
                 }
+                .hero-eyebrow {
+                    display: flex; align-items: center; justify-content: center;
+                    gap: 14px; margin-bottom: 20px;
+                }
+                .hero-eyebrow-line {
+                    height: 1px; background: linear-gradient(90deg, transparent, rgba(200,160,80,0.8), transparent);
+                    animation: heroLineExpand 1.2s ease forwards;
+                }
+                .hero-eyebrow-text {
+                    font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase;
+                    color: rgba(200,160,80,0.9); font-weight: 600;
+                    text-shadow: 0 0 12px rgba(200,160,80,0.6);
+                    white-space: nowrap;
+                }
                 .hero-cta-btn {
-                    display: inline-flex; align-items: center; gap: 8px;
-                    background: rgba(200,160,60,0.15);
-                    border: 1px solid rgba(255,255,255,0.3);
+                    display: inline-flex; align-items: center; gap: 10px;
+                    background: transparent;
+                    border: 1px solid rgba(200,160,80,0.5);
                     color: #fff;
-                    padding: 14px 40px;
-                    border-radius: 6px;
+                    padding: 15px 44px;
+                    border-radius: 2px;
                     text-decoration: none;
-                    font-size: 1rem;
+                    font-size: 0.85rem;
                     font-weight: 600;
-                    letter-spacing: 0.08em;
+                    letter-spacing: 0.14em;
                     text-transform: uppercase;
-                    transition: all 0.35s;
-                    backdrop-filter: blur(10px);
-                    animation: heroBorderGlow 3s ease-in-out infinite;
+                    transition: all 0.4s;
+                    position: relative;
+                    overflow: hidden;
+                    animation: heroBorderGlow 3.5s ease-in-out infinite;
                 }
-                .hero-cta-btn:hover {
-                    background: rgba(200,160,60,0.32);
-                    transform: translateY(-3px);
-                    box-shadow: 0 8px 32px rgba(200,160,80,0.3);
-                    border-color: rgba(200,160,80,0.8);
+                .hero-cta-btn::before {
+                    content: '';
+                    position: absolute; inset: 0;
+                    background: linear-gradient(135deg, rgba(200,160,80,0.12), transparent 60%);
+                    opacity: 0; transition: opacity 0.4s;
                 }
+                .hero-cta-btn:hover { background: rgba(200,160,80,0.1); transform: translateY(-2px); border-color: rgba(200,160,80,0.9); letter-spacing: 0.18em; }
+                .hero-cta-btn:hover::before { opacity: 1; }
                 .hero-section {
                     position: relative;
-                    min-height: clamp(480px, 75vh, 780px);
+                    min-height: clamp(480px, 80vh, 860px);
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     overflow: hidden;
                 }
                 @media (max-width: 640px) {
-                    .hero-section {
-                        min-height: 0;
-                        height: 92svh;
-                        max-height: 620px;
-                    }
+                    .hero-section { min-height: 0; height: 92svh; max-height: 680px; }
                 }
                 .hero-title {
-                    font-size: clamp(2rem, 6vw, 4rem);
-                    font-weight: 300;
+                    font-size: clamp(2.2rem, 6vw, 4.4rem);
+                    font-weight: 200;
                     color: #fff;
-                    line-height: 1.2;
-                    margin-bottom: 24px;
+                    line-height: 1.18;
+                    margin-bottom: 20px;
                     font-style: italic;
+                    letter-spacing: 0.01em;
                     animation: heroGoldPulse 4s ease-in-out infinite;
+                }
+                .hero-subtitle-line {
+                    width: 40px; height: 1px;
+                    background: rgba(200,160,80,0.6);
+                    margin: 0 auto 16px;
+                }
+                .custom-banner { display: flex; align-items: stretch; min-height: 220px; }
+                .custom-banner-text {
+                    flex: 0 0 auto; max-width: 340px; width: 100%;
+                    background: linear-gradient(90deg, #0d0a06 65%, rgba(13,10,6,0.85) 100%);
+                    padding: 28px 36px; position: relative; z-index: 1;
+                    display: flex; flex-direction: column; justify-content: center;
+                }
+                .custom-banner-grid {
+                    flex: 1; display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    grid-template-rows: repeat(2, 1fr);
+                    gap: 3px; overflow: hidden;
+                }
+                @media (max-width: 700px) {
+                    .custom-banner { flex-direction: column; }
+                    .custom-banner-text { max-width: 100%; padding: 24px 20px; background: #0d0a06; }
+                    .custom-banner-grid { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 80px); }
                 }
             `}</style>
 
@@ -136,11 +182,13 @@ export function LandingPageClient({
                         <img src={heroImage || '/hero-ring.jpg'} alt={heroTitle} />
                     </div>
 
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(10,6,2,0.38) 0%, rgba(30,18,8,0.62) 60%, rgba(10,6,2,0.82) 100%)' }} />
-                    <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 70% 40%, rgba(180,110,30,0.18) 0%, transparent 65%)' }} />
-                    <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 0% 100%, rgba(0,0,0,0.6) 0%, transparent 50%), radial-gradient(ellipse at 100% 0%, rgba(0,0,0,0.4) 0%, transparent 50%)' }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(5,3,1,0.3) 0%, rgba(10,6,2,0.5) 40%, rgba(5,3,1,0.85) 100%)' }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 60%, rgba(180,110,30,0.14) 0%, transparent 60%)' }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 0% 50%, rgba(0,0,0,0.55) 0%, transparent 45%), radial-gradient(ellipse at 100% 50%, rgba(0,0,0,0.55) 0%, transparent 45%)' }} />
+                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 120, background: 'linear-gradient(to bottom, transparent, rgba(5,3,1,0.9))' }} />
 
                     <div className="hero-shimmer" />
+                    <div className="hero-grain" />
 
                     <span className="hero-sparkle" style={{ top: '22%', left: '18%', animationDuration: '2.8s', animationDelay: '0s' }} />
                     <span className="hero-sparkle" style={{ top: '35%', left: '75%', animationDuration: '3.5s', animationDelay: '0.9s' }} />
@@ -149,26 +197,33 @@ export function LandingPageClient({
                     <span className="hero-sparkle" style={{ top: '78%', left: '82%', animationDuration: '2.6s', animationDelay: '2.1s', width: 3, height: 3 }} />
                     <span className="hero-sparkle" style={{ top: '14%', left: '55%', animationDuration: '3.8s', animationDelay: '1.2s', width: 3, height: 3 }} />
 
-                    <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '40px 20px', maxWidth: 820 }}>
-                        <div style={{ marginBottom: 12, fontSize: '0.75rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#fff', fontWeight: 600, textShadow: '0 0 12px rgba(200,160,80,0.8), 0 1px 4px rgba(0,0,0,0.6)' }}>
-                            {t.exclusiveCollection}
+                    <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '40px 20px', maxWidth: 860 }}>
+                        <div className="hero-eyebrow">
+                            <span className="hero-eyebrow-line" style={{ width: 48 }} />
+                            <span className="hero-eyebrow-text">{t.exclusiveCollection}</span>
+                            <span className="hero-eyebrow-line" style={{ width: 48 }} />
                         </div>
                         <h1 className="hero-title">
                             {heroTitle}
                         </h1>
+                        <div className="hero-subtitle-line" />
                         <p style={{
-                            fontSize: 'clamp(1rem, 2.5vw, 1.3rem)',
-                            color: 'rgba(255,240,200,0.82)',
-                            marginBottom: 44,
+                            fontSize: 'clamp(0.95rem, 2.2vw, 1.2rem)',
+                            color: 'rgba(255,240,210,0.72)',
+                            marginBottom: 48,
                             fontStyle: 'italic',
                             fontWeight: 300,
-                            letterSpacing: '0.03em',
+                            letterSpacing: '0.05em',
                         }}>
                             {heroSubtitle}
                         </p>
                         <Link href="/loja" className="hero-cta-btn">
-                            {ctaText} <ChevronRight size={18} />
+                            {ctaText} <ChevronRight size={16} />
                         </Link>
+                    </div>
+
+                    <div style={{ position: 'absolute', bottom: 32, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, opacity: 0.4 }}>
+                        <div style={{ width: 1, height: 40, background: 'linear-gradient(to bottom, rgba(200,160,80,0.8), transparent)' }} />
                     </div>
                 </section>
 
@@ -178,14 +233,12 @@ export function LandingPageClient({
                             href={whatsappLink}
                             target="_blank"
                             rel="noopener noreferrer"
+                            className="custom-banner"
                             style={{
                                 position: 'relative',
-                                display: 'flex',
-                                alignItems: 'stretch',
                                 borderRadius: 14,
                                 overflow: 'hidden',
                                 textDecoration: 'none',
-                                minHeight: 200,
                                 background: '#0d0a06',
                                 border: '1px solid rgba(200,160,80,0.18)',
                                 boxShadow: '0 4px 32px rgba(0,0,0,0.5)',
@@ -194,7 +247,7 @@ export function LandingPageClient({
                             onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 48px rgba(0,0,0,0.7)'; e.currentTarget.style.transform = 'translateY(-3px)' }}
                             onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 4px 32px rgba(0,0,0,0.5)'; e.currentTarget.style.transform = 'translateY(0)' }}
                         >
-                            <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '28px 36px', flex: '0 0 auto', maxWidth: 340, background: 'linear-gradient(90deg, #0d0a06 60%, transparent 100%)' }}>
+                            <div className="custom-banner-text">
                                 <div style={{ width: 28, height: 1, background: 'rgba(200,160,80,0.7)', marginBottom: 14 }} />
                                 <h3 style={{
                                     color: '#fff',
@@ -228,7 +281,7 @@ export function LandingPageClient({
                                 </div>
                             </div>
 
-                            <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gridTemplateRows: 'repeat(2, 1fr)', gap: 3, minHeight: 220, overflow: 'hidden' }}>
+                            <div className="custom-banner-grid">
                                 {[
                                     { src: '/produtos/colar-placa.png', pos: 'center' },
                                     { src: '/produtos/brinco-sol.png', pos: 'center' },

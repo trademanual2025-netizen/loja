@@ -61,22 +61,26 @@ export default async function NossaMarcaPage() {
                     object-fit: contain;
                     object-position: center bottom;
                     display: block;
-                    -webkit-mask-image:
-                        linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%),
-                        linear-gradient(to right, transparent 0%, black 12%, black 68%, transparent 100%);
-                    -webkit-mask-composite: intersect;
-                    mask-image:
-                        linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%),
-                        linear-gradient(to right, transparent 0%, black 12%, black 68%, transparent 100%);
-                    mask-composite: intersect;
                 }
-                /* fade da foto para o painel de texto */
+                /* fade esquerda (para painel de texto) */
                 .marca-hero-right::before {
                     content: '';
                     position: absolute;
                     top: 0; left: 0; bottom: 0;
-                    width: 120px;
-                    background: linear-gradient(to right, #0d0a06, transparent);
+                    width: 220px;
+                    background: linear-gradient(to right, #0d0a06 0%, rgba(13,10,6,0.6) 60%, transparent 100%);
+                    z-index: 2;
+                    pointer-events: none;
+                }
+                /* fades: topo, direita e base */
+                .marca-hero-right::after {
+                    content: '';
+                    position: absolute;
+                    inset: 0;
+                    background:
+                        linear-gradient(to bottom, #0d0a06 0%, transparent 22%),
+                        linear-gradient(to left,   #0d0a06 0%, transparent 28%),
+                        linear-gradient(to top,    #0d0a06 0%, transparent 14%);
                     z-index: 2;
                     pointer-events: none;
                 }
@@ -98,16 +102,27 @@ export default async function NossaMarcaPage() {
                     object-fit: cover;
                     object-position: center 35%;
                     display: block;
-                    -webkit-mask-image:
-                        linear-gradient(to bottom, transparent 0%, black 14%, black 78%, transparent 100%),
-                        linear-gradient(to right, transparent 0%, black 8%, black 62%, transparent 100%);
-                    -webkit-mask-composite: intersect;
-                    mask-image:
-                        linear-gradient(to bottom, transparent 0%, black 14%, black 78%, transparent 100%),
-                        linear-gradient(to right, transparent 0%, black 8%, black 62%, transparent 100%);
-                    mask-composite: intersect;
                 }
-                .marca-about-img::after { display: none; }
+                /* fades: topo, base e direita (para o painel de texto) */
+                .marca-about-img::before {
+                    content: '';
+                    position: absolute;
+                    inset: 0;
+                    background:
+                        linear-gradient(to bottom, var(--bg) 0%, transparent 18%),
+                        linear-gradient(to top,    var(--bg) 0%, transparent 14%);
+                    z-index: 2;
+                    pointer-events: none;
+                }
+                .marca-about-img::after {
+                    content: '';
+                    position: absolute;
+                    top: 0; right: 0; bottom: 0;
+                    width: 180px;
+                    background: linear-gradient(to left, var(--bg) 0%, rgba(13,10,6,0.5) 55%, transparent 100%);
+                    z-index: 2;
+                    pointer-events: none;
+                }
                 .marca-about-text {
                     display: flex;
                     flex-direction: column;
@@ -150,11 +165,15 @@ export default async function NossaMarcaPage() {
                     }
                     .marca-hero-right::before {
                         width: unset;
-                        height: 80px;
+                        height: 100px;
                         top: unset;
                         right: 0;
                         bottom: 0;
                         background: linear-gradient(to top, #0d0a06, transparent);
+                    }
+                    .marca-hero-right::after {
+                        background:
+                            linear-gradient(to bottom, #0d0a06 0%, transparent 20%);
                     }
                     .marca-hero-left {
                         padding: 36px 24px 48px;

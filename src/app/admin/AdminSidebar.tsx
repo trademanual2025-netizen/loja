@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Package, ShoppingBag, Users, Settings, Code2, Shield, Tag, LogOut, Sun, Moon, Mail } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingBag, Users, Settings, Code2, Shield, Tag, LogOut, Sun, Moon, Mail, RotateCcw } from 'lucide-react'
 import { useTheme } from '@/components/ThemeProvider'
 
 const navItems = [
@@ -10,6 +10,7 @@ const navItems = [
     { href: '/admin/products', label: 'Produtos', icon: Package },
     { href: '/admin/categories', label: 'Categorias', icon: Tag },
     { href: '/admin/orders', label: 'Pedidos', icon: ShoppingBag },
+    { href: '/admin/reembolsos', label: 'Reembolsos', icon: RotateCcw },
     { href: '/admin/leads', label: 'Leads', icon: Users },
     { href: '/admin/mensagens', label: 'Mensagens', icon: Mail },
     { href: '/admin/admins', label: 'Administradores', icon: Shield },

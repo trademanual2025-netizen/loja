@@ -134,11 +134,35 @@ model Order {
   trackingCode    String?
   trackingUrl     String?
   shippingNote    String?
+  deliveredAt     DateTime?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
-  items       OrderItem[]
-  webhookLogs WebhookLog[]
+  items         OrderItem[]
+  webhookLogs   WebhookLog[]
+  refundRequest RefundRequest?
+}
+
+model RefundRequest {
+  id        String       @id @default(cuid())
+  orderId   String       @unique
+  order     Order        @relation(fields: [orderId], references: [id])
+  userId    String
+  status    RefundStatus @default(PENDING)
+  reason    String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  messages  RefundMessage[]
+}
+
+model RefundMessage {
+  id              String        @id @default(cuid())
+  refundRequestId String
+  refundRequest   RefundRequest @relation(fields: [refundRequestId], references: [id], onDelete: Cascade)
+  authorType      String
+  content         String
+  createdAt       DateTime      @default(now())
 }
 
 enum OrderStatus {
@@ -146,6 +170,14 @@ enum OrderStatus {
   PAID
   CANCELLED
   REFUNDED
+  DELIVERED
+  REFUND_REQUESTED
+}
+
+enum RefundStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 model OrderItem {

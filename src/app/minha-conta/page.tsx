@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { User, ShoppingBag, KeyRound, Camera, MapPin, Phone, Mail, LogOut, Truck, ExternalLink } from 'lucide-react'
+import { User, ShoppingBag, KeyRound, Camera, MapPin, Phone, Mail, LogOut, Truck, ExternalLink, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
 import { getCookie } from 'cookies-next'
 import { dictionaries, Locale, defaultLocale, translateDb } from '@/lib/i18n'
@@ -14,6 +14,9 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
     PAID: { label: 'Pago', color: '#22c55e' },
     CANCELLED: { label: 'Cancelado', color: '#ef4444' },
     REFUNDED: { label: 'Reembolsado', color: '#8b5cf6' },
+    DELIVERED: { label: 'Entregue', color: '#3b82f6' },
+    REFUND_REQUESTED: { label: 'Reembolso Solicitado', color: '#ef4444' },
+    SHIPPED: { label: 'Em Trânsito', color: '#06b6d4' },
 }
 
 interface Order {
@@ -23,6 +26,7 @@ interface Order {
     gateway: string
     gatewayData: string | null
     createdAt: string
+    deliveredAt: string | null
     trackingCode: string | null
     trackingUrl: string | null
     shippingNote: string | null
@@ -331,6 +335,32 @@ export default function MinhaContaPage() {
                                             {order.shippingNote && (
                                                 <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: order.trackingCode ? 4 : 0 }}>{order.shippingNote}</p>
                                             )}
+                                        </div>
+                                    )}
+                                    {order.status === 'DELIVERED' && (() => {
+                                        const diffDays = order.deliveredAt ? (Date.now() - new Date(order.deliveredAt).getTime()) / (1000 * 60 * 60 * 24) : 0
+                                        const eligible = !order.deliveredAt || diffDays <= 7
+                                        if (!eligible) return null
+                                        return (
+                                            <div style={{ padding: '10px 14px', background: 'rgba(59,130,246,0.08)', borderRadius: 8, border: '1px solid rgba(59,130,246,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                                                <p style={{ fontSize: '0.82rem', color: '#3b82f6' }}>
+                                                    Produto com problema? Você pode solicitar um reembolso.
+                                                    {order.deliveredAt && <span style={{ marginLeft: 4, opacity: 0.8 }}>({Math.max(0, Math.ceil(7 - diffDays))}d restantes)</span>}
+                                                </p>
+                                                <Link href={`/reembolso/${order.id}`} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 8, background: 'rgba(59,130,246,0.15)', color: '#3b82f6', textDecoration: 'none', fontSize: '0.82rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                                                    <RotateCcw size={13} /> Solicitar Reembolso
+                                                </Link>
+                                            </div>
+                                        )
+                                    })()}
+                                    {(order.status === 'REFUND_REQUESTED' || order.status === 'REFUNDED') && (
+                                        <div style={{ padding: '10px 14px', background: order.status === 'REFUNDED' ? 'rgba(139,92,246,0.08)' : 'rgba(239,68,68,0.08)', borderRadius: 8, border: `1px solid ${order.status === 'REFUNDED' ? 'rgba(139,92,246,0.25)' : 'rgba(239,68,68,0.25)'}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                                            <p style={{ fontSize: '0.82rem', color: order.status === 'REFUNDED' ? '#8b5cf6' : '#ef4444', fontWeight: 600 }}>
+                                                {order.status === 'REFUND_REQUESTED' ? 'Reembolso em análise pela equipe.' : 'Reembolso concluído.'}
+                                            </p>
+                                            <Link href={`/reembolso/${order.id}`} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 8, background: order.status === 'REFUNDED' ? 'rgba(139,92,246,0.15)' : 'rgba(239,68,68,0.15)', color: order.status === 'REFUNDED' ? '#8b5cf6' : '#ef4444', textDecoration: 'none', fontSize: '0.82rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                                                <RotateCcw size={13} /> Ver Solicitação
+                                            </Link>
                                         </div>
                                     )}
                                     <div style={{ textAlign: 'right' }}>

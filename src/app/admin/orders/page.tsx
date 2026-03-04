@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useEffect, Fragment } from 'react'
-import { Filter, Loader2, Truck, ChevronDown, ChevronUp, Check } from 'lucide-react'
+import { Filter, Loader2, Truck, ChevronDown, ChevronUp, Check, RotateCcw } from 'lucide-react'
+import Link from 'next/link'
 import { toast } from 'sonner'
 
 interface OrderItem { product: { name: string }; variant?: { name: string }; quantity: number; price: number }
 interface Order {
     id: string
-    status: 'PENDING' | 'PAID' | 'CANCELLED' | 'REFUNDED'
+    status: string
     total: number
     shippingCost: number
     gateway: string
@@ -19,8 +20,8 @@ interface Order {
     items: OrderItem[]
 }
 
-const STATUS_LABELS: Record<string, string> = { PENDING: 'Pendente', PAID: 'Pago', CANCELLED: 'Cancelado', REFUNDED: 'Reembolsado' }
-const STATUS_BADGES: Record<string, string> = { PENDING: 'badge-yellow', PAID: 'badge-green', CANCELLED: 'badge-red', REFUNDED: 'badge-blue' }
+const STATUS_LABELS: Record<string, string> = { PENDING: 'Pendente', PAID: 'Pago', CANCELLED: 'Cancelado', REFUNDED: 'Reembolsado', DELIVERED: 'Entregue', REFUND_REQUESTED: 'Reembolso Solicitado' }
+const STATUS_BADGES: Record<string, string> = { PENDING: 'badge-yellow', PAID: 'badge-green', CANCELLED: 'badge-red', REFUNDED: 'badge-blue', DELIVERED: 'badge-blue', REFUND_REQUESTED: 'badge-red' }
 
 export default function AdminOrdersPage() {
     const [orders, setOrders] = useState<Order[]>([])
@@ -111,7 +112,7 @@ export default function AdminOrdersPage() {
                 <Filter size={16} color="var(--text-muted)" />
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Status:</span>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {['', 'PENDING', 'PAID', 'CANCELLED', 'REFUNDED'].map(s => (
+                    {['', 'PENDING', 'PAID', 'DELIVERED', 'REFUND_REQUESTED', 'CANCELLED', 'REFUNDED'].map(s => (
                         <button key={s} onClick={() => { setStatusFilter(s); setPage(1) }}
                             style={{ padding: '5px 12px', borderRadius: 20, fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', border: '1px solid', borderColor: statusFilter === s ? 'var(--primary)' : 'var(--border)', background: statusFilter === s ? 'rgba(99,102,241,0.15)' : 'transparent', color: statusFilter === s ? 'var(--primary)' : 'var(--text-muted)', transition: 'all 0.15s' }}>
                             {s === '' ? 'Todos' : STATUS_LABELS[s]}
@@ -158,11 +159,20 @@ export default function AdminOrdersPage() {
                                             <td style={{ padding: '12px 16px' }}><span className={`badge ${STATUS_BADGES[o.status]}`}>{STATUS_LABELS[o.status]}</span></td>
                                             <td style={{ padding: '12px 16px', color: 'var(--text-muted)', fontSize: '0.8rem' }}>{new Date(o.createdAt).toLocaleDateString('pt-BR')}</td>
                                             <td style={{ padding: '12px 16px' }}>
-                                                <button onClick={() => toggleExpand(o)}
-                                                    style={{ padding: '5px 10px', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}
-                                                    title="Gerenciar pedido">
-                                                    {expandedId === o.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                                                </button>
+                                                <div style={{ display: 'flex', gap: 6 }}>
+                                                    {(o.status === 'REFUND_REQUESTED') && (
+                                                        <Link href="/admin/reembolsos"
+                                                            style={{ padding: '5px 10px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6, color: '#ef4444', display: 'flex', alignItems: 'center', gap: 4, textDecoration: 'none', fontSize: '0.78rem', fontWeight: 600 }}
+                                                            title="Ver reembolso">
+                                                            <RotateCcw size={12} /> Reembolso
+                                                        </Link>
+                                                    )}
+                                                    <button onClick={() => toggleExpand(o)}
+                                                        style={{ padding: '5px 10px', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}
+                                                        title="Gerenciar pedido">
+                                                        {expandedId === o.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                         {expandedId === o.id && trackingForms[o.id] && (
@@ -198,6 +208,8 @@ export default function AdminOrdersPage() {
                                                                         onChange={e => updateTrackingForm(o.id, 'status', e.target.value)}>
                                                                         <option value="PENDING">Pendente</option>
                                                                         <option value="PAID">Pago</option>
+                                                                        <option value="DELIVERED">Entregue</option>
+                                                                        <option value="REFUND_REQUESTED">Reembolso Solicitado</option>
                                                                         <option value="CANCELLED">Cancelado</option>
                                                                         <option value="REFUNDED">Reembolsado</option>
                                                                     </select>

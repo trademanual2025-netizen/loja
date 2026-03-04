@@ -117,3 +117,9 @@ Loja online de joias artesanais da marca Giovana Dias. Construída com Next.js 1
 - Configurações da landing page na aba "Landing Page" do admin: hero (imagem/título/subtítulo/CTA), banner customizado, texto sobre, contato (WhatsApp/telefone/Instagram/e-mail)
 - Settings keys: `landing_hero_image`, `landing_hero_title`, `landing_hero_subtitle`, `landing_cta_text`, `landing_whatsapp`, `landing_instagram`, `landing_email`, `landing_phone`, `landing_custom_banner_image`, `landing_custom_banner_title`, `landing_custom_banner_text`, `landing_about_text`
 - Componente: `src/components/store/LandingPageClient.tsx`
+- Sistema de Reembolso: status DELIVERED e REFUND_REQUESTED adicionados ao OrderStatus; campo `deliveredAt` no Order (preenchido automaticamente ao marcar como Entregue); modelos `RefundRequest` e `RefundMessage` no schema
+- Fluxo do reembolso: admin marca pedido como Entregue → usuário tem 7 dias para solicitar em `/reembolso/[orderId]` → admin avalia em `/admin/reembolsos` com chat bidirecional → Aprovado (status REFUNDED) ou Recusado (volta DELIVERED)
+- API `/api/user/refund/[orderId]` (GET/POST) e `/api/user/refund/[orderId]/messages` (POST) para o usuário
+- API `/api/admin/refunds` (GET), `/api/admin/refunds/[id]` (PATCH), `/api/admin/refunds/[id]/messages` (POST) para o admin
+- Minha conta mostra botão "Solicitar Reembolso" em azul para pedidos Entregues com prazo restante; badge "Reembolso em análise" ou "Reembolso concluído" para os outros status
+- AdminSidebar tem link "Reembolsos" (ícone RotateCcw); admin orders tem link direto para /admin/reembolsos em pedidos com REFUND_REQUESTED

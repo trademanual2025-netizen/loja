@@ -325,6 +325,13 @@ function AdminTopBar({ onMenuToggle, isOpen }: { onMenuToggle: () => void; isOpe
 
                             {/* Menu items */}
                             <div style={{ padding: '6px' }}>
+                                <button
+                                    onClick={() => { setDropdownOpen(false); setAvatarModalOpen(true) }}
+                                    style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 8, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500, width: '100%', transition: 'all 0.12s' }}
+                                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-card2)'; (e.currentTarget as HTMLElement).style.color = 'var(--text)' }}
+                                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)' }}>
+                                    <Camera size={15} /> Editar foto de perfil
+                                </button>
                                 <Link href="/admin/admins" onClick={() => setDropdownOpen(false)}
                                     style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 8, color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 500, transition: 'all 0.12s' }}
                                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-card2)'; (e.currentTarget as HTMLElement).style.color = 'var(--text)' }}

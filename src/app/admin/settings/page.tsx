@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Save, TestTube2 } from 'lucide-react'
 import WebhooksTab from '@/components/admin/WebhooksTab'
+import ShippingByRegionTab from '@/components/admin/ShippingByRegionTab'
 
 const TABS = ['Banco de Dados', 'Pagamentos', 'Tracking', 'Webhooks', 'Frete', 'Loja', 'SEO', 'Banner', 'Email / SMTP']
 
@@ -321,10 +322,10 @@ export default function AdminSettings() {
                         )}
 
                         {settings.shipping_mode === 'by_state' && (
-                            <div className="form-group">
-                                <label className="form-label">Tabela por Estado (JSON: {'{"SP": 15, "RJ": 20, "DEFAULT": 30}'})</label>
-                                <textarea className="input" rows={6} value={settings.shipping_state_table || '{}'} onChange={e => set('shipping_state_table', e.target.value)} style={{ resize: 'vertical', fontFamily: 'monospace', fontSize: '0.85rem' }} />
-                            </div>
+                            <ShippingByRegionTab
+                                value={settings.shipping_state_table || '[]'}
+                                onChange={v => set('shipping_state_table', v)}
+                            />
                         )}
 
                         {settings.shipping_mode === 'correios' && (
@@ -332,38 +333,20 @@ export default function AdminSettings() {
                                 <div style={{ padding: 12, background: 'rgba(99,102,241,0.08)', borderRadius: 8, border: '1px solid rgba(99,102,241,0.25)', fontSize: '0.83rem', color: 'var(--text-muted)' }}>
                                     📦 Usa o webservice público dos Correios — sem necessidade de contrato. Para cotações com desconto contratual, preencha também o Código Empresa e Senha abaixo.
                                 </div>
-                                <div className="form-group">
-                                    <label className="form-label">CEP de Origem (Apenas números) *</label>
-                                    <input className="input" placeholder="01310100" maxLength={8}
-                                        value={settings.shipping_origin_cep || ''}
-                                        onChange={e => set('shipping_origin_cep', formatCEP(e.target.value))} />
-                                </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                                    <div className="form-group">
-                                        <label className="form-label">Peso padrão (kg)</label>
-                                        <input className="input" placeholder="0.5" type="number" step="0.1" value={settings.shipping_default_weight || ''} onChange={e => set('shipping_default_weight', e.target.value)} />
+                                    <div className="form-group" style={{ marginBottom: 0 }}>
+                                        <label className="form-label">CEP de Origem (só números) *</label>
+                                        <input className="input" placeholder="01310100" maxLength={8}
+                                            value={settings.shipping_origin_cep || ''}
+                                            onChange={e => set('shipping_origin_cep', formatCEP(e.target.value))} />
                                     </div>
-                                    <div className="form-group">
-                                        <label className="form-label">Frete Grátis acima de R$ (0 = desativado)</label>
+                                    <div className="form-group" style={{ marginBottom: 0 }}>
+                                        <label className="form-label">Frete Grátis acima de R$ (0 = nunca)</label>
                                         <input className="input" placeholder="0" type="number" step="0.01" value={settings.shipping_free_above || ''} onChange={e => set('shipping_free_above', e.target.value)} />
                                     </div>
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-                                    <div className="form-group">
-                                        <label className="form-label">Comprimento (cm)</label>
-                                        <input className="input" placeholder="20" type="number" value={settings.shipping_default_length || ''} onChange={e => set('shipping_default_length', e.target.value)} />
-                                    </div>
-                                    <div className="form-group">
-                                        <label className="form-label">Altura (cm)</label>
-                                        <input className="input" placeholder="10" type="number" value={settings.shipping_default_height || ''} onChange={e => set('shipping_default_height', e.target.value)} />
-                                    </div>
-                                    <div className="form-group">
-                                        <label className="form-label">Largura (cm)</label>
-                                        <input className="input" placeholder="15" type="number" value={settings.shipping_default_width || ''} onChange={e => set('shipping_default_width', e.target.value)} />
-                                    </div>
-                                </div>
                                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: -4 }}>
-                                    ⚠️ Use as dimensões do pacote que você envia. Afeta diretamente o preço cotado.
+                                    Peso e dimensões são configurados por produto. O Correios usará os dados do produto para calcular o frete real.
                                 </p>
                                 <hr className="divider" />
                                 <p style={{ fontWeight: 600, fontSize: '0.88rem' }}>Credenciais de Contrato (Opcional)</p>

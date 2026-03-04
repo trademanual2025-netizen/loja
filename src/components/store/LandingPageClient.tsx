@@ -140,7 +140,13 @@ export function LandingPageClient({
                     overflow: hidden;
                 }
                 @media (max-width: 640px) {
-                    .hero-section { min-height: 0; height: 92svh; max-height: 680px; }
+                    .hero-section { min-height: 0; height: 88svh; max-height: 680px; }
+                    .hero-scroll-indicator { display: none; }
+                    .hero-cta-btn { padding: 13px 28px; font-size: 0.8rem; letter-spacing: 0.12em; }
+                    .hero-eyebrow { gap: 10px; margin-bottom: 16px; }
+                    .hero-eyebrow-line { width: 28px !important; }
+                    .hero-title { font-size: clamp(1.9rem, 7.5vw, 2.8rem) !important; margin-bottom: 14px; }
+                    .hero-subtitle-line { margin-bottom: 10px; }
                 }
                 .hero-title {
                     font-size: clamp(2.2rem, 6vw, 4.4rem);
@@ -171,9 +177,10 @@ export function LandingPageClient({
                     gap: 3px; overflow: hidden;
                 }
                 @media (max-width: 700px) {
-                    .custom-banner { flex-direction: column; }
-                    .custom-banner-text { max-width: 100%; padding: 24px 20px; background: #0d0a06; }
-                    .custom-banner-grid { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 80px); }
+                    .custom-banner { flex-direction: column; border-radius: 12px; }
+                    .custom-banner-text { max-width: 100%; padding: 22px 20px 18px; background: linear-gradient(180deg, #0d0a06 70%, rgba(13,10,6,0.95) 100%); }
+                    .custom-banner-grid { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 110px); }
+                    .custom-banner-section { padding: 20px 14px 48px !important; }
                 }
             `}</style>
 
@@ -197,7 +204,7 @@ export function LandingPageClient({
                     <span className="hero-sparkle" style={{ top: '78%', left: '82%', animationDuration: '2.6s', animationDelay: '2.1s', width: 3, height: 3 }} />
                     <span className="hero-sparkle" style={{ top: '14%', left: '55%', animationDuration: '3.8s', animationDelay: '1.2s', width: 3, height: 3 }} />
 
-                    <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '40px 20px', maxWidth: 860 }}>
+                    <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: 'clamp(20px, 5vw, 40px) 20px', maxWidth: 860 }}>
                         <div className="hero-eyebrow">
                             <span className="hero-eyebrow-line" style={{ width: 48 }} />
                             <span className="hero-eyebrow-text">{t.exclusiveCollection}</span>
@@ -208,9 +215,9 @@ export function LandingPageClient({
                         </h1>
                         <div className="hero-subtitle-line" />
                         <p style={{
-                            fontSize: 'clamp(0.95rem, 2.2vw, 1.2rem)',
+                            fontSize: 'clamp(0.88rem, 2.2vw, 1.2rem)',
                             color: 'rgba(255,240,210,0.72)',
-                            marginBottom: 48,
+                            marginBottom: 'clamp(28px, 6vw, 48px)',
                             fontStyle: 'italic',
                             fontWeight: 300,
                             letterSpacing: '0.05em',
@@ -222,13 +229,13 @@ export function LandingPageClient({
                         </Link>
                     </div>
 
-                    <div style={{ position: 'absolute', bottom: 32, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, opacity: 0.4 }}>
+                    <div className="hero-scroll-indicator" style={{ position: 'absolute', bottom: 32, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, opacity: 0.4 }}>
                         <div style={{ width: 1, height: 40, background: 'linear-gradient(to bottom, rgba(200,160,80,0.8), transparent)' }} />
                     </div>
                 </section>
 
                 {whatsappLink && (
-                    <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 20px 60px' }}>
+                    <section className="custom-banner-section" style={{ maxWidth: 1000, margin: '0 auto', padding: '28px 20px 60px' }}>
                         <a
                             href={whatsappLink}
                             target="_blank"

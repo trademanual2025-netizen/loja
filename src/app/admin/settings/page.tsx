@@ -90,13 +90,27 @@ const PRESET_THEMES: { name: string; colors: ThemeColors }[] = [
     { name: 'Rose Elegance', colors: { store_primary_color: '#831843', store_bg_color: '#fff5f5', store_bg_card_color: '#ffffff', store_text_color: '#4a4a4a', store_text_title: '#111827', store_btn_buy: '#831843', store_btn_header: '#831843', store_icon_cart: '#831843' } },
 ]
 
+const LANDING_DEFAULTS: Record<string, string> = {
+    landing_hero_title: 'Joias autênticas para pessoas autênticas',
+    landing_hero_subtitle: 'Honrada em enfeitar você!',
+    landing_cta_text: 'Acessar Loja',
+    landing_custom_banner_title: 'Joias Customizadas',
+    landing_custom_banner_text: 'Entre em contato para joias personalizadas.',
+}
+
 export default function AdminSettings() {
     const [tab, setTab] = useState('Banco de Dados')
     const [settings, setSettings] = useState<Record<string, string>>({})
     const [saving, setSaving] = useState(false)
 
     useEffect(() => {
-        fetch('/api/admin/settings').then(r => r.json()).then(setSettings)
+        fetch('/api/admin/settings').then(r => r.json()).then((data: Record<string, string>) => {
+            const merged = { ...data }
+            for (const [k, v] of Object.entries(LANDING_DEFAULTS)) {
+                if (!merged[k]) merged[k] = v
+            }
+            setSettings(merged)
+        })
     }, [])
 
     function set(key: string, value: string) {
@@ -500,9 +514,22 @@ export default function AdminSettings() {
                 {/* Landing Page */}
                 {tab === 'Landing Page' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                        <div style={{ padding: 16, background: 'rgba(99,102,241,0.1)', borderRadius: 8, border: '1px solid rgba(99,102,241,0.3)', marginBottom: 4 }}>
-                            <p style={{ fontWeight: 700, marginBottom: 6 }}>🏠 Página Inicial (Landing Page)</p>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Configure a página institucional que aparece como página principal do site. A loja de produtos está disponível em <code>/loja</code>.</p>
+                        <div style={{ padding: 16, background: 'rgba(99,102,241,0.1)', borderRadius: 8, border: '1px solid rgba(99,102,241,0.3)' }}>
+                            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                                <div>
+                                    <p style={{ fontWeight: 700, marginBottom: 4 }}>🏠 Página Inicial (Landing Page)</p>
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Configure a página institucional. Os textos já estão pré-preenchidos com os valores que aparecem no site — edite e salve para personalizar.</p>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setSettings(prev => ({ ...prev, ...LANDING_DEFAULTS }))
+                                        toast.success('Campos restaurados com os valores padrão. Clique em Salvar para aplicar.')
+                                    }}
+                                    style={{ flexShrink: 0, padding: '7px 14px', borderRadius: 7, border: '1px solid rgba(99,102,241,0.5)', background: 'transparent', color: 'rgba(99,102,241,0.9)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, whiteSpace: 'nowrap' }}
+                                >
+                                    ↺ Restaurar padrões
+                                </button>
+                            </div>
                         </div>
 
                         <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8 }}>
@@ -510,7 +537,7 @@ export default function AdminSettings() {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                                 <F settings={settings} set={set} label="Título Principal" k="landing_hero_title" placeholder="Joias autênticas para pessoas autênticas" />
                                 <F settings={settings} set={set} label="Subtítulo" k="landing_hero_subtitle" placeholder="Honrada em enfeitar você!" />
-                                <ImageF label="Imagem de Fundo (Hero)" k="landing_hero_image" help="Recomendado: 1920x900 pixels, alta qualidade." settings={settings} uploadFile={uploadFile} />
+                                <ImageF label="Imagem de Fundo (Hero)" k="landing_hero_image" help="Recomendado: 1920x900 pixels, alta qualidade. Se vazio, usa a imagem padrão /hero-ring.jpg." settings={settings} uploadFile={uploadFile} />
                                 <F settings={settings} set={set} label="Texto do Botão CTA" k="landing_cta_text" placeholder="Acessar Loja" help="Texto do botão que leva para a loja." />
                             </div>
                         </div>
@@ -525,17 +552,19 @@ export default function AdminSettings() {
                         </div>
 
                         <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8 }}>
-                            <p style={{ fontWeight: 700, marginBottom: 12 }}>Sobre / História da Marca</p>
-                            <F settings={settings} set={set} label="Texto Sobre (aceita HTML)" k="landing_about_text" type="textarea" placeholder="Conte a história da sua marca..." help="Aparece na seção 'Sobre' da landing page. Pode usar HTML para formatação." />
+                            <p style={{ fontWeight: 700, marginBottom: 4 }}>Sobre / História da Marca</p>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 12 }}>Se vazio, a seção "Sobre" não aparece na página.</p>
+                            <F settings={settings} set={set} label="Texto Sobre (aceita HTML)" k="landing_about_text" type="textarea" placeholder="Conte a história da sua marca..." help='Exemplo: &lt;p&gt;Criadora de joias autorais desde 2015...&lt;/p&gt;' />
                         </div>
 
                         <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8 }}>
-                            <p style={{ fontWeight: 700, marginBottom: 12 }}>Contato e Redes Sociais</p>
+                            <p style={{ fontWeight: 700, marginBottom: 4 }}>Contato e Redes Sociais</p>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 12 }}>Aparecem no rodapé da página e no card de atendimento. Campos vazios ficam ocultos.</p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                                 <F settings={settings} set={set} label="WhatsApp (com DDD e DDI)" k="landing_whatsapp" placeholder="5511991371234" help="Número completo com código do país. Ex: 5511991371234" />
                                 <F settings={settings} set={set} label="Telefone (exibição)" k="landing_phone" placeholder="(11) 91371-5454" help="Formato que será exibido no site." />
                                 <F settings={settings} set={set} label="Instagram" k="landing_instagram" placeholder="@giovanadiasjewelry" help="Username ou URL completa do Instagram." />
-                                <F settings={settings} set={set} label="E-mail" k="landing_email" placeholder="contato@loja.com" />
+                                <F settings={settings} set={set} label="E-mail de contato" k="landing_email" placeholder="contato@giovanadias.com.br" />
                             </div>
                         </div>
 

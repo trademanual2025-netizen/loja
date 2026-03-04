@@ -3,7 +3,7 @@ import { ShoppingBag, Users, DollarSign, TrendingUp } from 'lucide-react'
 
 export default async function AdminDashboard() {
     const [orderCount, leadCount, revenueAgg, recentOrders] = await Promise.all([
-        prisma.order.count(),
+        prisma.order.count({ where: { status: 'PAID' } }),
         prisma.lead.count(),
         prisma.order.aggregate({
             where: { status: 'PAID' },

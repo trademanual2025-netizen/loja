@@ -185,7 +185,7 @@ export function LandingPageClient({
                                 borderRadius: 14,
                                 overflow: 'hidden',
                                 textDecoration: 'none',
-                                height: 200,
+                                minHeight: 200,
                                 background: '#0d0a06',
                                 border: '1px solid rgba(200,160,80,0.18)',
                                 boxShadow: '0 4px 32px rgba(0,0,0,0.5)',
@@ -194,44 +194,29 @@ export function LandingPageClient({
                             onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 48px rgba(0,0,0,0.7)'; e.currentTarget.style.transform = 'translateY(-3px)' }}
                             onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 4px 32px rgba(0,0,0,0.5)'; e.currentTarget.style.transform = 'translateY(0)' }}
                         >
-                            {customBannerImage && (
-                                <img
-                                    src={customBannerImage}
-                                    alt={customBannerTitle || 'Joias Customizadas'}
-                                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
-                                />
-                            )}
-
-                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(8,5,2,0.88) 0%, rgba(8,5,2,0.6) 45%, rgba(8,5,2,0.15) 100%)' }} />
-                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(0deg, rgba(0,0,0,0.45) 0%, transparent 60%)' }} />
-
-                            <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '28px 36px', flex: 1 }}>
-                                <div style={{ width: 28, height: 1, background: 'rgba(200,160,80,0.7)', marginBottom: 12 }} />
+                            <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '28px 36px', flex: '0 0 auto', maxWidth: 340, background: 'linear-gradient(90deg, #0d0a06 60%, transparent 100%)' }}>
+                                <div style={{ width: 28, height: 1, background: 'rgba(200,160,80,0.7)', marginBottom: 14 }} />
                                 <h3 style={{
                                     color: '#fff',
-                                    fontSize: 'clamp(1.5rem, 4vw, 2.1rem)',
+                                    fontSize: 'clamp(1.3rem, 3.5vw, 2rem)',
                                     fontWeight: 200,
                                     letterSpacing: '0.08em',
                                     textTransform: 'uppercase',
                                     margin: 0,
                                     lineHeight: 1.2,
-                                    textShadow: '0 2px 16px rgba(0,0,0,0.6)',
                                 }}>
                                     {customBannerTitle || t.customBannerTitle}
                                 </h3>
-                                <p style={{ color: 'rgba(200,160,80,0.75)', fontSize: '0.75rem', marginTop: 8, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500 }}>
+                                <p style={{ color: 'rgba(200,160,80,0.75)', fontSize: '0.75rem', marginTop: 10, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500 }}>
                                     {customBannerText || t.customBannerText}
                                 </p>
-                            </div>
-
-                            <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '28px 36px', flexShrink: 0 }}>
                                 <div style={{
-                                    display: 'flex', alignItems: 'center', gap: 10,
+                                    display: 'inline-flex', alignItems: 'center', gap: 10, marginTop: 20,
                                     background: 'rgba(37,211,102,0.12)',
                                     border: '1px solid rgba(37,211,102,0.35)',
                                     borderRadius: 50,
                                     padding: '10px 22px',
-                                    backdropFilter: 'blur(8px)',
+                                    alignSelf: 'flex-start',
                                 }}>
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
@@ -241,6 +226,27 @@ export function LandingPageClient({
                                         {t.talkToUs}
                                     </span>
                                 </div>
+                            </div>
+
+                            <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gridTemplateRows: 'repeat(2, 1fr)', gap: 3, minHeight: 220, overflow: 'hidden' }}>
+                                {[
+                                    { src: '/produtos/colar-placa.png', pos: 'center' },
+                                    { src: '/produtos/brinco-sol.png', pos: 'center' },
+                                    { src: '/produtos/anel-sementes.png', pos: 'center' },
+                                    { src: '/produtos/anel-martelado.png', pos: 'center top' },
+                                    { src: '/produtos/brinco-coral.png', pos: 'center' },
+                                    { src: '/produtos/colar-dente.png', pos: 'center' },
+                                ].map((img, i) => (
+                                    <div key={i} style={{ overflow: 'hidden', position: 'relative' }}>
+                                        <img
+                                            src={img.src}
+                                            alt=""
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: img.pos, display: 'block', transition: 'transform 0.5s' }}
+                                            onMouseEnter={e => { (e.currentTarget as HTMLImageElement).style.transform = 'scale(1.08)' }}
+                                            onMouseLeave={e => { (e.currentTarget as HTMLImageElement).style.transform = 'scale(1)' }}
+                                        />
+                                    </div>
+                                ))}
                             </div>
                         </a>
                     </section>

@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { Save, TestTube2 } from 'lucide-react'
 import WebhooksTab from '@/components/admin/WebhooksTab'
 
-const TABS = ['Banco de Dados', 'Pagamentos', 'Tracking', 'Webhooks', 'Frete', 'Loja', 'SEO', 'Banner', 'Landing Page']
+const TABS = ['Banco de Dados', 'Pagamentos', 'Tracking', 'Webhooks', 'Frete', 'Loja', 'SEO', 'Banner', 'Landing Page', 'Email / SMTP']
 
 const ImageF = ({ label, k, help = '', settings, uploadFile }: { label: string; k: string; help?: string; settings: any; uploadFile: any }) => (
     <div className="form-group">
@@ -69,6 +69,48 @@ const ColorF = ({ label, k, defaultColor, settings, set }: { label: string; k: s
                 </div>
                 <input className="input" type="text" value={val} onChange={e => set(k, e.target.value)}
                     placeholder="#000000" style={{ fontFamily: 'monospace', textTransform: 'uppercase' }} />
+
+                {/* Email / SMTP */}
+                {tab === 'Email / SMTP' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                        <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8 }}>
+                            <p style={{ fontWeight: 700, marginBottom: 6 }}>📧 Notificação de Contato</p>
+                            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 16 }}>
+                                Quando alguém enviar uma mensagem pelo formulário de contato, você receberá uma notificação por email neste endereço.
+                            </p>
+                            <F settings={settings} set={set} label='Email que recebe notificações' k='contact_notify_email' placeholder='contato@giovanadias.com.br' help='Endereço de email onde você receberá as mensagens de contato.' />
+                        </div>
+
+                        <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8 }}>
+                            <p style={{ fontWeight: 700, marginBottom: 6 }}>⚙️ Configuração SMTP</p>
+                            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 16 }}>
+                                Configure seu servidor de email. Para Gmail, ative a verificação em 2 etapas e gere uma <strong>Senha de App</strong> em Conta Google → Segurança.
+                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                <F settings={settings} set={set} label='Servidor SMTP' k='smtp_host' placeholder='smtp.gmail.com' help='Para Gmail: smtp.gmail.com | Outlook: smtp.office365.com' />
+                                <F settings={settings} set={set} label='Porta SMTP' k='smtp_port' placeholder='587' help='587 para TLS (recomendado) | 465 para SSL' />
+                                <F settings={settings} set={set} label='Usuário SMTP' k='smtp_user' placeholder='seu@gmail.com' />
+                                <F settings={settings} set={set} label='Senha SMTP' k='smtp_pass' type='password' placeholder='••••••••••••' help='Para Gmail: use a Senha de App gerada (não sua senha normal).' />
+                                <F settings={settings} set={set} label='Email remetente (From)' k='smtp_from' placeholder='Giovana Dias Joias <noreply@giovanadias.com.br>' help='Opcional. Se vazio, usa o Usuário SMTP.' />
+                            </div>
+                        </div>
+
+                        <div style={{ padding: 12, background: 'rgba(200,160,80,0.06)', border: '1px solid rgba(200,160,80,0.2)', borderRadius: 8 }}>
+                            <p style={{ fontSize: '0.82rem', color: 'rgba(200,160,80,0.9)', fontWeight: 600, marginBottom: 6 }}>Como configurar com Gmail</p>
+                            <ol style={{ fontSize: '0.8rem', color: 'var(--text-muted)', paddingLeft: 18, lineHeight: 1.9, margin: 0 }}>
+                                <li>Acesse <strong>myaccount.google.com</strong> → Segurança → Verificação em 2 etapas (ative)</li>
+                                <li>Após ativar, vá em Segurança → <strong>Senhas de App</strong></li>
+                                <li>Crie uma senha para &#34;Email&#34; — copie os 16 dígitos gerados</li>
+                                <li>Use essa senha no campo Senha SMTP (sem espaços)</li>
+                                <li>Servidor: smtp.gmail.com | Porta: 587</li>
+                            </ol>
+                        </div>
+
+                        <button className='btn btn-primary' onClick={() => save([
+                            'contact_notify_email', 'smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_from',
+                        ])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar Configurações de Email'}</button>
+                    </div>
+                )}
             </div>
         </div>
     )

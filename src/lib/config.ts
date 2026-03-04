@@ -119,4 +119,10 @@ export const SETTINGS_KEYS = {
     LANDING_CUSTOM_BANNER_TEXT: 'landing_custom_banner_text',
     LANDING_ABOUT_TEXT: 'landing_about_text',
     LANDING_PHONE: 'landing_phone',
+    CONTACT_NOTIFY_EMAIL: 'contact_notify_email',
+    SMTP_HOST: 'smtp_host',
+    SMTP_PORT: 'smtp_port',
+    SMTP_USER: 'smtp_user',
+    SMTP_PASS: 'smtp_pass',
+    SMTP_FROM: 'smtp_from',
 } as const

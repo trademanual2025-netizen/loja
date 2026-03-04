@@ -52,7 +52,7 @@ export default async function LandingPage() {
       instagram={landingSettings[SETTINGS_KEYS.LANDING_INSTAGRAM] || ''}
       email={landingSettings[SETTINGS_KEYS.LANDING_EMAIL] || ''}
       phone={landingSettings[SETTINGS_KEYS.LANDING_PHONE] || ''}
-      customBannerImage={landingSettings[SETTINGS_KEYS.LANDING_CUSTOM_BANNER_IMAGE] || ''}
+      customBannerImage={landingSettings[SETTINGS_KEYS.LANDING_CUSTOM_BANNER_IMAGE] || '/custom-jewelry-banner.png'}
       customBannerTitle={landingSettings[SETTINGS_KEYS.LANDING_CUSTOM_BANNER_TITLE] || ''}
       customBannerText={landingSettings[SETTINGS_KEYS.LANDING_CUSTOM_BANNER_TEXT] || ''}
       aboutText={landingSettings[SETTINGS_KEYS.LANDING_ABOUT_TEXT] || ''}

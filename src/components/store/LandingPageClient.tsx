@@ -53,8 +53,8 @@ export function LandingPageClient({
                     100% { transform: translateX(220%)  skewX(-20deg); opacity: 0; }
                 }
                 @keyframes heroGoldPulse {
-                    0%, 100% { text-shadow: 0 2px 24px rgba(0,0,0,0.5), 0 0 40px rgba(200,160,80,0.18); }
-                    50%      { text-shadow: 0 2px 24px rgba(0,0,0,0.5), 0 0 70px rgba(200,160,80,0.38); }
+                    0%, 100% { text-shadow: 0 2px 16px rgba(0,0,0,0.9), 0 4px 32px rgba(0,0,0,0.7), 0 0 40px rgba(200,160,80,0.18); }
+                    50%      { text-shadow: 0 2px 16px rgba(0,0,0,0.9), 0 4px 32px rgba(0,0,0,0.7), 0 0 70px rgba(200,160,80,0.38); }
                 }
                 @keyframes heroSparkle {
                     0%, 100% { opacity: 0; transform: scale(0.6); }
@@ -103,7 +103,7 @@ export function LandingPageClient({
                 .hero-eyebrow-text {
                     font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase;
                     color: rgba(200,160,80,0.9); font-weight: 600;
-                    text-shadow: 0 0 12px rgba(200,160,80,0.6);
+                    text-shadow: 0 1px 8px rgba(0,0,0,0.9), 0 0 12px rgba(200,160,80,0.5);
                     white-space: nowrap;
                 }
                 .hero-cta-btn {
@@ -189,10 +189,10 @@ export function LandingPageClient({
                         <img src={heroImage || '/hero-ring.jpg'} alt={heroTitle} />
                     </div>
 
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(5,3,1,0.3) 0%, rgba(10,6,2,0.5) 40%, rgba(5,3,1,0.85) 100%)' }} />
-                    <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 60%, rgba(180,110,30,0.14) 0%, transparent 60%)' }} />
-                    <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 0% 50%, rgba(0,0,0,0.55) 0%, transparent 45%), radial-gradient(ellipse at 100% 50%, rgba(0,0,0,0.55) 0%, transparent 45%)' }} />
-                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 120, background: 'linear-gradient(to bottom, transparent, rgba(5,3,1,0.9))' }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(5,3,1,0.35) 0%, rgba(10,6,2,0.55) 40%, rgba(5,3,1,0.9) 100%)' }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 75% 55% at 50% 52%, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.1) 65%, transparent 100%)' }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 0% 50%, rgba(0,0,0,0.6) 0%, transparent 45%), radial-gradient(ellipse at 100% 50%, rgba(0,0,0,0.6) 0%, transparent 45%)' }} />
+                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 160, background: 'linear-gradient(to bottom, transparent, rgba(5,3,1,0.95))' }} />
 
                     <div className="hero-shimmer" />
                     <div className="hero-grain" />
@@ -216,11 +216,12 @@ export function LandingPageClient({
                         <div className="hero-subtitle-line" />
                         <p style={{
                             fontSize: 'clamp(0.88rem, 2.2vw, 1.2rem)',
-                            color: 'rgba(255,240,210,0.72)',
+                            color: 'rgba(255,240,210,0.8)',
                             marginBottom: 'clamp(28px, 6vw, 48px)',
                             fontStyle: 'italic',
                             fontWeight: 300,
                             letterSpacing: '0.05em',
+                            textShadow: '0 1px 10px rgba(0,0,0,0.95), 0 2px 20px rgba(0,0,0,0.8)',
                         }}>
                             {heroSubtitle}
                         </p>

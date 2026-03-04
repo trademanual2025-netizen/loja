@@ -15,6 +15,7 @@ interface Props {
 export function ContactFormClient({ whatsappLink, dict }: Props) {
     const c = dict.contactPage
     const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
+    const [hp, setHp] = useState('')
     const [loading, setLoading] = useState(false)
     const [sent, setSent] = useState(false)
 
@@ -29,10 +30,12 @@ export function ContactFormClient({ whatsappLink, dict }: Props) {
             const res = await fetch('/api/contact', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form),
+                body: JSON.stringify({ ...form, _hp: hp }),
             })
             if (res.ok) {
                 setSent(true)
+            } else if (res.status === 429) {
+                toast.error('Muitas tentativas. Aguarde alguns minutos e tente novamente.')
             } else {
                 toast.error(c.sendError)
             }
@@ -69,6 +72,17 @@ export function ContactFormClient({ whatsappLink, dict }: Props) {
 
     return (
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* honeypot anti-spam: invisível para humanos, bots preenchem */}
+            <input
+                type="text"
+                name="website"
+                value={hp}
+                onChange={e => setHp(e.target.value)}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, overflow: 'hidden', opacity: 0 }}
+            />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 <div className="form-group" style={{ margin: 0 }}>
                     <label className="form-label" style={{ color: 'var(--text-muted)', fontSize: '0.72rem', letterSpacing: '0.15em', textTransform: 'uppercase' }}>{c.formName} *</label>

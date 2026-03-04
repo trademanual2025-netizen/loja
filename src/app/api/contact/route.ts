@@ -3,12 +3,42 @@ import { prisma } from '@/lib/prisma'
 import { getSettings, SETTINGS_KEYS } from '@/lib/config'
 import { sendEmail, buildContactNotificationHtml } from '@/lib/email'
 
+const RATE_LIMIT = 3
+const WINDOW_MS = 10 * 60 * 1000
+const ipLog = new Map<string, number[]>()
+
+function getIP(req: NextRequest): string {
+    return (
+        req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+        req.headers.get('x-real-ip') ||
+        'unknown'
+    )
+}
+
+function isRateLimited(ip: string): boolean {
+    const now = Date.now()
+    const timestamps = (ipLog.get(ip) || []).filter(t => now - t < WINDOW_MS)
+    if (timestamps.length >= RATE_LIMIT) return true
+    ipLog.set(ip, [...timestamps, now])
+    return false
+}
+
 export async function POST(req: NextRequest) {
     try {
-        const { name, email, subject, message } = await req.json()
+        const body = await req.json()
+        const { name, email, subject, message, _hp } = body
+
+        if (_hp) {
+            return NextResponse.json({ ok: true })
+        }
 
         if (!name || !email || !message) {
             return NextResponse.json({ error: 'Campos obrigatórios ausentes.' }, { status: 400 })
+        }
+
+        const ip = getIP(req)
+        if (isRateLimited(ip)) {
+            return NextResponse.json({ error: 'Muitas tentativas. Aguarde alguns minutos.' }, { status: 429 })
         }
 
         const saved = await prisma.contactMessage.create({

@@ -321,12 +321,12 @@ export function LandingPageClient({
                             <div>
                                 <h4 style={{ color: 'rgba(200,160,80,0.8)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>{t.contact}</h4>
                                 {(phone || whatsapp) && (
-                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: 6 }}>
+                                    <a href={whatsappLink || `tel:${(phone || whatsapp).replace(/\D/g, '')}`} target={whatsappLink ? '_blank' : undefined} rel="noopener noreferrer" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: 6, display: 'block', textDecoration: 'none' }}>
                                         {t.phoneWhatsapp}: {phone || whatsapp}
-                                    </p>
+                                    </a>
                                 )}
                                 {email && (
-                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: 6 }}>{email}</p>
+                                    <a href={`mailto:${email}`} style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: 6, display: 'block', textDecoration: 'none' }}>{email}</a>
                                 )}
                                 {whatsappLink && (
                                     <a href={whatsappLink} target="_blank" rel="noopener noreferrer"

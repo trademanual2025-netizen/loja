@@ -374,9 +374,15 @@ export default function AdminSettings() {
                 {/* Loja */}
                 {tab === 'Loja' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                        <F settings={settings} set={set} label="Nome da Loja" k="store_name" placeholder="Ex: Velour" />
-                        <ImageF label="Logo da Loja" k="store_logo" help="Recomendado: PNG transparente, max 160x40px" settings={settings} uploadFile={uploadFile} />
-                        <ImageF label="Favicon" k="store_favicon" help="Ícone da aba do navegador. Recomendado: PNG quadrado 32x32 ou 64x64" settings={settings} uploadFile={uploadFile} />
+                        <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 10, border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 14 }}>
+                            <p style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: 2 }}>🏷️ Identidade da Marca</p>
+                            <F settings={settings} set={set} label="Nome da Loja" k="store_name" placeholder="Ex: Giovana Dias Joias" />
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                                <ImageF label="Logo da Loja (Front-end)" k="store_logo" help="Aparece no cabeçalho da loja. PNG transparente, max 160x40px." settings={settings} uploadFile={uploadFile} />
+                                <ImageF label="Logo do Painel Admin" k="admin_logo" help="Aparece no menu lateral do admin. PNG transparente, max 160x40px." settings={settings} uploadFile={uploadFile} />
+                            </div>
+                            <ImageF label="Favicon" k="store_favicon" help="Ícone da aba do navegador. PNG quadrado 32x32 ou 64x64." settings={settings} uploadFile={uploadFile} />
+                        </div>
 
                         <div style={{ background: 'var(--bg-card2)', padding: 16, borderRadius: 8, border: '1px solid var(--border)' }}>
                             <p style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: 12 }}>🎨 Temas Prontos</p>
@@ -448,7 +454,7 @@ export default function AdminSettings() {
                         </div>
 
                         <F settings={settings} set={set} label="Texto do Rodapé" k="store_footer_text" />
-                        <button className="btn btn-primary" onClick={() => save(['store_name', 'store_logo', 'store_favicon', 'store_primary_color', 'store_text_color', 'store_bg_color', 'store_bg_card_color', 'store_text_title', 'store_btn_buy', 'store_btn_header', 'store_icon_cart', 'store_footer_text', 'store_products_per_page', 'store_installments', 'store_installments_min_value'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
+                        <button className="btn btn-primary" onClick={() => save(['store_name', 'store_logo', 'admin_logo', 'store_favicon', 'store_primary_color', 'store_text_color', 'store_bg_color', 'store_bg_card_color', 'store_text_title', 'store_btn_buy', 'store_btn_header', 'store_icon_cart', 'store_footer_text', 'store_products_per_page', 'store_installments', 'store_installments_min_value'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
                     </div>
                 )}
 

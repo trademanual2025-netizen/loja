@@ -73,7 +73,7 @@ export default async function LojaPage({
   const logoUrl = storeSettings[SETTINGS_KEYS.STORE_LOGO] || null
   const bannerUrl = storeSettings[SETTINGS_KEYS.STORE_BANNER_URL] || null
   const bannerTitle = storeSettings[SETTINGS_KEYS.STORE_BANNER_TITLE] || storeName
-  const bannerSubtitle = storeSettings[SETTINGS_KEYS.STORE_BANNER_SUBTITLE] || 'Produtos selecionados com qualidade e cuidado'
+  const bannerSubtitle = storeSettings[SETTINGS_KEYS.STORE_BANNER_SUBTITLE] || dict.store.bannerSubtitle
 
   return (
     <>

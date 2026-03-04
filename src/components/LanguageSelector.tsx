@@ -2,11 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Cookies from 'js-cookie'
-import { useRouter } from 'next/navigation'
 import { Locale } from '@/lib/i18n'
 
 export function LanguageSelector() {
-    const router = useRouter()
     const [locale, setLocale] = useState<Locale>('pt')
 
     useEffect(() => {
@@ -19,7 +17,7 @@ export function LanguageSelector() {
     const changeLocale = (newLocale: Locale) => {
         Cookies.set('NEXT_LOCALE', newLocale, { expires: 365 })
         setLocale(newLocale)
-        router.refresh()
+        window.location.reload()
     }
 
     return (

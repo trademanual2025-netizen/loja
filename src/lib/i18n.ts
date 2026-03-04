@@ -20,6 +20,7 @@ export const dictionaries = {
             categoryAll: 'Todas as categorias',
             searchBtn: 'Buscar',
             noProducts: 'Nenhum produto encontrado.',
+            bannerSubtitle: 'Produtos selecionados com qualidade e cuidado',
             homeParams: {
                 popular: 'Populares',
                 newest: 'Lançamentos'
@@ -292,6 +293,7 @@ export const dictionaries = {
             categoryAll: 'All categories',
             searchBtn: 'Search',
             noProducts: 'No products found.',
+            bannerSubtitle: 'Selected products with quality and care',
             homeParams: {
                 popular: 'Popular',
                 newest: 'New Arrivals'
@@ -564,6 +566,7 @@ export const dictionaries = {
             categoryAll: 'Todas las categorías',
             searchBtn: 'Buscar',
             noProducts: 'Ningún producto encontrado.',
+            bannerSubtitle: 'Productos seleccionados con calidad y cuidado',
             homeParams: {
                 popular: 'Populares',
                 newest: 'Novedades'
@@ -823,6 +826,7 @@ export const dictionaries = {
 export const dbTranslations: Record<Locale, Record<string, string>> = {
     pt: {},
     en: {
+        'Produtos selecionados com qualidade e cuidado': 'Selected products with quality and care',
         'Coleções Essenciais Primavera': 'Spring Essential Collections',
         'Silhuetas atemporais e tecidos refinados para o seu dia a dia.': 'Timeless silhouettes and refined fabrics for your everyday life.',
         'Camiseta Básica Premium': 'Premium Basic T-Shirt',
@@ -852,6 +856,7 @@ export const dbTranslations: Record<Locale, Record<string, string>> = {
         'Acessórios': 'Accessories',
     },
     es: {
+        'Produtos selecionados com qualidade e cuidado': 'Productos seleccionados con calidad y cuidado',
         'Coleções Essenciais Primavera': 'Colecciones Esenciales de Primavera',
         'Silhuetas atemporais e tecidos refinados para o seu dia a dia.': 'Siluetas atemporales y telas refinadas para tu día a día.',
         'Camiseta Básica Premium': 'Camiseta Básica Premium',

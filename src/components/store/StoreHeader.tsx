@@ -8,7 +8,6 @@ import { useEffect, useState } from 'react'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { LanguageSelector } from '@/components/LanguageSelector'
 import { Dictionary } from '@/lib/i18n'
-import { useTheme } from '@/components/ThemeProvider'
 
 interface Props {
     storeName: string
@@ -29,7 +28,6 @@ export function StoreHeader({ storeName, logoUrl, user, dict }: Props) {
     const clearCart = useCart((s) => s.clearCart)
     const router = useRouter()
     const pathname = usePathname()
-    const { theme } = useTheme()
     const [mounted, setMounted] = useState(false)
     useEffect(() => { setMounted(true) }, [])
 
@@ -55,7 +53,7 @@ export function StoreHeader({ storeName, logoUrl, user, dict }: Props) {
             <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
                 <Link href="/loja" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', gap: 8 }}>
                     {logoUrl ? (
-                        <img src={logoUrl} alt={storeName} style={{ height: 40, maxWidth: 160, objectFit: 'contain', filter: theme === 'light' ? 'brightness(0)' : 'none', transition: 'filter 0.3s' }} />
+                        <img src={logoUrl} alt={storeName} className="store-logo-img" style={{ height: 40, maxWidth: 160, objectFit: 'contain' }} />
                     ) : (
                         <span style={{ fontWeight: 800, fontSize: '1.2rem', color: 'var(--primary)' }}>{storeName}</span>
                     )}

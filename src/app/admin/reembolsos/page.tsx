@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Loader2, Send, Check, X, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react'
+import { Loader2, Send, Check, X, ChevronDown, ChevronUp, RotateCcw, PackageCheck } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface RefundMessage { id: string; authorType: string; content: string; createdAt: string }
@@ -31,6 +31,7 @@ export default function AdminReembolsosPage() {
     const [sendingMsg, setSendingMsg] = useState<string | null>(null)
     const [updatingId, setUpdatingId] = useState<string | null>(null)
     const [statusFilter, setStatusFilter] = useState('')
+    const [restoreStock, setRestoreStock] = useState<Record<string, boolean>>({})
     const chatRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
     async function load() {
@@ -71,10 +72,17 @@ export default function AdminReembolsosPage() {
     async function updateStatus(refundId: string, status: 'APPROVED' | 'REJECTED') {
         setUpdatingId(refundId)
         const res = await fetch(`/api/admin/refunds/${refundId}`, {
-            method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }),
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status, restoreStock: restoreStock[refundId] ?? false }),
         })
         if (res.ok) {
-            toast.success(status === 'APPROVED' ? 'Reembolso aprovado!' : 'Reembolso recusado.')
+            const didRestore = status === 'APPROVED' && (restoreStock[refundId] ?? false)
+            toast.success(
+                status === 'APPROVED'
+                    ? didRestore ? 'Reembolso aprovado e estoque restaurado!' : 'Reembolso aprovado!'
+                    : 'Reembolso recusado.'
+            )
             load()
         } else toast.error('Erro ao atualizar status.')
         setUpdatingId(null)
@@ -118,6 +126,7 @@ export default function AdminReembolsosPage() {
                         const st = STATUS_LABELS[refund.status] || { label: refund.status, color: 'var(--text-muted)' }
                         const isOpen = expandedId === refund.id
                         const dl = daysLeft(refund.order.deliveredAt)
+                        const willRestoreStock = restoreStock[refund.id] ?? false
 
                         return (
                             <div key={refund.id} className="card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -164,22 +173,44 @@ export default function AdminReembolsosPage() {
                                                 </div>
 
                                                 {refund.status === 'PENDING' && (
-                                                    <div style={{ display: 'flex', gap: 10 }}>
-                                                        <button
-                                                            onClick={() => updateStatus(refund.id, 'APPROVED')}
-                                                            disabled={updatingId === refund.id}
-                                                            className="btn btn-primary"
-                                                            style={{ flex: 1, gap: 6, background: '#22c55e', borderColor: '#22c55e' }}>
-                                                            {updatingId === refund.id ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={14} />}
-                                                            Aprovar
-                                                        </button>
-                                                        <button
-                                                            onClick={() => updateStatus(refund.id, 'REJECTED')}
-                                                            disabled={updatingId === refund.id}
-                                                            className="btn"
-                                                            style={{ flex: 1, gap: 6, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.4)', color: '#ef4444' }}>
-                                                            <X size={14} /> Recusar
-                                                        </button>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                                        {/* Checkbox restaurar estoque */}
+                                                        <label
+                                                            onClick={e => e.stopPropagation()}
+                                                            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 8, background: willRestoreStock ? 'rgba(34,197,94,0.08)' : 'var(--bg)', border: `1px solid ${willRestoreStock ? 'rgba(34,197,94,0.3)' : 'var(--border)'}`, cursor: 'pointer', transition: 'all 0.15s' }}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={willRestoreStock}
+                                                                onChange={e => setRestoreStock(p => ({ ...p, [refund.id]: e.target.checked }))}
+                                                                style={{ width: 16, height: 16, accentColor: '#22c55e', cursor: 'pointer', flexShrink: 0 }}
+                                                            />
+                                                            <div>
+                                                                <p style={{ fontSize: '0.85rem', fontWeight: 600, color: willRestoreStock ? '#22c55e' : 'var(--text)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                                                                    <PackageCheck size={14} /> Restaurar estoque ao aprovar
+                                                                </p>
+                                                                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                                                                    As unidades voltam para o estoque de cada produto
+                                                                </p>
+                                                            </div>
+                                                        </label>
+
+                                                        <div style={{ display: 'flex', gap: 10 }}>
+                                                            <button
+                                                                onClick={() => updateStatus(refund.id, 'APPROVED')}
+                                                                disabled={updatingId === refund.id}
+                                                                className="btn btn-primary"
+                                                                style={{ flex: 1, gap: 6, background: '#22c55e', borderColor: '#22c55e' }}>
+                                                                {updatingId === refund.id ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={14} />}
+                                                                Aprovar
+                                                            </button>
+                                                            <button
+                                                                onClick={() => updateStatus(refund.id, 'REJECTED')}
+                                                                disabled={updatingId === refund.id}
+                                                                className="btn"
+                                                                style={{ flex: 1, gap: 6, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.4)', color: '#ef4444' }}>
+                                                                <X size={14} /> Recusar
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 )}
                                                 {refund.status !== 'PENDING' && (

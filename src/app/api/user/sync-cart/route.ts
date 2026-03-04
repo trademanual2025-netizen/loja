@@ -25,8 +25,10 @@ export async function POST(req: NextRequest) {
     try {
         const { items } = await req.json()
 
-        const cartData = Array.isArray(items) && items.length > 0
-            ? JSON.stringify(items.map((i: any) => ({
+        const cartItems = Array.isArray(items) ? items : []
+
+        const cartData = cartItems.length > 0
+            ? JSON.stringify(cartItems.map((i: any) => ({
                 id: i.id,
                 name: i.name,
                 price: i.price,
@@ -42,6 +44,31 @@ export async function POST(req: NextRequest) {
             where: { id: user.id },
             data: { cartData },
         })
+
+        await prisma.stockReservation.deleteMany({ where: { userId: user.id } })
+
+        if (cartItems.length > 0) {
+            const productIds = [...new Set(cartItems.map((i: any) => i.id as string))]
+            const products = await prisma.product.findMany({
+                where: { id: { in: productIds } },
+                select: { id: true, reserveMinutes: true },
+            })
+            const reserveMap = Object.fromEntries(products.map(p => [p.id, p.reserveMinutes]))
+
+            for (const item of cartItems) {
+                const minutes = reserveMap[item.id] ?? 30
+                const expiresAt = new Date(Date.now() + minutes * 60 * 1000)
+                await prisma.stockReservation.create({
+                    data: {
+                        userId: user.id,
+                        productId: item.id,
+                        variantId: item.variantId || null,
+                        quantity: item.quantity,
+                        expiresAt,
+                    },
+                })
+            }
+        }
 
         return NextResponse.json({ ok: true })
     } catch {

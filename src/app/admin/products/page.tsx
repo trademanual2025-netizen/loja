@@ -22,10 +22,11 @@ interface Product {
     category?: Category
     options?: ProductOption[]
     variants?: ProductVariant[]
+    reserveMinutes?: number
     createdAt: string
 }
 
-const emptyForm = { name: '', description: '', price: '', comparePrice: '', hasComparePrice: false, stock: '0', bannerUrl: '', active: true, categoryId: '', weight: '', height: '', width: '', length: '' }
+const emptyForm = { name: '', description: '', price: '', comparePrice: '', hasComparePrice: false, stock: '0', bannerUrl: '', active: true, categoryId: '', weight: '', height: '', width: '', length: '', reserveMinutes: '30' }
 
 export default function AdminProductsPage() {
     const [products, setProducts] = useState<Product[]>([])
@@ -85,7 +86,8 @@ export default function AdminProductsPage() {
             bannerUrl: p.bannerUrl || '',
             active: p.active,
             categoryId: p.categoryId || '',
-            weight: '', height: '', width: '', length: ''
+            weight: '', height: '', width: '', length: '',
+            reserveMinutes: String(p.reserveMinutes ?? 30)
         })
         setImages(p.images || [])
         setOptions(p.options || [])
@@ -99,6 +101,7 @@ export default function AdminProductsPage() {
                 height: data.height ? String(data.height) : '',
                 width: data.width ? String(data.width) : '',
                 length: data.length ? String(data.length) : '',
+                reserveMinutes: String(data.reserveMinutes ?? 30),
             }))
             if (data.options) setOptions(data.options)
             if (data.variants) setVariants(data.variants)
@@ -187,6 +190,7 @@ export default function AdminProductsPage() {
                 height: safeParseFloat(form.height),
                 width: safeParseFloat(form.width),
                 length: safeParseFloat(form.length),
+                reserveMinutes: Math.max(1, parseInt(form.reserveMinutes) || 30),
                 images,
                 options: (options || []).filter(o => o.name && o.name.trim() !== ''),
                 variants: (variants || []).map(v => ({
@@ -392,6 +396,12 @@ export default function AdminProductsPage() {
                                             {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                         </select>
                                     </div>
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">Reserva de Estoque no Carrinho (minutos)</label>
+                                    <input className="input" type="number" min="1" max="1440" value={form.reserveMinutes} onChange={e => setForm(f => ({ ...f, reserveMinutes: e.target.value }))} />
+                                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 4, display: 'block' }}>Tempo que o item fica reservado ao ser adicionado ao carrinho. Padrão: 30 minutos.</span>
                                 </div>
 
                                 {/* Envio */}

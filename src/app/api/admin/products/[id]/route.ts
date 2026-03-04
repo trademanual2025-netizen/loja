@@ -35,7 +35,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     try {
         const { id } = await params
         const body = await req.json()
-        const { name, description, price, comparePrice, stock, images, bannerUrl, active, categoryId, options, variants, weight, height, width, length } = body
+        const { name, description, price, comparePrice, stock, images, bannerUrl, active, categoryId, options, variants, weight, height, width, length, reserveMinutes } = body
 
         const safeParseFloat = (val: any) => {
             if (val === undefined || val === null || val === '') return null
@@ -69,6 +69,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
                 ...(height !== undefined && { height: safeParseFloat(height) }),
                 ...(width !== undefined && { width: safeParseFloat(width) }),
                 ...(length !== undefined && { length: safeParseFloat(length) }),
+                ...(reserveMinutes !== undefined && { reserveMinutes: Math.max(1, parseInt(String(reserveMinutes)) || 30) }),
             }
         })
 

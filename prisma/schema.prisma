@@ -64,12 +64,27 @@ model Product {
   height         Float?
   width          Float?
   length         Float?
+  reserveMinutes Int      @default(30)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  orderItems OrderItem[]
-  options    ProductOption[]
-  variants   ProductVariant[]
+  orderItems   OrderItem[]
+  options      ProductOption[]
+  variants     ProductVariant[]
+  reservations StockReservation[]
+}
+
+model StockReservation {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId String?
+  quantity  Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId, variantId])
 }
 
 model ProductOption {

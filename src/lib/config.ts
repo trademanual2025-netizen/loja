@@ -1,19 +1,33 @@
 import { prisma } from './prisma'
+import { unstable_cache, revalidateTag } from 'next/cache'
 
-const cache = new Map<string, { value: string; ts: number }>()
-const CACHE_TTL = 60_000
+const localCache = new Map<string, { value: string; ts: number }>()
+const LOCAL_TTL = 60_000
+
+const fetchAllSettingsFromDb = unstable_cache(
+    async () => {
+        const rows = await prisma.settings.findMany()
+        const map: Record<string, string> = {}
+        for (const r of rows) map[r.key] = r.value
+        return map
+    },
+    ['all-settings'],
+    { revalidate: 300, tags: ['settings'] }
+)
 
 export async function getSetting(key: string): Promise<string | null> {
-    const cached = cache.get(key)
-    if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.value
+    const cached = localCache.get(key)
+    if (cached && Date.now() - cached.ts < LOCAL_TTL) return cached.value
     try {
-        const setting = await prisma.settings.findUnique({ where: { key } })
-        if (setting) {
-            cache.set(key, { value: setting.value, ts: Date.now() })
-            return setting.value
+        const all = await fetchAllSettingsFromDb()
+        const now = Date.now()
+        for (const [k, v] of Object.entries(all)) {
+            localCache.set(k, { value: v, ts: now })
         }
-    } catch { }
-    return null
+        return all[key] ?? null
+    } catch {
+        return null
+    }
 }
 
 export async function setSetting(key: string, value: string): Promise<void> {
@@ -22,39 +36,33 @@ export async function setSetting(key: string, value: string): Promise<void> {
         update: { value },
         create: { key, value },
     })
-    cache.set(key, { value, ts: Date.now() })
+    localCache.set(key, { value, ts: Date.now() })
+    revalidateTag('settings')
 }
 
 export function clearSettingsCache(keys?: string[]): void {
     if (keys && keys.length > 0) {
-        keys.forEach(k => cache.delete(k))
+        keys.forEach(k => localCache.delete(k))
     } else {
-        cache.clear()
+        localCache.clear()
     }
 }
 
 export async function getSettings(keys: string[]): Promise<Record<string, string>> {
-    const now = Date.now()
-    const missing = keys.filter(k => {
-        const c = cache.get(k)
-        return !c || now - c.ts >= CACHE_TTL
-    })
-
-    if (missing.length > 0) {
-        const settings = await prisma.settings.findMany({
-            where: { key: { in: missing } },
-        })
-        for (const s of settings) {
-            cache.set(s.key, { value: s.value, ts: now })
+    try {
+        const all = await fetchAllSettingsFromDb()
+        const now = Date.now()
+        for (const [k, v] of Object.entries(all)) {
+            localCache.set(k, { value: v, ts: now })
         }
+        const result: Record<string, string> = {}
+        for (const k of keys) {
+            if (all[k] !== undefined) result[k] = all[k]
+        }
+        return result
+    } catch {
+        return {}
     }
-
-    const result: Record<string, string> = {}
-    for (const k of keys) {
-        const c = cache.get(k)
-        if (c) result[k] = c.value
-    }
-    return result
 }
 
 export const SETTINGS_KEYS = {

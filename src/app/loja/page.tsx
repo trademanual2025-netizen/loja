@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { getSetting, getSettings, SETTINGS_KEYS } from '@/lib/config'
+import { getSettings, SETTINGS_KEYS } from '@/lib/config'
 import { getAuthUser } from '@/lib/auth'
 import { StoreHeader } from '@/components/store/StoreHeader'
 import { ProductFilter } from '@/components/store/ProductFilter'
@@ -44,12 +44,8 @@ export default async function LojaPage({
   searchParams: Promise<{ search?: string; category?: string }>
 }) {
   const params = await searchParams
-  const perPageSetting = await getSetting(SETTINGS_KEYS.STORE_PRODUCTS_PER_PAGE)
-  const perPage = parseInt(perPageSetting || '24')
 
-  const [productsData, categories, storeSettings, user, cookieStore] = await Promise.all([
-    getProducts(params.search, params.category, perPage),
-    getCategories(),
+  const [storeSettings, categories, user, cookieStore] = await Promise.all([
     getSettings([
       SETTINGS_KEYS.STORE_NAME,
       SETTINGS_KEYS.STORE_LOGO,
@@ -61,9 +57,13 @@ export default async function LojaPage({
       SETTINGS_KEYS.STORE_INSTALLMENTS_MIN_VALUE,
       SETTINGS_KEYS.STORE_FOOTER_TEXT,
     ]),
+    getCategories(),
     getAuthUser(),
     cookies(),
   ])
+
+  const perPage = parseInt(storeSettings[SETTINGS_KEYS.STORE_PRODUCTS_PER_PAGE] || '24')
+  const productsData = await getProducts(params.search, params.category, perPage)
 
   const localeCookie = cookieStore.get('NEXT_LOCALE')?.value as Locale
   const currentLocale = (localeCookie && dictionaries[localeCookie]) ? localeCookie : defaultLocale

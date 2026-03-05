@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "sonner";
 import { CartSync } from "@/components/store/CartSync";
 import { CartNotification } from "@/components/store/CartNotification";
+import { NavigationProgress } from "@/components/NavigationProgress";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -109,6 +110,7 @@ export default async function RootLayout({
       </head>
       <body className={inter.className} suppressHydrationWarning>
         <ThemeProvider>
+          <NavigationProgress />
           {fbEnabled && fbPixelId && <FacebookPixel pixelId={fbPixelId} />}
           {googleEnabled && googleAdsId && <GoogleAds adsId={googleAdsId} />}
           <Toaster theme="dark" position="bottom-center" />

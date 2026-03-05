@@ -22,7 +22,9 @@ export default function proxy(req: NextRequest) {
         !pathname.startsWith('/admin/login')
 
     const isAdminApi = pathname.startsWith('/api/admin') &&
-        !pathname.startsWith('/api/admin/logout')
+        !pathname.startsWith('/api/admin/logout') &&
+        !pathname.startsWith('/api/admin/login') &&
+        !pathname.startsWith('/api/admin/setup')
 
     if (isAdminPage || isAdminApi) {
         const payload = verifyAdminCookie(req)

@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
 
         // Estoque já decrementado — só dispara webhook de comprador
         if (order.status === 'PAID') {
-            dispatchBuyerWebhook(order).catch(() => {})
+            dispatchBuyerWebhook(order as any).catch(() => {})
         }
 
         const response: Record<string, unknown> = {

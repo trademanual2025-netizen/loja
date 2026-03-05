@@ -100,7 +100,7 @@ export async function dispatchBuyerWebhook(order: {
     total: number
     zipCode: string
     street: string
-    number: string
+    number: string | null
     complement: string | null
     neighborhood: string
     city: string

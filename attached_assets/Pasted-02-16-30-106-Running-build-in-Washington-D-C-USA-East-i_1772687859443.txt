@@ -1,0 +1,68 @@
+02:16:30.106 Running build in Washington, D.C., USA (East) – iad1
+02:16:30.107 Build machine configuration: 2 cores, 8 GB
+02:16:30.233 Cloning github.com/Giovana2026/loja (Branch: main, Commit: c983b09)
+02:16:30.234 Previous build caches not available.
+02:16:31.902 Cloning completed: 1.668s
+02:16:33.122 Running "vercel build"
+02:16:34.092 Running "install" command: `npm install --legacy-peer-deps`...
+02:16:54.632 
+02:16:54.634 added 524 packages, and audited 525 packages in 20s
+02:16:54.634 
+02:16:54.634 167 packages are looking for funding
+02:16:54.635   run `npm fund` for details
+02:16:54.717 
+02:16:54.717 11 vulnerabilities (5 moderate, 6 high)
+02:16:54.719 
+02:16:54.719 To address issues that do not require attention, run:
+02:16:54.719   npm audit fix
+02:16:54.719 
+02:16:54.720 To address all issues possible (including breaking changes), run:
+02:16:54.720   npm audit fix --force
+02:16:54.720 
+02:16:54.720 Some issues need review, and may require choosing
+02:16:54.721 a different dependency.
+02:16:54.726 
+02:16:54.726 Run `npm audit` for details.
+02:16:54.797 Detected Next.js version: 16.1.6
+02:16:54.802 Running "npm run build"
+02:16:54.904 
+02:16:54.908 > loja@0.1.0 build
+02:16:54.908 > prisma generate && next build
+02:16:54.908 
+02:16:55.877 Loaded Prisma config from prisma.config.ts.
+02:16:55.877 
+02:16:56.027 Prisma schema loaded from prisma/schema.prisma.
+02:16:56.386 
+02:16:56.386 ✔ Generated Prisma Client (v7.4.1) to ./node_modules/@prisma/client in 236ms
+02:16:56.387 
+02:16:56.387 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+02:16:56.387 
+02:16:56.387 
+02:16:57.178 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+02:16:57.178 This information is used to shape Next.js' roadmap and prioritize features.
+02:16:57.179 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+02:16:57.179 https://nextjs.org/telemetry
+02:16:57.179 
+02:16:57.191 ▲ Next.js 16.1.6 (Turbopack)
+02:16:57.192 - Environments: .env
+02:16:57.192 
+02:16:57.240   Creating an optimized production build ...
+02:17:11.462 ✓ Compiled successfully in 13.7s
+02:17:11.465   Running TypeScript ...
+02:17:21.996 Failed to compile.
+02:17:21.996 
+02:17:21.996 ./src/app/api/checkout/mercadopago/route.ts:138:34
+02:17:21.997 Type error: Argument of type '{ user: { number: string | null; password: string; id: string; name: string; createdAt: Date; active: boolean; updatedAt: Date; email: string; avatarUrl: string | null; phone: string | null; ... 7 more ...; cartData: string | null; }; items: ({ ...; } & { ...; })[]; } & { ...; }' is not assignable to parameter of type '{ id: string; gateway: string; gatewayId: string | null; subtotal: number; shippingCost: number; total: number; zipCode: string; street: string; number: string; complement: string | null; neighborhood: string; city: string; state: string; user: { ...; }; items: { ...; }[]; }'.
+02:17:21.997   Types of property 'number' are incompatible.
+02:17:21.997     Type 'string | null' is not assignable to type 'string'.
+02:17:21.997       Type 'null' is not assignable to type 'string'.
+02:17:21.997 
+02:17:21.997 [0m [90m 136 |[39m         [90m// Estoque já decrementado — só dispara webhook de comprador[39m
+02:17:21.997  [90m 137 |[39m         [36mif[39m (order[33m.[39mstatus [33m===[39m [32m'PAID'[39m) {
+02:17:21.997 [31m[1m>[22m[39m[90m 138 |[39m             dispatchBuyerWebhook(order)[33m.[39m[36mcatch[39m(() [33m=>[39m {})
+02:17:21.997  [90m     |[39m                                  [31m[1m^[22m[39m
+02:17:21.997  [90m 139 |[39m         }
+02:17:21.997  [90m 140 |[39m
+02:17:21.997  [90m 141 |[39m         [36mconst[39m response[33m:[39m [33mRecord[39m[33m<[39m[33mstring[39m[33m,[39m unknown[33m>[39m [33m=[39m {[0m
+02:17:22.050 Next.js build worker exited with code: 1 and signal: null
+02:17:22.099 Error: Command "npm run build" exited with 1

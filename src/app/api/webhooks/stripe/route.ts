@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
                 // Pedido antigo (sem reserva) — decrementa agora para compatibilidade
                 decreaseStock(updated.items).catch((err) => { console.error('[Stripe Webhook] Erro estoque:', err) })
             }
-            dispatchBuyerWebhook(updated).catch((err) => { console.error('[Stripe Webhook] Erro webhook:', err) })
+            dispatchBuyerWebhook(updated as any).catch((err) => { console.error('[Stripe Webhook] Erro webhook:', err) })
             console.log(`[Stripe Webhook] Pedido ${order.id} atualizado: ${order.status} → PAID`)
         }
     }

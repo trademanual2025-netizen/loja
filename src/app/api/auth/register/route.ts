@@ -2,9 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { dispatchLeadWebhook } from '@/lib/webhooks'
+import { rateLimit, getIP } from '@/lib/rate-limit'
 
 export async function POST(req: NextRequest) {
     try {
+        const ip = getIP(req)
+        const { allowed, retryAfterSeconds } = rateLimit(`register:${ip}`, 5, 60 * 60 * 1000)
+        if (!allowed) {
+            return NextResponse.json(
+                { error: `Muitas tentativas. Tente novamente em ${retryAfterSeconds} segundos.` },
+                { status: 429, headers: { 'Retry-After': String(retryAfterSeconds) } }
+            )
+        }
+
         const { name, email, phone, cpf, password } = await req.json()
 
         if (!name || !email || !password) {

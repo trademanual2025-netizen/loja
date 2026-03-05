@@ -3,11 +3,21 @@ import { prisma } from '@/lib/prisma'
 import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 import { sign } from 'jsonwebtoken'
+import { rateLimit, getIP } from '@/lib/rate-limit'
 
 const ADMIN_SECRET = process.env.ADMIN_JWT_SECRET || ''
 
 export async function POST(req: NextRequest) {
     try {
+        const ip = getIP(req)
+        const { allowed, retryAfterSeconds } = rateLimit(`admin-login:${ip}`, 5, 15 * 60 * 1000)
+        if (!allowed) {
+            return NextResponse.json(
+                { error: `Muitas tentativas. Tente novamente em ${retryAfterSeconds} segundos.` },
+                { status: 429, headers: { 'Retry-After': String(retryAfterSeconds) } }
+            )
+        }
+
         if (!ADMIN_SECRET) {
             return NextResponse.json({ error: 'Configuração de segurança ausente.' }, { status: 500 })
         }

@@ -4,6 +4,7 @@ import { getAuthUser } from '@/lib/auth'
 import { cookies } from 'next/headers'
 import { dictionaries, defaultLocale, Locale } from '@/lib/i18n'
 import { LandingPageClient } from '@/components/store/LandingPageClient'
+import { sanitizeHtml } from '@/lib/sanitize'
 
 export const revalidate = 60
 
@@ -55,7 +56,7 @@ export default async function LandingPage() {
       customBannerImage={landingSettings[SETTINGS_KEYS.LANDING_CUSTOM_BANNER_IMAGE] || '/custom-jewelry-banner.png'}
       customBannerTitle={landingSettings[SETTINGS_KEYS.LANDING_CUSTOM_BANNER_TITLE] || ''}
       customBannerText={landingSettings[SETTINGS_KEYS.LANDING_CUSTOM_BANNER_TEXT] || ''}
-      aboutText={landingSettings[SETTINGS_KEYS.LANDING_ABOUT_TEXT] || ''}
+      aboutText={sanitizeHtml(landingSettings[SETTINGS_KEYS.LANDING_ABOUT_TEXT] || '')}
     />
   )
 }

@@ -116,7 +116,7 @@ function AdminTopBar({ onMenuToggle, isOpen }: { onMenuToggle: () => void; isOpe
                     cursor: 'pointer', transition: 'all 0.15s',
                 }}>
                     <AdminAvatar src={admin?.avatarUrl} initials={initials} size={32} radius={8} />
-                    <div className="hide-mobile" style={{ textAlign: 'left' }}>
+                    <div className="hide-mobile" style={{ textAlign: 'left', flexDirection: 'column', gap: 0 }}>
                         <p style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text)', lineHeight: 1.2, whiteSpace: 'nowrap', margin: 0 }}>
                             {admin?.name || 'Admin'}
                         </p>

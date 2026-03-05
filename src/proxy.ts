@@ -4,33 +4,39 @@ import { verify } from 'jsonwebtoken'
 const JWT_SECRET = process.env.JWT_SECRET || ''
 const ADMIN_SECRET = process.env.ADMIN_JWT_SECRET || ''
 
+function verifyAdminCookie(req: NextRequest): { email: string } | null {
+    const token = req.cookies.get('admin_token')?.value
+    if (!token || !ADMIN_SECRET) return null
+    try {
+        return verify(token, ADMIN_SECRET) as { email: string }
+    } catch {
+        return null
+    }
+}
+
 export default function proxy(req: NextRequest) {
     const { pathname } = req.nextUrl
 
-    if (pathname.startsWith('/admin') &&
+    const isAdminPage = pathname.startsWith('/admin') &&
         !pathname.startsWith('/admin/setup') &&
-        !pathname.startsWith('/admin/login') &&
-        !pathname.startsWith('/api/admin/logout')) {
-        const token = req.cookies.get('admin_token')?.value
-        if (!token) {
-            if (pathname.startsWith('/api/')) {
+        !pathname.startsWith('/admin/login')
+
+    const isAdminApi = pathname.startsWith('/api/admin') &&
+        !pathname.startsWith('/api/admin/logout')
+
+    if (isAdminPage || isAdminApi) {
+        const payload = verifyAdminCookie(req)
+        if (!payload) {
+            if (isAdminApi) {
                 return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 })
             }
             return NextResponse.redirect(new URL('/admin/login', req.url))
         }
-        if (!ADMIN_SECRET) {
-            if (pathname.startsWith('/api/')) {
-                return NextResponse.json({ error: 'Configuração de segurança ausente.' }, { status: 500 })
-            }
-            return NextResponse.redirect(new URL('/admin/login', req.url))
-        }
-        try {
-            verify(token, ADMIN_SECRET)
-        } catch {
-            if (pathname.startsWith('/api/')) {
-                return NextResponse.json({ error: 'Token inválido.' }, { status: 401 })
-            }
-            return NextResponse.redirect(new URL('/admin/login', req.url))
+        // Pass verified email to API routes via request header
+        if (isAdminApi) {
+            const requestHeaders = new Headers(req.headers)
+            requestHeaders.set('x-admin-email', payload.email)
+            return NextResponse.next({ request: { headers: requestHeaders } })
         }
     }
 

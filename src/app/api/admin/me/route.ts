@@ -1,34 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verify } from 'jsonwebtoken'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
-const ADMIN_SECRET = process.env.ADMIN_JWT_SECRET || ''
-
-async function getAdminFromToken(req: NextRequest) {
-    if (!ADMIN_SECRET) return null
-    const token = req.cookies.get('admin_token')?.value
-    if (!token) return null
-    try {
-        const payload = verify(token, ADMIN_SECRET) as { email: string }
-        return await prisma.adminUser.findUnique({
-            where: { email: payload.email },
-            select: { id: true, name: true, email: true, avatarUrl: true, password: true },
-        })
-    } catch {
-        return null
-    }
+async function getAdmin(req: NextRequest) {
+    const email = req.headers.get('x-admin-email')
+    if (!email) return null
+    return prisma.adminUser.findUnique({
+        where: { email },
+        select: { id: true, name: true, email: true, avatarUrl: true, password: true },
+    })
 }
 
 export async function GET(req: NextRequest) {
-    const admin = await getAdminFromToken(req)
+    const admin = await getAdmin(req)
     if (!admin) return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 })
     const { password: _p, ...safe } = admin
     return NextResponse.json(safe)
 }
 
 export async function PATCH(req: NextRequest) {
-    const admin = await getAdminFromToken(req)
+    const admin = await getAdmin(req)
     if (!admin) return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 })
 
     const body = await req.json()

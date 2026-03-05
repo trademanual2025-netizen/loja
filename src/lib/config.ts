@@ -1,5 +1,5 @@
 import { prisma } from './prisma'
-import { unstable_cache, revalidateTag } from 'next/cache'
+import { unstable_cache } from 'next/cache'
 
 const localCache = new Map<string, { value: string; ts: number }>()
 const LOCAL_TTL = 60_000
@@ -37,7 +37,6 @@ export async function setSetting(key: string, value: string): Promise<void> {
         create: { key, value },
     })
     localCache.set(key, { value, ts: Date.now() })
-    revalidateTag('settings')
 }
 
 export function clearSettingsCache(keys?: string[]): void {

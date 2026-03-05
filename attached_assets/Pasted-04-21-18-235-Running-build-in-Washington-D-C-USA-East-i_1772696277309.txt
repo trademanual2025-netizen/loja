@@ -1,0 +1,60 @@
+04:21:18.235 Running build in Washington, D.C., USA (East) – iad1
+04:21:18.236 Build machine configuration: 2 cores, 8 GB
+04:21:18.376 Cloning github.com/Giovana2026/loja (Branch: main, Commit: c7afb33)
+04:21:20.942 Cloning completed: 2.566s
+04:21:22.593 Restored build cache from previous deployment (5ZLMTTJqbYQcPzYVaggfsgfNKnyK)
+04:21:22.852 Running "vercel build"
+04:21:23.727 Running "install" command: `npm install --legacy-peer-deps`...
+04:21:27.128 
+04:21:27.128 up to date, audited 525 packages in 3s
+04:21:27.129 
+04:21:27.129 167 packages are looking for funding
+04:21:27.129   run `npm fund` for details
+04:21:27.213 
+04:21:27.214 11 vulnerabilities (5 moderate, 6 high)
+04:21:27.214 
+04:21:27.214 To address issues that do not require attention, run:
+04:21:27.215   npm audit fix
+04:21:27.215 
+04:21:27.215 To address all issues possible (including breaking changes), run:
+04:21:27.216   npm audit fix --force
+04:21:27.216 
+04:21:27.216 Some issues need review, and may require choosing
+04:21:27.216 a different dependency.
+04:21:27.217 
+04:21:27.217 Run `npm audit` for details.
+04:21:27.253 Detected Next.js version: 16.1.6
+04:21:27.258 Running "npm run build"
+04:21:27.358 
+04:21:27.358 > loja@0.1.0 build
+04:21:27.358 > prisma generate && next build
+04:21:27.359 
+04:21:28.338 Loaded Prisma config from prisma.config.ts.
+04:21:28.338 
+04:21:28.402 Prisma schema loaded from prisma/schema.prisma.
+04:21:28.864 
+04:21:28.865 ✔ Generated Prisma Client (v7.4.1) to ./node_modules/@prisma/client in 308ms
+04:21:28.865 
+04:21:28.865 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+04:21:28.865 
+04:21:28.865 
+04:21:29.859 ▲ Next.js 16.1.6 (Turbopack)
+04:21:29.859 - Environments: .env
+04:21:29.860 
+04:21:29.907   Creating an optimized production build ...
+04:21:44.733 ✓ Compiled successfully in 14.2s
+04:21:44.734   Running TypeScript ...
+04:21:55.797 Failed to compile.
+04:21:55.797 
+04:21:55.798 ./src/lib/config.ts:40:5
+04:21:55.798 Type error: Expected 2 arguments, but got 1.
+04:21:55.798 
+04:21:55.798 [0m [90m 38 |[39m     })
+04:21:55.798  [90m 39 |[39m     localCache[33m.[39m[36mset[39m(key[33m,[39m { value[33m,[39m ts[33m:[39m [33mDate[39m[33m.[39mnow() })
+04:21:55.799 [31m[1m>[22m[39m[90m 40 |[39m     revalidateTag([32m'settings'[39m)
+04:21:55.799  [90m    |[39m     [31m[1m^[22m[39m
+04:21:55.799  [90m 41 |[39m }
+04:21:55.799  [90m 42 |[39m
+04:21:55.799  [90m 43 |[39m [36mexport[39m [36mfunction[39m clearSettingsCache(keys[33m?[39m[33m:[39m string[])[33m:[39m [36mvoid[39m {[0m
+04:21:55.845 Next.js build worker exited with code: 1 and signal: null
+04:21:55.891 Error: Command "npm run build" exited with 1

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getAuthUser } from '@/lib/auth'
+import { increaseStock } from '@/lib/inventory'
 
 export async function POST(req: Request) {
     const user = await getAuthUser()
@@ -47,6 +48,13 @@ export async function POST(req: Request) {
             }),
         },
     })
+
+    // Restaura estoque se estava reservado
+    if (existingGw.stockReserved === true) {
+        increaseStock(order.items).catch((err) => {
+            console.error('[Cancel] Erro ao restaurar estoque:', err)
+        })
+    }
 
     const cartItems = order.items.map(item => ({
         id: item.productId,

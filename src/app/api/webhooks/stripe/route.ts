@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { dispatchBuyerWebhook } from '@/lib/webhooks'
 import { getSetting, SETTINGS_KEYS } from '@/lib/config'
 import Stripe from 'stripe'
-import { decreaseStock } from '@/lib/inventory'
+import { decreaseStock, increaseStock } from '@/lib/inventory'
 
 export async function POST(req: NextRequest) {
     const body = await req.text()
@@ -36,6 +36,8 @@ export async function POST(req: NextRequest) {
             let existingGw: Record<string, unknown> = {}
             try { if (order.gatewayData) existingGw = JSON.parse(order.gatewayData) } catch {}
 
+            const stockReserved = existingGw.stockReserved === true
+
             const updated = await prisma.order.update({
                 where: { id: order.id },
                 data: {
@@ -49,7 +51,11 @@ export async function POST(req: NextRequest) {
                 },
                 include: { user: true, items: { include: { product: true } } },
             })
-            decreaseStock(updated.items).catch((err) => { console.error('[Stripe Webhook] Erro estoque:', err) })
+
+            if (!stockReserved) {
+                // Pedido antigo (sem reserva) — decrementa agora para compatibilidade
+                decreaseStock(updated.items).catch((err) => { console.error('[Stripe Webhook] Erro estoque:', err) })
+            }
             dispatchBuyerWebhook(updated).catch((err) => { console.error('[Stripe Webhook] Erro webhook:', err) })
             console.log(`[Stripe Webhook] Pedido ${order.id} atualizado: ${order.status} → PAID`)
         }
@@ -59,12 +65,14 @@ export async function POST(req: NextRequest) {
         const pi = event.data.object as Stripe.PaymentIntent
         const order = await prisma.order.findFirst({
             where: { gatewayId: pi.id },
-            select: { id: true, status: true, gatewayData: true },
+            include: { items: true },
+            // select: { id: true, status: true, gatewayData: true },
         })
         if (order && order.status === 'PENDING') {
             let existingGw: Record<string, unknown> = {}
             try { if (order.gatewayData) existingGw = JSON.parse(order.gatewayData) } catch {}
 
+            const stockReserved = existingGw.stockReserved === true
             const failReason = pi.last_payment_error?.message || pi.last_payment_error?.code || 'payment_failed'
 
             await prisma.order.update({
@@ -79,6 +87,11 @@ export async function POST(req: NextRequest) {
                     }),
                 },
             })
+
+            if (stockReserved) {
+                increaseStock(order.items).catch((err) => { console.error('[Stripe Webhook] Erro restaurar estoque:', err) })
+            }
+
             console.log(`[Stripe Webhook] Pedido ${order.id} falhou: ${failReason}`)
         }
     }

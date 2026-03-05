@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { dispatchBuyerWebhook } from '@/lib/webhooks'
 import { getSetting, SETTINGS_KEYS } from '@/lib/config'
-import { decreaseStock } from '@/lib/inventory'
+import { increaseStock } from '@/lib/inventory'
 import crypto from 'crypto'
 
 async function verifyMPSignature(req: NextRequest, body: string): Promise<boolean> {
@@ -93,6 +93,8 @@ export async function POST(req: NextRequest) {
         let existingGw: Record<string, unknown> = {}
         try { if (order.gatewayData) existingGw = JSON.parse(order.gatewayData) } catch {}
 
+        const stockReserved = existingGw.stockReserved === true
+
         const updatedGw = {
             ...existingGw,
             lastWebhookStatus: paymentData.status,
@@ -110,8 +112,18 @@ export async function POST(req: NextRequest) {
         }) as any
 
         if (newStatus === 'PAID') {
-            decreaseStock(updated.items).catch((err) => { console.error('[MP Webhook] Erro estoque:', err) })
-            dispatchBuyerWebhook(updated).catch((err) => { console.error('[MP Webhook] Erro webhook:', err) })
+            // Estoque já foi reservado no checkout — só dispara webhook de comprador
+            if (!stockReserved) {
+                // Pedido antigo (sem reserva) — decrementa agora para compatibilidade
+                const { decreaseStock } = await import('@/lib/inventory')
+                decreaseStock(updated.items).catch((err: Error) => { console.error('[MP Webhook] Erro estoque:', err) })
+            }
+            dispatchBuyerWebhook(updated).catch((err: Error) => { console.error('[MP Webhook] Erro webhook:', err) })
+        }
+
+        if (newStatus === 'CANCELLED' && stockReserved && order.status === 'PENDING') {
+            // Pedido cancelado/rejeitado — restaura estoque reservado
+            increaseStock(order.items).catch((err: Error) => { console.error('[MP Webhook] Erro restaurar estoque:', err) })
         }
 
         console.log(`[MP Webhook] Pedido ${order.id} atualizado: ${order.status} → ${newStatus}`)

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getAuthUser } from '@/lib/auth'
 import { getSetting, SETTINGS_KEYS } from '@/lib/config'
 import Stripe from 'stripe'
+import { decreaseStock, increaseStock } from '@/lib/inventory'
 
 export async function POST(req: NextRequest) {
     const session = await getAuthUser()
@@ -19,6 +20,20 @@ export async function POST(req: NextRequest) {
     const subtotal = items.reduce((s: number, i: { price: number; quantity: number }) => s + i.price * i.quantity, 0)
     const total = subtotal + shippingCost
 
+    // Reservar estoque antes de criar o pagamento
+    const stockItems = items.map((i: { id: string; quantity: number; variantId?: string }) => ({
+        productId: i.id,
+        variantId: i.variantId || null,
+        quantity: i.quantity,
+    }))
+
+    try {
+        await decreaseStock(stockItems)
+    } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Estoque insuficiente.'
+        return NextResponse.json({ error: msg }, { status: 400 })
+    }
+
     try {
         const stripe = new Stripe(secretKey)
         const paymentIntent = await stripe.paymentIntents.create({
@@ -31,6 +46,7 @@ export async function POST(req: NextRequest) {
         const gwData = {
             paymentIntentId: paymentIntent.id,
             statusDetail: paymentIntent.status,
+            stockReserved: true,
         }
 
         const order = await prisma.order.create({
@@ -57,6 +73,8 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ clientSecret: paymentIntent.client_secret, paymentIntentId: paymentIntent.id, orderId: order.id })
     } catch (err: unknown) {
+        // Se algo deu errado após reservar o estoque, restaura
+        await increaseStock(stockItems).catch(() => {})
         console.error('[Stripe Checkout] Error:', err)
         return NextResponse.json({ error: 'Erro ao criar PaymentIntent.' }, { status: 500 })
     }

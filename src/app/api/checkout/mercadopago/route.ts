@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { verify } from 'jsonwebtoken'
 import { getSetting, SETTINGS_KEYS } from '@/lib/config'
 import { dispatchBuyerWebhook } from '@/lib/webhooks'
-import { decreaseStock } from '@/lib/inventory'
+import { decreaseStock, increaseStock } from '@/lib/inventory'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'loja-secret-change-in-production'
 
@@ -17,7 +17,6 @@ async function getUserFromRequest(req: NextRequest) {
     }
 }
 
-// POST /api/checkout/mercadopago — cria pagamento
 export async function POST(req: NextRequest) {
     const session = await getUserFromRequest(req)
     if (!session) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
@@ -50,8 +49,21 @@ export async function POST(req: NextRequest) {
         })
     }
 
+    // Reservar estoque antes de criar o pagamento
+    const stockItems = items.map((i: { id: string; quantity: number; variantId?: string }) => ({
+        productId: i.id,
+        variantId: i.variantId || null,
+        quantity: i.quantity,
+    }))
+
     try {
-        // Criar pagamento no MP
+        await decreaseStock(stockItems)
+    } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Estoque insuficiente.'
+        return NextResponse.json({ error: msg }, { status: 400 })
+    }
+
+    try {
         const { MercadoPagoConfig, Payment } = await import('mercadopago')
         const client = new MercadoPagoConfig({ accessToken })
         const payment = new Payment(client)
@@ -67,6 +79,7 @@ export async function POST(req: NextRequest) {
         }
 
         if (!requestData.transaction_amount || (requestData.transaction_amount as number) <= 0) {
+            await increaseStock(stockItems).catch(() => {})
             return NextResponse.json({ error: 'Valor total inválido.' }, { status: 400 })
         }
 
@@ -77,6 +90,7 @@ export async function POST(req: NextRequest) {
         const gwData: Record<string, unknown> = {
             paymentMethod: mpPayment.payment_method_id,
             statusDetail: mpPayment.status_detail,
+            stockReserved: true,
         }
         if (mpPayment.point_of_interaction?.transaction_data) {
             const txData = mpPayment.point_of_interaction.transaction_data
@@ -91,13 +105,15 @@ export async function POST(req: NextRequest) {
             gwData.expiresAt = mpPayment.date_of_expiration
         }
 
+        const orderStatus = mpPayment.status === 'approved' ? 'PAID' : 'PENDING'
+
         const order = await prisma.order.create({
             data: {
                 userId: user.id,
                 gateway: 'mercadopago',
                 gatewayId: String(mpPayment.id),
                 gatewayData: JSON.stringify(gwData),
-                status: mpPayment.status === 'approved' ? 'PAID' : 'PENDING',
+                status: orderStatus,
                 subtotal,
                 shippingCost: shipping,
                 total,
@@ -117,10 +133,9 @@ export async function POST(req: NextRequest) {
             },
         })
 
-        // Webhook comprador se aprovado + Baixa de estoque
+        // Estoque já decrementado — só dispara webhook de comprador
         if (order.status === 'PAID') {
-            decreaseStock(order.items).catch(() => { })
-            dispatchBuyerWebhook(order).catch(() => { })
+            dispatchBuyerWebhook(order).catch(() => {})
         }
 
         const response: Record<string, unknown> = {
@@ -142,6 +157,8 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json(response)
     } catch (err: unknown) {
+        // Se algo deu errado após reservar o estoque, restaura
+        await increaseStock(stockItems).catch(() => {})
         console.error('[MercadoPago] Error:', err)
         let msg = 'Erro ao processar pagamento.'
         if (err && typeof err === 'object') {

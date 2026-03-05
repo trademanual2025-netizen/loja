@@ -1,6 +1,8 @@
 import { prisma } from './prisma'
 
-export async function decreaseStock(items: { productId: string; variantId?: string | null; quantity: number }[]) {
+type StockItem = { productId: string; variantId?: string | null; quantity: number }
+
+export async function decreaseStock(items: StockItem[]) {
     return prisma.$transaction(async (tx) => {
         for (const item of items) {
             if (item.variantId) {
@@ -15,11 +17,29 @@ export async function decreaseStock(items: { productId: string; variantId?: stri
             } else {
                 const product = await tx.product.findUnique({ where: { id: item.productId } })
                 if (!product || product.stock < item.quantity) {
-                    throw new Error(`Estoque insuficiente para produto ${item.productId}`)
+                    throw new Error(`Estoque insuficiente para o produto ${item.productId}`)
                 }
                 await tx.product.update({
                     where: { id: item.productId },
                     data: { stock: { decrement: item.quantity } }
+                })
+            }
+        }
+    })
+}
+
+export async function increaseStock(items: StockItem[]) {
+    return prisma.$transaction(async (tx) => {
+        for (const item of items) {
+            if (item.variantId) {
+                await tx.productVariant.update({
+                    where: { id: item.variantId },
+                    data: { stock: { increment: item.quantity } }
+                })
+            } else {
+                await tx.product.update({
+                    where: { id: item.productId },
+                    data: { stock: { increment: item.quantity } }
                 })
             }
         }

@@ -41,6 +41,6 @@ build = ["npm", "run", "build"]
 [userenv]
 
 [userenv.shared]
-NEON_DATABASE_URL = "postgresql://neondb_owner:npg_hxj7qgkZuoI5@ep-nameless-wind-ac3q998i-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require"
 JWT_SECRET = "loja-jwt-secret-mm5sc5pv6gexykvl15m"
 ADMIN_JWT_SECRET = "admin-jwt-secret-mm5sc5pvsw4if8ttqo"
+NEON_DATABASE_URL = "postgresql://neondb_owner:npg_BHoNiM2s0hPG@ep-polished-resonance-aiplvsp0-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require"

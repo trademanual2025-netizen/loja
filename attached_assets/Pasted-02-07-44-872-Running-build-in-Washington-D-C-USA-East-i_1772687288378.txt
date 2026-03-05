@@ -1,0 +1,53 @@
+02:07:44.872 Running build in Washington, D.C., USA (East) – iad1
+02:07:44.873 Build machine configuration: 2 cores, 8 GB
+02:07:44.883 Cloning github.com/Giovana2026/loja (Branch: main, Commit: ea76bfa)
+02:07:44.884 Skipping build cache, deployment was triggered without cache.
+02:07:46.770 Cloning completed: 1.887s
+02:07:47.834 Running "vercel build"
+02:07:48.877 Installing dependencies...
+02:07:50.116 npm warn ERESOLVE overriding peer dependency
+02:07:50.117 npm warn While resolving: @auth/core@0.41.0
+02:07:50.118 npm warn Found: nodemailer@8.0.1
+02:07:50.118 npm warn node_modules/nodemailer
+02:07:50.118 npm warn   nodemailer@"^8.0.1" from the root project
+02:07:50.118 npm warn
+02:07:50.119 npm warn Could not resolve dependency:
+02:07:50.119 npm warn peerOptional nodemailer@"^6.8.0" from @auth/core@0.41.0
+02:07:50.119 npm warn node_modules/@auth/core
+02:07:50.119 npm warn   @auth/core@"0.41.0" from next-auth@5.0.0-beta.30
+02:07:50.120 npm warn   node_modules/next-auth
+02:07:50.120 npm warn
+02:07:50.120 npm warn Conflicting peer dependency: nodemailer@6.10.1
+02:07:50.120 npm warn node_modules/nodemailer
+02:07:50.121 npm warn   peerOptional nodemailer@"^6.8.0" from @auth/core@0.41.0
+02:07:50.121 npm warn   node_modules/@auth/core
+02:07:50.121 npm warn     @auth/core@"0.41.0" from next-auth@5.0.0-beta.30
+02:07:50.121 npm warn     node_modules/next-auth
+02:07:50.147 npm error code ERESOLVE
+02:07:50.148 npm error ERESOLVE could not resolve
+02:07:50.148 npm error
+02:07:50.149 npm error While resolving: next-auth@5.0.0-beta.30
+02:07:50.150 npm error Found: nodemailer@8.0.1
+02:07:50.150 npm error node_modules/nodemailer
+02:07:50.151 npm error   nodemailer@"^8.0.1" from the root project
+02:07:50.151 npm error
+02:07:50.151 npm error Could not resolve dependency:
+02:07:50.151 npm error peerOptional nodemailer@"^7.0.7" from next-auth@5.0.0-beta.30
+02:07:50.152 npm error node_modules/next-auth
+02:07:50.152 npm error   next-auth@"^5.0.0-beta.30" from the root project
+02:07:50.152 npm error
+02:07:50.152 npm error Conflicting peer dependency: nodemailer@7.0.13
+02:07:50.152 npm error node_modules/nodemailer
+02:07:50.152 npm error   peerOptional nodemailer@"^7.0.7" from next-auth@5.0.0-beta.30
+02:07:50.152 npm error   node_modules/next-auth
+02:07:50.153 npm error     next-auth@"^5.0.0-beta.30" from the root project
+02:07:50.153 npm error
+02:07:50.153 npm error Fix the upstream dependency conflict, or retry
+02:07:50.153 npm error this command with --force or --legacy-peer-deps
+02:07:50.153 npm error to accept an incorrect (and potentially broken) dependency resolution.
+02:07:50.153 npm error
+02:07:50.153 npm error
+02:07:50.153 npm error For a full report see:
+02:07:50.153 npm error /vercel/.npm/_logs/2026-03-05T05_07_49_125Z-eresolve-report.txt
+02:07:50.154 npm error A complete log of this run can be found in: /vercel/.npm/_logs/2026-03-05T05_07_49_125Z-debug-0.log
+02:07:50.188 Error: Command "npm install" exited with 1

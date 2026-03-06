@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import {
     MessageSquare, Plus, Edit2, Trash2, Send, RefreshCw,
     Clock, Wifi, WifiOff, Loader2, Check, X, ChevronDown, ChevronUp,
-    History, Zap, AlertCircle
+    History, Zap, AlertCircle, RotateCcw
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -25,11 +25,11 @@ const TRIGGER_OPTIONS = Object.entries(TRIGGER_LABELS).filter(([k]) => k !== 'ma
 
 const VARIABLES_HELP = [
     { v: '{{nome}}', desc: 'Nome do cliente' },
-    { v: '{{pedido}}', desc: 'Número do pedido (últimos 8 caracteres)' },
-    { v: '{{total}}', desc: 'Valor total do pedido' },
-    { v: '{{rastreio}}', desc: 'Código de rastreio' },
+    { v: '{{pedido}}', desc: 'Número do pedido' },
+    { v: '{{total}}', desc: 'Valor total (ex: 150,00)' },
     { v: '{{produto}}', desc: 'Nome do primeiro produto' },
-    { v: '{{link_pedido}}', desc: 'Link para a página do pedido' },
+    { v: '{{rastreio}}', desc: 'Código de rastreio' },
+    { v: '{{link_pedido}}', desc: 'Link para o pedido' },
 ]
 
 interface Template {
@@ -56,6 +56,15 @@ const emptyTpl = (): Partial<Template> => ({
     name: '', trigger: 'order_paid', delayMinutes: 0, message: '', active: true,
 })
 
+function highlightTags(text: string) {
+    const parts = text.split(/({{[^}]+}})/)
+    return parts.map((part, i) =>
+        part.startsWith('{{') && part.endsWith('}}')
+            ? <mark key={i} style={{ background: 'rgba(200,160,80,0.18)', color: 'rgba(200,160,80,1)', borderRadius: 3, padding: '1px 3px', fontWeight: 700, fontFamily: 'monospace', fontSize: '0.9em' }}>{part}</mark>
+            : <span key={i}>{part}</span>
+    )
+}
+
 export default function ComunicacaoPage() {
     const [tab, setTab] = useState<'modelos' | 'historico' | 'envio'>('modelos')
     const [templates, setTemplates] = useState<Template[]>([])
@@ -69,8 +78,8 @@ export default function ComunicacaoPage() {
     const [logsPage, setLogsPage] = useState(1)
     const [logsTotal, setLogsTotal] = useState(0)
     const [logsLoading, setLogsLoading] = useState(false)
-    const [queueCount, setQueueCount] = useState(0)
     const [processing, setProcessing] = useState(false)
+    const [resetting, setResetting] = useState(false)
     const [manualPhone, setManualPhone] = useState('')
     const [manualMsg, setManualMsg] = useState('')
     const [sending, setSending] = useState(false)
@@ -172,6 +181,18 @@ export default function ComunicacaoPage() {
         setProcessing(false)
     }
 
+    async function resetTemplates() {
+        if (!confirm('Isso vai apagar TODOS os modelos atuais e restaurar os padrões. Confirmar?')) return
+        setResetting(true)
+        try {
+            const r = await fetch('/api/admin/comunicacao/templates/reset', { method: 'POST' })
+            const data = await r.json()
+            setTemplates(data)
+            toast.success('Modelos restaurados com sucesso!')
+        } catch { toast.error('Erro ao restaurar modelos.') }
+        setResetting(false)
+    }
+
     async function sendManual() {
         if (!manualPhone.trim() || !manualMsg.trim()) {
             toast.error('Preencha o telefone e a mensagem.')
@@ -250,16 +271,19 @@ export default function ComunicacaoPage() {
             {/* MODELOS TAB */}
             {tab === 'modelos' && (
                 <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
-                        <div>
-                            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                                Configure as mensagens automáticas enviadas para clientes em cada evento.
-                            </p>
-                        </div>
-                        <div style={{ display: 'flex', gap: 8 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                            Configure as mensagens automáticas enviadas para clientes a cada evento.<br />
+                            Use as <strong style={{ color: 'rgba(200,160,80,1)' }}>{'{{tags}}'}</strong> para inserir dados reais do pedido e cliente.
+                        </p>
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                             <button onClick={processQueue} disabled={processing} className="btn" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'var(--bg-card2)', border: '1px solid var(--border)', cursor: 'pointer', fontSize: '0.82rem' }}>
                                 {processing ? <Loader2 size={14} /> : <Clock size={14} />}
-                                Processar fila agendada
+                                Processar fila
+                            </button>
+                            <button onClick={resetTemplates} disabled={resetting} className="btn" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'var(--bg-card2)', border: '1px solid var(--border)', cursor: 'pointer', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                                {resetting ? <Loader2 size={14} /> : <RotateCcw size={14} />}
+                                Restaurar padrão
                             </button>
                             <button onClick={() => { setEditing(emptyTpl()); setEditingId(null) }} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                 <Plus size={15} /> Novo Modelo
@@ -271,14 +295,14 @@ export default function ComunicacaoPage() {
                     <div style={{ marginBottom: 20 }}>
                         <button onClick={() => setShowVars(v => !v)} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: '1px solid var(--border)', padding: '7px 12px', borderRadius: 8, cursor: 'pointer', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
                             {showVars ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                            Variáveis disponíveis nas mensagens
+                            Tags disponíveis nas mensagens
                         </button>
                         {showVars && (
-                            <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                            <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                                 {VARIABLES_HELP.map(({ v, desc }) => (
-                                    <div key={v} style={{ padding: '5px 10px', background: 'var(--bg-card2)', borderRadius: 6, border: '1px solid var(--border)', fontSize: '0.8rem' }}>
-                                        <code style={{ color: 'var(--primary)', fontWeight: 700 }}>{v}</code>
-                                        <span style={{ color: 'var(--text-muted)', marginLeft: 6 }}>{desc}</span>
+                                    <div key={v} style={{ padding: '6px 12px', background: 'var(--bg-card2)', borderRadius: 8, border: '1px solid var(--border)', fontSize: '0.82rem', display: 'flex', gap: 8, alignItems: 'center' }}>
+                                        <code style={{ color: 'rgba(200,160,80,1)', fontWeight: 700, background: 'rgba(200,160,80,0.12)', padding: '1px 5px', borderRadius: 4 }}>{v}</code>
+                                        <span style={{ color: 'var(--text-muted)' }}>{desc}</span>
                                     </div>
                                 ))}
                             </div>
@@ -288,14 +312,18 @@ export default function ComunicacaoPage() {
                     {loading ? (
                         <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}><Loader2 size={24} /></div>
                     ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
                             {Object.entries(TRIGGER_LABELS).filter(([k]) => k !== 'manual').map(([trigger, triggerLabel]) => {
                                 const tpls = groupedTemplates[trigger] || []
                                 return (
                                     <div key={trigger}>
-                                        <p style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                            {triggerLabel}
-                                        </p>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                                            <p style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                                {triggerLabel}
+                                            </p>
+                                            <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{tpls.length} modelo{tpls.length !== 1 ? 's' : ''}</span>
+                                        </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                                             {tpls.map(tpl => (
                                                 <TemplateCard
@@ -307,8 +335,8 @@ export default function ComunicacaoPage() {
                                                 />
                                             ))}
                                             {tpls.length === 0 && (
-                                                <div style={{ padding: '12px 16px', background: 'var(--bg-card2)', borderRadius: 8, fontSize: '0.82rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                                                    Nenhum modelo para este gatilho. Clique em "Novo Modelo" para adicionar.
+                                                <div style={{ padding: '12px 16px', background: 'var(--bg-card2)', borderRadius: 8, fontSize: '0.82rem', color: 'var(--text-muted)', fontStyle: 'italic', border: '1px dashed var(--border)' }}>
+                                                    Nenhum modelo para este gatilho.
                                                 </div>
                                             )}
                                         </div>
@@ -347,9 +375,9 @@ export default function ComunicacaoPage() {
                                             <span style={{ padding: '2px 8px', borderRadius: 4, background: 'var(--bg-card2)', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                                                 {TRIGGER_LABELS[log.trigger] || log.trigger}
                                             </span>
-                                            {log.orderId && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Pedido: #{log.orderId.slice(-8).toUpperCase()}</span>}
+                                            {log.orderId && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>#{log.orderId.slice(-8).toUpperCase()}</span>}
                                         </div>
-                                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{log.message.substring(0, 120)}{log.message.length > 120 ? '...' : ''}</p>
+                                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{log.message.substring(0, 140)}{log.message.length > 140 ? '…' : ''}</p>
                                         {log.error && <p style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: 4 }}>{log.error}</p>}
                                     </div>
                                     <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', flexShrink: 0, whiteSpace: 'nowrap' }}>
@@ -374,7 +402,7 @@ export default function ComunicacaoPage() {
             {tab === 'envio' && (
                 <div style={{ maxWidth: 560 }}>
                     <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: 20, lineHeight: 1.6 }}>
-                        Envie uma mensagem diretamente para qualquer número de WhatsApp. Use para suporte, avisos pontuais ou testes.
+                        Envie uma mensagem diretamente para qualquer número. Use para suporte pontual ou testes de template.
                     </p>
                     <div className="form-group">
                         <label className="form-label">Telefone (com DDD)</label>
@@ -384,19 +412,19 @@ export default function ComunicacaoPage() {
                             value={manualPhone}
                             onChange={e => setManualPhone(e.target.value)}
                         />
-                        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 4 }}>O código do país será adicionado automaticamente se necessário.</p>
+                        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 4 }}>O código do país (+55) é adicionado automaticamente.</p>
                     </div>
                     <div className="form-group">
                         <label className="form-label">Mensagem</label>
                         <textarea
                             className="input"
-                            rows={6}
-                            placeholder="Digite a mensagem..."
+                            rows={7}
+                            placeholder="Digite a mensagem... Use *negrito*, _itálico_ e `monoespaçado`"
                             value={manualMsg}
                             onChange={e => setManualMsg(e.target.value)}
-                            style={{ resize: 'vertical' }}
+                            style={{ resize: 'vertical', fontFamily: 'monospace', fontSize: '0.88rem' }}
                         />
-                        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 4 }}>{manualMsg.length} caracteres • Use *negrito* e _itálico_ no WhatsApp</p>
+                        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 4 }}>{manualMsg.length} caracteres</p>
                     </div>
                     <button onClick={sendManual} disabled={sending} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         {sending ? <Loader2 size={16} /> : <Send size={16} />}
@@ -407,60 +435,68 @@ export default function ComunicacaoPage() {
 
             {/* Modal editor de template */}
             {editing && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-                    <div className="card" style={{ width: '100%', maxWidth: 560, maxHeight: '90vh', overflowY: 'auto' }}>
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+                    <div className="card" style={{ width: '100%', maxWidth: 620, maxHeight: '92vh', overflowY: 'auto' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                             <h2 style={{ fontWeight: 700, fontSize: '1.1rem' }}>{editingId ? 'Editar Modelo' : 'Novo Modelo'}</h2>
                             <button onClick={() => { setEditing(null); setEditingId(null) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={20} /></button>
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                             <div className="form-group">
                                 <label className="form-label">Nome do modelo</label>
                                 <input className="input" placeholder="ex: Confirmação de pagamento" value={editing.name || ''} onChange={e => setEditing(p => ({ ...p, name: e.target.value }))} />
                             </div>
 
-                            <div className="form-group">
-                                <label className="form-label">Gatilho (quando enviar)</label>
-                                <select className="input" value={editing.trigger || 'order_paid'} onChange={e => setEditing(p => ({ ...p, trigger: e.target.value }))}>
-                                    {TRIGGER_OPTIONS.map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                                </select>
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">Atraso no envio</label>
-                                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                                    <input className="input" type="number" min={0} max={10080} style={{ width: 100 }} value={editing.delayMinutes || 0} onChange={e => setEditing(p => ({ ...p, delayMinutes: parseInt(e.target.value) || 0 }))} />
-                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>minutos após o evento (0 = imediato)</span>
+                            <div style={{ display: 'flex', gap: 12 }}>
+                                <div className="form-group" style={{ flex: 2 }}>
+                                    <label className="form-label">Gatilho (quando enviar)</label>
+                                    <select className="input" value={editing.trigger || 'order_paid'} onChange={e => setEditing(p => ({ ...p, trigger: e.target.value }))}>
+                                        {TRIGGER_OPTIONS.map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                                    </select>
                                 </div>
-                                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 4 }}>
-                                    Ex: 30 min → ótimo para follow-up de carrinho abandonado
-                                </p>
+                                <div className="form-group" style={{ flex: 1 }}>
+                                    <label className="form-label">Atraso (minutos)</label>
+                                    <input className="input" type="number" min={0} max={10080} placeholder="0 = imediato" value={editing.delayMinutes ?? 0} onChange={e => setEditing(p => ({ ...p, delayMinutes: parseInt(e.target.value) || 0 }))} />
+                                </div>
                             </div>
 
                             <div className="form-group">
                                 <label className="form-label">Mensagem</label>
                                 <textarea
                                     className="input"
-                                    rows={8}
-                                    placeholder="Olá, {{nome}}! Seu pedido #{{pedido}} foi confirmado..."
+                                    rows={10}
                                     value={editing.message || ''}
                                     onChange={e => setEditing(p => ({ ...p, message: e.target.value }))}
-                                    style={{ resize: 'vertical', fontFamily: 'monospace', fontSize: '0.85rem' }}
+                                    style={{ resize: 'vertical', fontFamily: 'monospace', fontSize: '0.85rem', lineHeight: 1.6 }}
+                                    placeholder="Escreva a mensagem aqui. Use *negrito*, _itálico_ e as tags abaixo."
                                 />
-                                <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                                    {VARIABLES_HELP.map(({ v }) => (
-                                        <button key={v} onClick={() => setEditing(p => p ? ({ ...p, message: (p.message || '') + v }) : p)}
-                                            style={{ padding: '2px 8px', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 4, cursor: 'pointer', fontSize: '0.75rem', color: 'var(--primary)' }}>
-                                            {v}
-                                        </button>
-                                    ))}
+                                <div style={{ marginTop: 8 }}>
+                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 5 }}>Clique para inserir uma tag:</p>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                                        {VARIABLES_HELP.map(({ v, desc }) => (
+                                            <button key={v} title={desc} onClick={() => setEditing(p => p ? ({ ...p, message: (p.message || '') + v }) : p)}
+                                                style={{ padding: '3px 9px', background: 'rgba(200,160,80,0.1)', border: '1px solid rgba(200,160,80,0.3)', borderRadius: 5, cursor: 'pointer', fontSize: '0.78rem', color: 'rgba(200,160,80,1)', fontFamily: 'monospace', fontWeight: 700 }}>
+                                                {v}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
 
+                            {/* Preview */}
+                            {editing.message && (
+                                <div>
+                                    <p style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Prévia da mensagem</p>
+                                    <div style={{ padding: '12px 14px', background: 'rgba(37,211,102,0.06)', border: '1px solid rgba(37,211,102,0.2)', borderRadius: 10, fontSize: '0.84rem', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                                        {highlightTags(editing.message)}
+                                    </div>
+                                </div>
+                            )}
+
                             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                                 <input type="checkbox" id="active-chk" checked={editing.active !== false} onChange={e => setEditing(p => ({ ...p, active: e.target.checked }))} style={{ width: 16, height: 16, cursor: 'pointer' }} />
-                                <label htmlFor="active-chk" style={{ fontSize: '0.88rem', cursor: 'pointer' }}>Ativo (será enviado automaticamente)</label>
+                                <label htmlFor="active-chk" style={{ fontSize: '0.88rem', cursor: 'pointer' }}>Ativo — será enviado automaticamente</label>
                             </div>
 
                             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
@@ -484,10 +520,11 @@ function TemplateCard({ tpl, onToggle, onEdit, onDelete }: { tpl: Template; onTo
     const [expanded, setExpanded] = useState(false)
 
     return (
-        <div className="card" style={{ padding: '12px 16px', opacity: tpl.active ? 1 : 0.55, transition: 'opacity 0.2s' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <button onClick={onToggle} style={{
-                    width: 38, height: 22, borderRadius: 11, border: 'none', cursor: 'pointer', flexShrink: 0,
+        <div className="card" style={{ padding: '14px 16px', opacity: tpl.active ? 1 : 0.5, transition: 'opacity 0.2s' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                {/* Toggle */}
+                <button onClick={onToggle} title={tpl.active ? 'Desativar' : 'Ativar'} style={{
+                    width: 38, height: 22, borderRadius: 11, border: 'none', cursor: 'pointer', flexShrink: 0, marginTop: 2,
                     background: tpl.active ? '#25d366' : 'var(--bg)',
                     transition: 'background 0.2s', position: 'relative',
                 }}>
@@ -499,35 +536,44 @@ function TemplateCard({ tpl, onToggle, onEdit, onDelete }: { tpl: Template; onTo
                 </button>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontWeight: 700, fontSize: '0.88rem' }}>{tpl.name}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
+                        <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{tpl.name}</span>
                         {tpl.delayMinutes > 0 && (
                             <span style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 4, background: 'rgba(234,179,8,0.12)', color: '#eab308', fontSize: '0.72rem', fontWeight: 600 }}>
-                                <Clock size={11} /> +{tpl.delayMinutes >= 60 ? `${Math.floor(tpl.delayMinutes / 60)}h ${tpl.delayMinutes % 60}min` : `${tpl.delayMinutes}min`}
+                                <Clock size={11} /> +{tpl.delayMinutes >= 60 ? `${Math.floor(tpl.delayMinutes / 60)}h${tpl.delayMinutes % 60 > 0 ? ` ${tpl.delayMinutes % 60}min` : ''}` : `${tpl.delayMinutes}min`}
                             </span>
                         )}
+                        {!tpl.active && (
+                            <span style={{ padding: '2px 7px', borderRadius: 4, background: 'rgba(239,68,68,0.1)', color: '#ef4444', fontSize: '0.72rem', fontWeight: 600 }}>inativo</span>
+                        )}
                     </div>
-                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {tpl.message.replace(/\n/g, ' ').substring(0, 80)}...
+                    {/* Tags used preview */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 4 }}>
+                        {Array.from(tpl.message.matchAll(/{{(\w+)}}/g)).map(m => m[1]).filter((v, i, a) => a.indexOf(v) === i).map(tag => (
+                            <span key={tag} style={{ fontSize: '0.7rem', padding: '1px 5px', background: 'rgba(200,160,80,0.1)', color: 'rgba(200,160,80,0.85)', borderRadius: 3, fontFamily: 'monospace', fontWeight: 600 }}>{`{{${tag}}}`}</span>
+                        ))}
+                    </div>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {tpl.message.replace(/\n/g, ' ').substring(0, 90)}{tpl.message.length > 90 ? '…' : ''}
                     </p>
                 </div>
 
-                <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
-                    <button onClick={() => setExpanded(v => !v)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
+                <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
+                    <button onClick={() => setExpanded(v => !v)} title="Ver mensagem" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 6, borderRadius: 6 }}>
                         {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
                     </button>
-                    <button onClick={onEdit} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
+                    <button onClick={onEdit} title="Editar" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 6, borderRadius: 6 }}>
                         <Edit2 size={15} />
                     </button>
-                    <button onClick={onDelete} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 4 }}>
+                    <button onClick={onDelete} title="Excluir" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 6, borderRadius: 6 }}>
                         <Trash2 size={15} />
                     </button>
                 </div>
             </div>
 
             {expanded && (
-                <div style={{ marginTop: 12, padding: '10px 12px', background: 'var(--bg-card2)', borderRadius: 8, fontSize: '0.82rem', color: 'var(--text-muted)', whiteSpace: 'pre-wrap', lineHeight: 1.6, borderLeft: '3px solid #25d366' }}>
-                    {tpl.message}
+                <div style={{ marginTop: 14, padding: '12px 14px', background: 'var(--bg-card2)', borderRadius: 10, fontSize: '0.83rem', lineHeight: 1.7, borderLeft: '3px solid #25d366', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                    {highlightTags(tpl.message)}
                 </div>
             )}
         </div>

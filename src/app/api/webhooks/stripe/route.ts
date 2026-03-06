@@ -4,6 +4,7 @@ import { dispatchBuyerWebhook } from '@/lib/webhooks'
 import { getSetting, SETTINGS_KEYS } from '@/lib/config'
 import Stripe from 'stripe'
 import { decreaseStock, increaseStock } from '@/lib/inventory'
+import { triggerWhatsApp, WA_TRIGGERS } from '@/lib/whatsapp'
 
 export async function POST(req: NextRequest) {
     const body = await req.text()
@@ -57,6 +58,17 @@ export async function POST(req: NextRequest) {
                 decreaseStock(updated.items).catch((err) => { console.error('[Stripe Webhook] Erro estoque:', err) })
             }
             dispatchBuyerWebhook(updated as any).catch((err) => { console.error('[Stripe Webhook] Erro webhook:', err) })
+            if ((updated as any).user?.phone) {
+                triggerWhatsApp(WA_TRIGGERS.ORDER_PAID, {
+                    phone: (updated as any).user.phone,
+                    nome: (updated as any).user.name,
+                    pedido: order.id.slice(-8).toUpperCase(),
+                    total: (updated as any).total.toFixed(2).replace('.', ','),
+                    produto: (updated as any).items?.[0]?.product?.name,
+                    orderId: order.id,
+                    userId: order.userId,
+                }).catch(() => {})
+            }
             console.log(`[Stripe Webhook] Pedido ${order.id} atualizado: ${order.status} → PAID`)
         }
     }

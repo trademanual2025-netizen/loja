@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { increaseStock } from '@/lib/inventory'
+import { triggerWhatsApp, WA_TRIGGERS } from '@/lib/whatsapp'
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
@@ -10,28 +11,30 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
         const data: Record<string, unknown> = {}
 
+        const existing = await prisma.order.findUnique({
+            where: { id },
+            select: {
+                status: true, gatewayData: true, deliveredAt: true,
+                trackingCode: true, total: true, userId: true,
+                user: { select: { name: true, phone: true } },
+                items: { include: { product: { select: { name: true } } } },
+            },
+        })
+
         if (status !== undefined) {
             data.status = status
 
-            if (status === 'DELIVERED') {
-                const existing = await prisma.order.findUnique({ where: { id }, select: { deliveredAt: true } })
-                if (!existing?.deliveredAt) data.deliveredAt = new Date()
+            if (status === 'DELIVERED' && !existing?.deliveredAt) {
+                data.deliveredAt = new Date()
             }
 
-            if (status === 'CANCELLED') {
-                // Se o pedido estava PENDING e tinha estoque reservado, restaura
-                const existing = await prisma.order.findUnique({
-                    where: { id },
-                    select: { status: true, gatewayData: true, items: true },
-                })
-                if (existing?.status === 'PENDING') {
-                    let gw: Record<string, unknown> = {}
-                    try { if (existing.gatewayData) gw = JSON.parse(existing.gatewayData) } catch {}
-                    if (gw.stockReserved === true) {
-                        increaseStock(existing.items).catch((err: Error) => {
-                            console.error('[Admin Cancel] Erro ao restaurar estoque:', err)
-                        })
-                    }
+            if (status === 'CANCELLED' && existing?.status === 'PENDING') {
+                let gw: Record<string, unknown> = {}
+                try { if (existing.gatewayData) gw = JSON.parse(existing.gatewayData) } catch {}
+                if (gw.stockReserved === true) {
+                    increaseStock(existing.items).catch((err: Error) => {
+                        console.error('[Admin Cancel] Erro ao restaurar estoque:', err)
+                    })
                 }
             }
         }
@@ -41,6 +44,32 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         if (shippingNote !== undefined) data.shippingNote = shippingNote
 
         const order = await prisma.order.update({ where: { id }, data })
+
+        const phone = existing?.user?.phone
+        const nome = existing?.user?.name
+        const pedido = id.slice(-8).toUpperCase()
+        const total = existing?.total?.toFixed(2).replace('.', ',')
+        const produto = existing?.items?.[0]?.product?.name
+
+        if (phone) {
+            const rastreio = trackingCode || existing?.trackingCode || undefined
+
+            if (status === 'DELIVERED') {
+                triggerWhatsApp(WA_TRIGGERS.ORDER_DELIVERED, {
+                    phone, nome, pedido, total, produto, orderId: id, userId: existing?.userId,
+                }).catch(() => {})
+            } else if (status === 'CANCELLED') {
+                triggerWhatsApp(WA_TRIGGERS.ORDER_CANCELLED, {
+                    phone, nome, pedido, total, produto, orderId: id, userId: existing?.userId,
+                }).catch(() => {})
+            }
+
+            if (trackingCode && !existing?.trackingCode) {
+                triggerWhatsApp(WA_TRIGGERS.ORDER_SHIPPED, {
+                    phone, nome, pedido, total, produto, rastreio, orderId: id, userId: existing?.userId,
+                }).catch(() => {})
+            }
+        }
 
         return NextResponse.json(order)
     } catch (error: any) {

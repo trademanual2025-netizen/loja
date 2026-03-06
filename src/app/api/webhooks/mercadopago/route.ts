@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { dispatchBuyerWebhook } from '@/lib/webhooks'
 import { getSetting, SETTINGS_KEYS } from '@/lib/config'
 import { increaseStock } from '@/lib/inventory'
+import { triggerWhatsApp, WA_TRIGGERS } from '@/lib/whatsapp'
 import crypto from 'crypto'
 
 async function verifyMPSignature(req: NextRequest, body: string): Promise<boolean> {
@@ -119,6 +120,17 @@ export async function POST(req: NextRequest) {
                 decreaseStock(updated.items).catch((err: Error) => { console.error('[MP Webhook] Erro estoque:', err) })
             }
             dispatchBuyerWebhook(updated).catch((err: Error) => { console.error('[MP Webhook] Erro webhook:', err) })
+            if (updated.user?.phone) {
+                triggerWhatsApp(WA_TRIGGERS.ORDER_PAID, {
+                    phone: updated.user.phone,
+                    nome: updated.user.name,
+                    pedido: updated.id.slice(-8).toUpperCase(),
+                    total: updated.total.toFixed(2).replace('.', ','),
+                    produto: updated.items?.[0]?.product?.name,
+                    orderId: updated.id,
+                    userId: updated.userId,
+                }).catch(() => {})
+            }
         }
 
         if (newStatus === 'CANCELLED' && stockReserved && order.status === 'PENDING') {

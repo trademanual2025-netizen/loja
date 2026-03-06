@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { dispatchLeadWebhook } from '@/lib/webhooks'
 import { rateLimit, getIP } from '@/lib/rate-limit'
+import { triggerWhatsApp, WA_TRIGGERS } from '@/lib/whatsapp'
 
 export async function POST(req: NextRequest) {
     try {
@@ -40,6 +41,14 @@ export async function POST(req: NextRequest) {
             ...lead,
             user: { name: user.name, email: user.email, phone: user.phone, cpf: user.cpf },
         }).catch((err) => { console.error('[Webhook] Lead dispatch failed:', err) })
+
+        if (user.phone) {
+            triggerWhatsApp(WA_TRIGGERS.NEW_LEAD, {
+                phone: user.phone,
+                nome: user.name,
+                userId: user.id,
+            }).catch(() => {})
+        }
 
         return NextResponse.json({
             id: user.id,

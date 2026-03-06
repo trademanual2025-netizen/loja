@@ -4,6 +4,7 @@ import { verify } from 'jsonwebtoken'
 import { getSetting, SETTINGS_KEYS } from '@/lib/config'
 import { dispatchBuyerWebhook } from '@/lib/webhooks'
 import { decreaseStock, increaseStock } from '@/lib/inventory'
+import { triggerWhatsApp, WA_TRIGGERS } from '@/lib/whatsapp'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'loja-secret-change-in-production'
 
@@ -136,6 +137,24 @@ export async function POST(req: NextRequest) {
         // Estoque já decrementado — só dispara webhook de comprador
         if (order.status === 'PAID') {
             dispatchBuyerWebhook(order as any).catch(() => {})
+        }
+
+        if (order.status === 'PENDING' && user.phone) {
+            const payMethod = String(gwData.paymentMethod || '')
+            const isPix = payMethod === 'pix' || !!gwData.pixQrCode
+            const isBoleto = payMethod === 'boleto' || !!gwData.boletoUrl
+            const trigger = isPix ? WA_TRIGGERS.ORDER_PIX_PENDING : isBoleto ? WA_TRIGGERS.ORDER_BOLETO_PENDING : null
+            if (trigger) {
+                triggerWhatsApp(trigger, {
+                    phone: user.phone,
+                    nome: user.name,
+                    pedido: order.id.slice(-8).toUpperCase(),
+                    total: total.toFixed(2).replace('.', ','),
+                    produto: order.items?.[0]?.product?.name,
+                    orderId: order.id,
+                    userId: user.id,
+                }).catch(() => {})
+            }
         }
 
         const response: Record<string, unknown> = {

@@ -233,3 +233,38 @@ model WebhookLog {
   lead      Lead?    @relation(fields: [leadId], references: [id])
   createdAt DateTime @default(now())
 }
+
+model WhatsAppTemplate {
+  id           String   @id @default(cuid())
+  name         String
+  trigger      String
+  delayMinutes Int      @default(0)
+  message      String
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model WhatsAppLog {
+  id         String   @id @default(cuid())
+  phone      String
+  trigger    String
+  message    String
+  status     String   @default("sent")
+  error      String?
+  orderId    String?
+  userId     String?
+  createdAt  DateTime @default(now())
+}
+
+model WhatsAppQueue {
+  id         String   @id @default(cuid())
+  phone      String
+  message    String
+  trigger    String
+  sendAt     DateTime
+  sent       Boolean  @default(false)
+  orderId    String?
+  userId     String?
+  createdAt  DateTime @default(now())
+}

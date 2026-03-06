@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAdminToken, unauthorizedResponse } from '@/lib/admin-auth'
 import { prisma } from '@/lib/prisma'
+import { triggerWhatsApp, WA_TRIGGERS } from '@/lib/whatsapp'
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const admin = await verifyAdminToken(req)
@@ -18,6 +19,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         include: {
             order: {
                 include: {
+                    user: { select: { name: true, phone: true } },
                     items: { select: { productId: true, variantId: true, quantity: true } },
                 },
             },
@@ -56,6 +58,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             where: { id: refund.orderId },
             data: { status: 'DELIVERED' },
         })
+    }
+
+    const phone = refund.order.user?.phone
+    if (phone) {
+        const trigger = status === 'APPROVED' ? WA_TRIGGERS.REFUND_APPROVED : WA_TRIGGERS.REFUND_REJECTED
+        triggerWhatsApp(trigger, {
+            phone,
+            nome: refund.order.user?.name,
+            pedido: refund.orderId.slice(-8).toUpperCase(),
+            orderId: refund.orderId,
+            userId: refund.userId,
+        }).catch(() => {})
     }
 
     return NextResponse.json({ success: true })

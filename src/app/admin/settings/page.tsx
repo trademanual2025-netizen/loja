@@ -5,8 +5,9 @@ import { toast } from 'sonner'
 import { Save, TestTube2 } from 'lucide-react'
 import WebhooksTab from '@/components/admin/WebhooksTab'
 import ShippingByRegionTab from '@/components/admin/ShippingByRegionTab'
+import WhatsAppTab from '@/components/admin/WhatsAppTab'
 
-const TABS = ['Banco de Dados', 'Pagamentos', 'Tracking', 'Webhooks', 'Frete', 'Loja', 'SEO', 'Banner', 'Email / SMTP']
+const TABS = ['Banco de Dados', 'Pagamentos', 'Tracking', 'Webhooks', 'Frete', 'Loja', 'SEO', 'Banner', 'Email / SMTP', 'WhatsApp']
 
 const ImageF = ({ label, k, help = '', settings, uploadFile }: { label: string; k: string; help?: string; settings: any; uploadFile: any }) => (
     <div className="form-group">
@@ -526,6 +527,10 @@ export default function AdminSettings() {
                             'contact_notify_email', 'smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_from',
                         ])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar Configurações de Email'}</button>
                     </div>
+                )}
+
+                {tab === 'WhatsApp' && (
+                    <WhatsAppTab settings={settings} set={set} save={save} saving={saving} />
                 )}
             </div>
         </div>

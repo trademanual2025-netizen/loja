@@ -118,6 +118,7 @@ Loja online de joias artesanais da marca Giovana Dias. Construída com Next.js 1
 - Landing page institucional em `/`: hero com imagem, título, subtítulo, botão CTA; seção de banners (WhatsApp/Loja); seção Sobre; footer com contato e redes sociais
 - Loja movida de `/` para `/loja`; StoreHeader logo linka para `/loja`
 - Configurações da landing page na aba "Landing Page" do admin: hero (imagem/título/subtítulo/CTA), banner customizado, texto sobre, contato (WhatsApp/telefone/Instagram/e-mail)
+- Integração WhatsApp via Evolution API: aba "WhatsApp" em Configurações → campos para URL da API, API Key e nome da instância; QR Code para escanear no admin; polling automático de 3s para detectar conexão; rotas proxy em `/api/admin/whatsapp/{status,qrcode,disconnect}`; settings keys: `evolution_api_url`, `evolution_api_key`, `evolution_instance_name`
 - Settings keys: `landing_hero_image`, `landing_hero_title`, `landing_hero_subtitle`, `landing_cta_text`, `landing_whatsapp`, `landing_instagram`, `landing_email`, `landing_phone`, `landing_custom_banner_image`, `landing_custom_banner_title`, `landing_custom_banner_text`, `landing_about_text`
 - Componente: `src/components/store/LandingPageClient.tsx`
 - Sistema de Reembolso: status DELIVERED e REFUND_REQUESTED adicionados ao OrderStatus; campo `deliveredAt` no Order (preenchido automaticamente ao marcar como Entregue); modelos `RefundRequest` e `RefundMessage` no schema

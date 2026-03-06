@@ -1,19 +1,37 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Copy, Check, ExternalLink, Clock, QrCode } from 'lucide-react'
+import { Copy, Check, ExternalLink, Clock, QrCode, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
+import { useCart } from '@/lib/cart'
+
+interface CartItem {
+    id: string
+    name: string
+    slug: string
+    price: number
+    image: string
+    quantity: number
+    variantId?: string
+    variantName?: string
+}
 
 interface Props {
     gateway: string
     gatewayData: Record<string, any>
     createdAt: string
+    orderId?: string
+    orderItems?: CartItem[]
 }
 
-export function PaymentInfo({ gateway, gatewayData, createdAt }: Props) {
+export function PaymentInfo({ gateway, gatewayData, createdAt, orderId, orderItems }: Props) {
     const [copied, setCopied] = useState(false)
     const [timeLeft, setTimeLeft] = useState('')
     const [expired, setExpired] = useState(false)
+    const [regenerating, setRegenerating] = useState(false)
+    const router = useRouter()
+    const { setItems } = useCart()
 
     const paymentMethod = gatewayData.paymentMethod || ''
     const isPix = paymentMethod === 'pix'
@@ -63,6 +81,30 @@ export function PaymentInfo({ gateway, gatewayData, createdAt }: Props) {
         }
     }
 
+    async function handleRegenerate() {
+        if (!orderId) return
+        setRegenerating(true)
+        try {
+            const res = await fetch('/api/orders/cancel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId }),
+            })
+            const data = await res.json()
+            if (!res.ok) {
+                toast.error(data.error || 'Erro ao cancelar pedido.')
+                setRegenerating(false)
+                return
+            }
+            setItems(data.cartItems || orderItems || [])
+            toast.success('Redirecionando para o checkout...')
+            router.push('/checkout')
+        } catch {
+            toast.error('Erro ao processar. Tente novamente.')
+            setRegenerating(false)
+        }
+    }
+
     if (isPix) {
         return (
             <div className="card" style={{ textAlign: 'left', marginBottom: 24 }}>
@@ -71,7 +113,7 @@ export function PaymentInfo({ gateway, gatewayData, createdAt }: Props) {
                     <h3 style={{ fontWeight: 700 }}>Pagamento via Pix</h3>
                 </div>
 
-                {gatewayData.pixQrCodeBase64 && (
+                {!expired && gatewayData.pixQrCodeBase64 && (
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
                         <div style={{ padding: 16, background: 'white', borderRadius: 12 }}>
                             <img
@@ -83,7 +125,7 @@ export function PaymentInfo({ gateway, gatewayData, createdAt }: Props) {
                     </div>
                 )}
 
-                {gatewayData.pixQrCode && (
+                {!expired && gatewayData.pixQrCode && (
                     <div style={{ marginBottom: 16 }}>
                         <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 8 }}>Ou copie o código Pix:</p>
                         <div style={{ display: 'flex', gap: 8 }}>
@@ -116,13 +158,28 @@ export function PaymentInfo({ gateway, gatewayData, createdAt }: Props) {
                         background: expired ? 'rgba(239,68,68,0.08)' : 'rgba(234,179,8,0.08)',
                         color: expired ? '#ef4444' : '#eab308',
                         border: `1px solid ${expired ? 'rgba(239,68,68,0.2)' : 'rgba(234,179,8,0.2)'}`,
+                        marginBottom: expired && orderId ? 12 : 0,
                     }}>
                         <Clock size={15} />
-                        {expired ? 'QR Code expirado. Faça um novo pedido.' : `Expira em ${timeLeft}`}
+                        {expired ? 'QR Code expirado.' : `Expira em ${timeLeft}`}
                     </div>
                 )}
 
-                {!timeLeft && (
+                {expired && orderId && (
+                    <button
+                        onClick={handleRegenerate}
+                        disabled={regenerating}
+                        className="btn btn-primary"
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                    >
+                        {regenerating
+                            ? <span className="spinner" style={{ width: 16, height: 16 }} />
+                            : <RefreshCw size={16} />}
+                        {regenerating ? 'Aguarde...' : 'Gerar novo pedido'}
+                    </button>
+                )}
+
+                {!timeLeft && !expired && (
                     <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
                         Abra o app do seu banco, escaneie o QR Code ou cole o código Pix para pagar.
                     </p>
@@ -143,7 +200,7 @@ export function PaymentInfo({ gateway, gatewayData, createdAt }: Props) {
                     O boleto pode levar até 3 dias úteis para ser compensado após o pagamento.
                 </p>
 
-                {(gatewayData.boletoUrl || gatewayData.ticketUrl) && (
+                {!expired && (gatewayData.boletoUrl || gatewayData.ticketUrl) && (
                     <a
                         href={gatewayData.boletoUrl || gatewayData.ticketUrl}
                         target="_blank"
@@ -163,10 +220,25 @@ export function PaymentInfo({ gateway, gatewayData, createdAt }: Props) {
                         background: expired ? 'rgba(239,68,68,0.08)' : 'rgba(234,179,8,0.08)',
                         color: expired ? '#ef4444' : '#eab308',
                         border: `1px solid ${expired ? 'rgba(239,68,68,0.2)' : 'rgba(234,179,8,0.2)'}`,
+                        marginBottom: expired && orderId ? 12 : 0,
                     }}>
                         <Clock size={15} />
-                        {expired ? 'Boleto vencido. Faça um novo pedido.' : `Vence em ${timeLeft}`}
+                        {expired ? 'Boleto vencido.' : `Vence em ${timeLeft}`}
                     </div>
+                )}
+
+                {expired && orderId && (
+                    <button
+                        onClick={handleRegenerate}
+                        disabled={regenerating}
+                        className="btn btn-primary"
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                    >
+                        {regenerating
+                            ? <span className="spinner" style={{ width: 16, height: 16 }} />
+                            : <RefreshCw size={16} />}
+                        {regenerating ? 'Aguarde...' : 'Gerar novo pedido'}
+                    </button>
                 )}
             </div>
         )

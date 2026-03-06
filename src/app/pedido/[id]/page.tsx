@@ -105,6 +105,8 @@ export default async function PedidoPage({ params }: { params: Promise<{ id: str
                     gateway={order.gateway}
                     gatewayData={gatewayData}
                     createdAt={order.createdAt.toISOString()}
+                    orderId={isOwner ? order.id : undefined}
+                    orderItems={isOwner ? orderItemsForCart : undefined}
                 />
             )}
 

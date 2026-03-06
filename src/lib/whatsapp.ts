@@ -76,7 +76,7 @@ export async function triggerWhatsApp(trigger: WATrigger, ctx: WATriggerContext)
         })
         if (!templates.length) return
 
-        const storeUrl = process.env.NEXT_PUBLIC_STORE_URL || ''
+        const storeUrl = process.env.NEXT_PUBLIC_STORE_URL || 'https://loja-eta-nine.vercel.app'
 
         for (const tpl of templates) {
             const vars: Record<string, string | undefined> = {

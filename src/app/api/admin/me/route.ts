@@ -1,26 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getAdminEmailFromRequest, unauthorizedResponse } from '@/lib/admin-auth'
 import bcrypt from 'bcryptjs'
 
-async function getAdmin(req: NextRequest) {
-    const email = req.headers.get('x-admin-email')
-    if (!email) return null
-    return prisma.adminUser.findUnique({
-        where: { email },
-        select: { id: true, name: true, email: true, avatarUrl: true, password: true },
-    })
-}
-
 export async function GET(req: NextRequest) {
-    const admin = await getAdmin(req)
-    if (!admin) return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 })
-    const { password: _p, ...safe } = admin
-    return NextResponse.json(safe)
+    const email = getAdminEmailFromRequest(req)
+    if (!email) return unauthorizedResponse()
+    const admin = await prisma.adminUser.findUnique({
+        where: { email },
+        select: { id: true, name: true, email: true, avatarUrl: true },
+    })
+    if (!admin) return unauthorizedResponse()
+    return NextResponse.json(admin)
 }
 
 export async function PATCH(req: NextRequest) {
-    const admin = await getAdmin(req)
-    if (!admin) return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 })
+    const email = getAdminEmailFromRequest(req)
+    if (!email) return unauthorizedResponse()
+
+    const admin = await prisma.adminUser.findUnique({
+        where: { email },
+        select: { id: true, password: true },
+    })
+    if (!admin) return unauthorizedResponse()
 
     const body = await req.json()
     const data: { name?: string; avatarUrl?: string | null; password?: string } = {}

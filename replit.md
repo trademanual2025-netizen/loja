@@ -18,7 +18,7 @@ Loja online de joias artesanais da marca Giovana Dias. Construída com Next.js 1
   - `src/app/produto/[slug]/` - Página de produto
 - `src/lib/` - Módulos utilitários (prisma, auth, admin-auth, config, cart, i18n, inventory, shipping, webhooks, countries)
 - `src/components/` - Componentes React compartilhados
-- `src/proxy.ts` - Proxy/middleware do Next.js 16 (protege rotas admin e checkout)
+- `src/middleware.ts` - Middleware do Next.js (verifica cookie admin, define x-pathname header)
 - `src/app/error.tsx` - Error boundary global
 - `prisma/` - Schema do banco de dados
 - `prisma.config.ts` - Configuração do Prisma (usa NEON_DATABASE_URL)
@@ -32,7 +32,10 @@ Loja online de joias artesanais da marca Giovana Dias. Construída com Next.js 1
 ## Segurança
 - Senhas hasheadas com bcrypt (10 rounds) — login compatível com SHA-256 legado (migra automaticamente)
 - JWT sem fallback hardcoded — falha se JWT_SECRET/ADMIN_JWT_SECRET não estiver configurado
-- Proxy (middleware) protege rotas `/admin/*` e `/api/admin/*` (exceto setup/login)
+- Middleware (`src/middleware.ts`) faz pré-verificação de cookie em rotas `/admin/*` — redireciona para login se ausente
+- Verificação real do JWT (ADMIN_JWT_SECRET) é feita em Node.js runtime: `src/app/admin/layout.tsx` (server component) e `src/lib/admin-auth.ts`
+- `src/app/admin/AdminLayoutClient.tsx` contém todo o UI do painel admin (client component)
+- Edge Runtime não tem acesso a env vars — toda autenticação JWT fica no runtime Node.js
 - Verificação de assinatura HMAC no webhook do MercadoPago (se `mp_webhook_secret` configurado)
 - Webhook do Stripe já verificava assinatura nativamente
 - Verificação de conta ativa no login e no getAuthUser
@@ -66,7 +69,7 @@ Loja online de joias artesanais da marca Giovana Dias. Construída com Next.js 1
 - Pool de conexões pg limitado a 5 conexões com idle timeout de 30s
 
 ## Notas Técnicas
-- Next.js 16 usa `proxy.ts` em vez de `middleware.ts` (com `export default`)
+- Next.js 16 usa `middleware.ts` (com `export default`) — `proxy.ts` foi removido (causava conflito)
 - `allowedDevOrigins` vai na raiz do next.config (não em experimental)
 - `devIndicators: false` desativa indicador de rota no dev mode
 - Fonte Inter carregada via `next/font/google` (não via `<link>` manual no `<head>`)

@@ -36,7 +36,7 @@ export function formatPhone(phone: string): string {
 }
 
 export function replaceVars(template: string, vars: Record<string, string | undefined>): string {
-    return template.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? `{{${key}}}`)
+    return template.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? '')
 }
 
 export async function sendWhatsAppRaw(phone: string, message: string): Promise<{ ok: boolean; error?: string }> {
@@ -180,7 +180,7 @@ export const DEFAULT_TEMPLATES = [
         name: 'Pedido entregue',
         trigger: WA_TRIGGERS.ORDER_DELIVERED,
         delayMinutes: 0,
-        message: `🎁 *Seu pedido foi entregue!*\n\nOlá, *{{nome}}*! O pedido *#{{pedido}}* chegou até você. Esperamos que sua *{{produto}}* tenha chegado perfeita. 💎✨\n\nSe gostar, adoraríamos ver você usando! Nos marque nas fotos. 📸\n\nCaso tenha algum problema com o pedido, acesse:\n👉 {{link_pedido}}\n\nMuito obrigada pela confiança. Até a próxima! 💛\n\n_Giovana Dias – Joias Autorais_`,
+        message: `🎁 *Seu pedido foi entregue!*\n\nOlá, *{{nome}}*! O pedido *#{{pedido}}* chegou até você.\n\n💎 *{{produto}}*\n\nEsperamos que chegou com tudo certinho e que você ame cada detalhe. ✨\n\nSe gostar, nos marque nas fotos — adoramos ver nossas joias ganhando vida! 📸\n\nQualquer problema, acesse:\n👉 {{link_pedido}}\n\nMuito obrigada pela confiança. Até a próxima! 💛\n\n_Giovana Dias – Joias Autorais_`,
     },
     {
         name: 'Pedido cancelado',

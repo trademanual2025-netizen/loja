@@ -1,8 +1,14 @@
 #!/bin/bash
 # Script de deploy para Giovana Dias - envia código para GitHub e aciona Vercel
-# Uso: bash deploy.sh "mensagem do commit"
+# Uso: bash deploy.sh
 
 set -e
+
+# ─── TOKEN GITHUB ─────────────────────────────────────────────
+# No Replit: lido automaticamente dos secrets
+# Fora do Replit: substitua SEU_TOKEN_AQUI pelo token real
+GITHUB_TOKEN_GIOVANA="${GITHUB_TOKEN_GIOVANA:-SEU_TOKEN_AQUI}"
+# ──────────────────────────────────────────────────────────────
 
 MSG="${1:-deploy: $(date '+%d/%m/%Y %H:%M')}"
 REPO="Giovana2026/loja"
@@ -10,8 +16,8 @@ BRANCH="main"
 AUTHOR_NAME="Giovana2026"
 AUTHOR_EMAIL="projeto.giovanadias@gmail.com"
 
-if [ -z "$GITHUB_TOKEN_GIOVANA" ]; then
-  echo "ERRO: variável GITHUB_TOKEN_GIOVANA não encontrada."
+if [ -z "$GITHUB_TOKEN_GIOVANA" ] || [ "$GITHUB_TOKEN_GIOVANA" = "SEU_TOKEN_AQUI" ]; then
+  echo "ERRO: coloque seu token GitHub na variável GITHUB_TOKEN_GIOVANA no topo do script."
   exit 1
 fi
 

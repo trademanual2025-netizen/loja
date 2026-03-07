@@ -4,7 +4,7 @@
 
 set -e
 
-MSG="${1:-deploy: atualizacoes}"
+MSG="${1:-deploy: $(date '+%d/%m/%Y %H:%M')}"
 REPO="Giovana2026/loja"
 BRANCH="main"
 AUTHOR_NAME="Giovana2026"

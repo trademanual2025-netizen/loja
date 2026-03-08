@@ -31,6 +31,7 @@ export const BUYER_FIELDS: FieldDef[] = [
     { key: 'phone', label: 'Telefone', defaultName: 'phone', group: 'data' },
     { key: 'cpf', label: 'CPF', defaultName: 'cpf', group: 'data' },
     { key: 'subtotal', label: 'Subtotal (R$)', defaultName: 'subtotal', group: 'data' },
+    { key: 'discount', label: 'Desconto (R$)', defaultName: 'discount', group: 'data' },
     { key: 'shipping', label: 'Frete (R$)', defaultName: 'shipping', group: 'data' },
     { key: 'total', label: 'Total pago (R$)', defaultName: 'total', group: 'data' },
     { key: 'currency', label: 'Moeda', defaultName: 'currency', group: 'data' },

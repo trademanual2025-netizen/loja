@@ -134,13 +134,20 @@ export default function AdminSettings() {
     async function testWebhook(type: 'lead' | 'buyer') {
         const url = type === 'lead' ? settings.webhook_lead_url : settings.webhook_buyer_url
         if (!url) { toast.error('Configure a URL primeiro.'); return }
-        const payload = type === 'lead'
-            ? { event: 'new_lead', data: { name: 'Teste', email: 'teste@email.com', phone: '11999990000', source: 'test' } }
-            : { event: 'purchase', data: { order_id: 'test-123', name: 'Teste', email: 'teste@email.com', total: 99.90, currency: 'BRL', gateway: 'test' } }
         try {
-            const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-            toast.success(`Webhook disparado! Status: ${res.status}`)
-        } catch { toast.error('Erro ao disparar webhook.') }
+            const token = document.cookie.split('; ').find(c => c.startsWith('admin_token='))?.split('=')[1]
+            const res = await fetch('/api/admin/webhooks/test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+                body: JSON.stringify({ type }),
+            })
+            const data = await res.json()
+            if (data.success) {
+                toast.success(`Webhook disparado com sucesso! Status: ${data.status}`)
+            } else {
+                toast.error(data.error || `Webhook falhou (status ${data.status})`)
+            }
+        } catch { toast.error('Erro ao disparar webhook de teste.') }
     }
 
     async function uploadFile(file: File, key: string) {

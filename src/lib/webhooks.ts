@@ -96,6 +96,7 @@ export async function dispatchBuyerWebhook(order: {
     gateway: string
     gatewayId: string | null
     subtotal: number
+    discount: number
     shippingCost: number
     total: number
     zipCode: string
@@ -140,6 +141,7 @@ export async function dispatchBuyerWebhook(order: {
         phone: order.user.phone,
         cpf: order.user.cpf,
         subtotal: order.subtotal,
+        discount: order.discount,
         shipping: order.shippingCost,
         total: order.total,
         currency: 'BRL',

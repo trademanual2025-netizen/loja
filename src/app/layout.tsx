@@ -15,11 +15,18 @@ const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
   display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {
   title: "Loja Virtual",
   description: "Bem-vindo à nossa loja",
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#0d0a06',
 };
 
 async function getLayoutSettings() {
@@ -95,6 +102,9 @@ export default async function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}})()` }} />
+        <link rel="dns-prefetch" href="https://connect.facebook.net" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
         <title>{metaTitle}</title>
         <meta name="description" content={metaDesc} />
         <meta property="og:title" content={metaTitle} />

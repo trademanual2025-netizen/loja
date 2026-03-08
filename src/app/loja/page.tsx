@@ -37,7 +37,11 @@ async function getProducts(search?: string, category?: string, limit = 24) {
     }),
     prisma.product.count({ where }),
   ])
-  return { products, total, pages: Math.ceil(total / limit) }
+  const slimProducts = products.map(p => ({
+    ...p,
+    images: p.images.length > 0 ? [p.images[0]] : [],
+  }))
+  return { products: slimProducts, total, pages: Math.ceil(total / limit) }
 }
 
 async function getCategories() {

@@ -93,6 +93,9 @@ html {
   scroll-behavior: smooth;
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--text) 22%, transparent) transparent;
+  text-rendering: optimizeSpeed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -385,6 +388,7 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
+  contain: layout style paint;
 }
 
 .product-card:hover {
@@ -401,6 +405,7 @@ body {
   aspect-ratio: 1;
   background: var(--bg-card2);
   overflow: hidden;
+  contain: strict;
 }
 
 .product-card-badge {

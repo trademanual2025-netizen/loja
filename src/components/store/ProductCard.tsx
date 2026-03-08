@@ -81,7 +81,7 @@ export function ProductCard({ product, dict, locale = 'pt', installments = 0, in
             <div className="product-card fade-in">
                 <div className="product-card-image">
                     {product.images[0] ? (
-                        <Image src={product.images[0]} alt={displayName} fill sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw" style={{ objectFit: 'cover', transition: 'transform 0.4s ease' }} />
+                        <Image src={product.images[0]} alt={displayName} fill sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw" loading="lazy" style={{ objectFit: 'cover', transition: 'transform 0.4s ease' }} />
                     ) : (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                             {l.noImage}

@@ -45,8 +45,13 @@ export async function GET(req: NextRequest) {
         prisma.product.count({ where }),
     ])
 
+    const slimProducts = products.map(p => ({
+        ...p,
+        images: p.images.length > 0 ? [p.images[0]] : [],
+    }))
+
     return NextResponse.json(
-        { products, total, page, pages: Math.ceil(total / limit) },
+        { products: slimProducts, total, page, pages: Math.ceil(total / limit) },
         { headers: { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60' } }
     )
 }

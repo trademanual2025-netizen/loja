@@ -28,8 +28,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             select: {
                 id: true,
                 name: true,
+                nameEn: true,
+                nameEs: true,
                 slug: true,
                 description: true,
+                descriptionEn: true,
+                descriptionEs: true,
                 price: true,
                 comparePrice: true,
                 images: true,
@@ -57,6 +61,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         select: {
             id: true,
             name: true,
+            nameEn: true,
+            nameEs: true,
             slug: true,
             price: true,
             comparePrice: true,
@@ -90,9 +96,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 <ProductPageClient
                     product={{
                         id: product.id,
-                        name: translateDb(product.name, currentLocale),
+                        name: currentLocale === 'en' ? (product.nameEn || product.name) : currentLocale === 'es' ? (product.nameEs || product.name) : product.name,
                         slug: product.slug,
-                        description: product.description ? translateDb(product.description, currentLocale) : null,
+                        description: currentLocale === 'en' ? (product.descriptionEn || product.description || null) : currentLocale === 'es' ? (product.descriptionEs || product.description || null) : (product.description || null),
                         price: product.price,
                         comparePrice: product.comparePrice,
                         images: product.images,
@@ -105,7 +111,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     installmentsMinValue={parseFloat(storeSettings[SETTINGS_KEYS.STORE_INSTALLMENTS_MIN_VALUE] || '0')}
                     relatedProducts={relatedProducts.map(rp => ({
                         id: rp.id,
-                        name: translateDb(rp.name, currentLocale),
+                        name: currentLocale === 'en' ? (rp.nameEn || rp.name) : currentLocale === 'es' ? (rp.nameEs || rp.name) : rp.name,
                         slug: rp.slug,
                         price: rp.price,
                         comparePrice: rp.comparePrice,

@@ -12,13 +12,19 @@ export const revalidate = 60
 async function getProducts(search?: string, category?: string, limit = 24) {
   const where: Record<string, unknown> = { active: true }
   if (category) where.category = { slug: category }
-  if (search) where.name = { contains: search, mode: 'insensitive' }
+  if (search) where.OR = [
+    { name: { contains: search, mode: 'insensitive' } },
+    { nameEn: { contains: search, mode: 'insensitive' } },
+    { nameEs: { contains: search, mode: 'insensitive' } },
+  ]
   const [products, total] = await Promise.all([
     prisma.product.findMany({
       where,
       select: {
         id: true,
         name: true,
+        nameEn: true,
+        nameEs: true,
         slug: true,
         price: true,
         comparePrice: true,

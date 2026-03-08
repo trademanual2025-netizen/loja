@@ -26,7 +26,7 @@ interface Product {
     createdAt: string
 }
 
-const emptyForm = { name: '', description: '', price: '', comparePrice: '', hasComparePrice: false, stock: '0', bannerUrl: '', active: true, categoryId: '', weight: '', height: '', width: '', length: '', reserveMinutes: '30' }
+const emptyForm = { name: '', nameEn: '', nameEs: '', description: '', descriptionEn: '', descriptionEs: '', price: '', comparePrice: '', hasComparePrice: false, stock: '0', bannerUrl: '', active: true, categoryId: '', weight: '', height: '', width: '', length: '', reserveMinutes: '30' }
 
 export default function AdminProductsPage() {
     const [products, setProducts] = useState<Product[]>([])
@@ -78,7 +78,9 @@ export default function AdminProductsPage() {
         setEditingId(p.id)
         setForm({
             name: p.name,
+            nameEn: '', nameEs: '',
             description: '',
+            descriptionEn: '', descriptionEs: '',
             price: String(p.price),
             comparePrice: p.comparePrice ? String(p.comparePrice) : '',
             hasComparePrice: !!p.comparePrice,
@@ -97,6 +99,10 @@ export default function AdminProductsPage() {
             setForm(f => ({
                 ...f,
                 description: data.description || '',
+                nameEn: data.nameEn || '',
+                nameEs: data.nameEs || '',
+                descriptionEn: data.descriptionEn || '',
+                descriptionEs: data.descriptionEs || '',
                 weight: data.weight ? String(data.weight) : '',
                 height: data.height ? String(data.height) : '',
                 width: data.width ? String(data.width) : '',
@@ -357,6 +363,35 @@ export default function AdminProductsPage() {
                                     <label className="form-label">Descrição</label>
                                     <textarea className="input" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Descrição do produto..." rows={3} style={{ resize: 'vertical' }} />
                                 </div>
+
+                                <details style={{ background: 'var(--bg-card2)', borderRadius: 10, padding: '0', border: '1px solid var(--border)' }}>
+                                    <summary style={{ padding: '12px 16px', cursor: 'pointer', fontWeight: 600, fontSize: '0.88rem', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        🌐 Traduções (EN / ES)
+                                    </summary>
+                                    <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 4 }}>
+                                            Preencha para exibir nome e descrição traduzidos quando o visitante mudar o idioma. Campos vazios mostram o texto em português.
+                                        </p>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                                <label className="form-label">Nome (English)</label>
+                                                <input className="input" value={form.nameEn} onChange={e => setForm(f => ({ ...f, nameEn: e.target.value }))} placeholder="Product name in English" />
+                                            </div>
+                                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                                <label className="form-label">Nombre (Español)</label>
+                                                <input className="input" value={form.nameEs} onChange={e => setForm(f => ({ ...f, nameEs: e.target.value }))} placeholder="Nombre del producto en español" />
+                                            </div>
+                                        </div>
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label className="form-label">Description (English)</label>
+                                            <textarea className="input" value={form.descriptionEn} onChange={e => setForm(f => ({ ...f, descriptionEn: e.target.value }))} placeholder="Product description in English..." rows={3} style={{ resize: 'vertical' }} />
+                                        </div>
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label className="form-label">Descripción (Español)</label>
+                                            <textarea className="input" value={form.descriptionEs} onChange={e => setForm(f => ({ ...f, descriptionEs: e.target.value }))} placeholder="Descripción del producto en español..." rows={3} style={{ resize: 'vertical' }} />
+                                        </div>
+                                    </div>
+                                </details>
 
                                 {/* Preço */}
                                 <div style={{ background: 'var(--bg-card2)', borderRadius: 10, padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>

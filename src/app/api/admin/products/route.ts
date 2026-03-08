@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
 // POST /api/admin/products — cria produto
 export async function POST(req: NextRequest) {
     const body = await req.json()
-    const { name, description, price, comparePrice, stock, images, bannerUrl, active, categoryId, options, variants, weight, height, width, length } = body
+    const { name, nameEn, nameEs, description, descriptionEn, descriptionEs, price, comparePrice, stock, images, bannerUrl, active, categoryId, options, variants, weight, height, width, length } = body
 
     if (!name || price === undefined) {
         return NextResponse.json({ error: 'Nome e preço são obrigatórios.' }, { status: 400 })
@@ -63,7 +63,9 @@ export async function POST(req: NextRequest) {
 
     const product = await prisma.product.create({
         data: {
-            name, slug, description, price: safeParseFloat(price) || 0,
+            name, nameEn: nameEn || null, nameEs: nameEs || null,
+            slug, description, descriptionEn: descriptionEn || null, descriptionEs: descriptionEs || null,
+            price: safeParseFloat(price) || 0,
             comparePrice: safeParseFloat(comparePrice),
             stock: safeParseInt(stock), images: images || [],
             bannerUrl: bannerUrl || null, active: active !== false,

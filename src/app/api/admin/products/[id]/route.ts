@@ -35,7 +35,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     try {
         const { id } = await params
         const body = await req.json()
-        const { name, description, price, comparePrice, stock, images, bannerUrl, active, categoryId, options, variants, weight, height, width, length, reserveMinutes } = body
+        const { name, nameEn, nameEs, description, descriptionEn, descriptionEs, price, comparePrice, stock, images, bannerUrl, active, categoryId, options, variants, weight, height, width, length, reserveMinutes } = body
 
         const safeParseFloat = (val: any) => {
             if (val === undefined || val === null || val === '') return null
@@ -55,7 +55,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             where: { id },
             data: {
                 ...(name && { name }),
+                ...(nameEn !== undefined && { nameEn: nameEn || null }),
+                ...(nameEs !== undefined && { nameEs: nameEs || null }),
                 ...(description !== undefined && { description }),
+                ...(descriptionEn !== undefined && { descriptionEn: descriptionEn || null }),
+                ...(descriptionEs !== undefined && { descriptionEs: descriptionEs || null }),
                 ...(price !== undefined && { price: safeParseFloat(price) || 0 }),
                 ...(comparePrice !== undefined && { comparePrice: safeParseFloat(comparePrice) }),
                 ...(stock !== undefined && { stock: safeParseInt(stock) }),

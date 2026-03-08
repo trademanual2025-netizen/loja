@@ -51,8 +51,12 @@ model Category {
 model Product {
   id             String   @id @default(cuid())
   name           String
+  nameEn         String?
+  nameEs         String?
   slug           String   @unique
   description    String?
+  descriptionEn  String?
+  descriptionEs  String?
   price          Float
   comparePrice   Float?
   stock          Int      @default(0)

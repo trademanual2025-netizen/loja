@@ -8,18 +8,26 @@ import { useRouter } from 'next/navigation'
 import { fbTrackAddToCart } from '@/components/tracking/FacebookPixel'
 import { gtagAddToCart } from '@/components/tracking/GoogleAds'
 import { toast } from 'sonner'
-import { translateDb, Locale } from '@/lib/i18n'
+import { Locale } from '@/lib/i18n'
 import { triggerCartNotification } from './CartNotification'
 
 interface Product {
     id: string
     name: any
+    nameEn?: string | null
+    nameEs?: string | null
     slug: string
     price: number
     comparePrice?: number | null
     images: string[]
     stock: number
     variants?: { id: string }[]
+}
+
+function getTranslatedName(product: Product, locale: Locale): string {
+    if (locale === 'en' && product.nameEn) return product.nameEn
+    if (locale === 'es' && product.nameEs) return product.nameEs
+    return product.name
 }
 
 const labels = {
@@ -33,6 +41,8 @@ export function ProductCard({ product, dict, locale = 'pt', installments = 0, in
     const router = useRouter()
     const hasVariants = product.variants && product.variants.length > 0
     const l = labels[locale] || labels.pt
+
+    const displayName = getTranslatedName(product, locale)
 
     function handleAdd(e: React.MouseEvent) {
         e.preventDefault()
@@ -54,7 +64,7 @@ export function ProductCard({ product, dict, locale = 'pt', installments = 0, in
         fbTrackAddToCart({ id: product.id, name: product.name, price: product.price })
         gtagAddToCart({ id: product.id, name: product.name, price: product.price })
         triggerCartNotification({
-            name: translateDb(product.name, locale),
+            name: displayName,
             image: product.images[0],
             price: product.price,
         })
@@ -71,7 +81,7 @@ export function ProductCard({ product, dict, locale = 'pt', installments = 0, in
             <div className="product-card fade-in">
                 <div className="product-card-image">
                     {product.images[0] ? (
-                        <Image src={product.images[0]} alt={translateDb(product.name, locale)} fill sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw" style={{ objectFit: 'cover', transition: 'transform 0.4s ease' }} />
+                        <Image src={product.images[0]} alt={displayName} fill sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw" style={{ objectFit: 'cover', transition: 'transform 0.4s ease' }} />
                     ) : (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                             {l.noImage}
@@ -89,7 +99,7 @@ export function ProductCard({ product, dict, locale = 'pt', installments = 0, in
 
                 <div className="product-card-info">
                     <h3 className="product-card-name">
-                        {translateDb(product.name, locale)}
+                        {displayName}
                     </h3>
                     <div className="product-card-pricing">
                         <span className="product-card-price">

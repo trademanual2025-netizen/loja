@@ -14,6 +14,8 @@ interface Category {
 interface Product {
     id: string
     name: any
+    nameEn?: string | null
+    nameEs?: string | null
     slug: string
     price: number
     comparePrice?: number | null

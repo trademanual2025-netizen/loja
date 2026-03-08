@@ -192,7 +192,7 @@ export function ProductPageClient({ product, dict, relatedProducts = [], install
 
                 {product.description && (
                     <div style={{ color: 'var(--text-muted)', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
-                        {translateDb(product.description, locale)}
+                        {product.description}
                     </div>
                 )}
 

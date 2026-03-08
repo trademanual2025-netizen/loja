@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation'
 import { useCart } from '@/lib/cart'
 import { fbTrackPurchase } from '@/components/tracking/FacebookPixel'
 import { gtagPurchase } from '@/components/tracking/GoogleAds'
+import type { TrackingUserData } from '@/lib/tracking'
+import type { GtagUserData } from '@/components/tracking/GoogleAds'
 import Link from 'next/link'
 
 interface MPProps {
@@ -17,9 +19,10 @@ interface MPProps {
     shippingCost: number
     payWithPix?: boolean
     adsConfig: { adsId: string; adsLabel: string } | null
+    trackingUser?: TrackingUserData
 }
 
-export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shippingCost, payWithPix, adsConfig }: MPProps) {
+export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shippingCost, payWithPix, adsConfig, trackingUser }: MPProps) {
     const [isReady, setIsReady] = useState(false)
     const [isProcessing, setIsProcessing] = useState(false)
     const [pendingOrderId, setPendingOrderId] = useState<string | null>(null)
@@ -81,13 +84,9 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
 
             if (isApproved) {
                 const productIds = items.map((i: any) => i.id)
-                fbTrackPurchase(data.orderId, totalAmount, productIds)
-                fetch('/api/tracking/capi', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ event_name: 'Purchase', value: totalAmount, order_id: data.orderId }),
-                }).catch(() => { })
-                if (adsConfig) gtagPurchase(data.orderId, totalAmount, adsConfig.adsLabel, adsConfig.adsId, items)
+                fbTrackPurchase(data.orderId, totalAmount, productIds, trackingUser)
+                const gtu: GtagUserData | undefined = trackingUser ? { email: trackingUser.email, phone: trackingUser.phone, firstName: trackingUser.firstName, lastName: trackingUser.lastName, city: trackingUser.city, state: trackingUser.state, zipCode: trackingUser.zipCode, country: trackingUser.country } : undefined
+                if (adsConfig) gtagPurchase(data.orderId, totalAmount, adsConfig.adsLabel, adsConfig.adsId, items, gtu)
                 clearCart()
                 router.push(`/pedido/${data.orderId}`)
             } else {

@@ -7,6 +7,8 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { fbTrackInitiateCheckout } from '@/components/tracking/FacebookPixel'
 import { gtagBeginCheckout } from '@/components/tracking/GoogleAds'
+import type { TrackingUserData } from '@/lib/tracking'
+import type { GtagUserData } from '@/components/tracking/GoogleAds'
 import { MapPin, CreditCard, Truck, Globe } from 'lucide-react'
 import { MercadoPagoBrick } from '@/components/checkout/MercadoPagoBrick'
 import { StripeCheckoutForm } from '@/components/checkout/StripeCheckoutForm'
@@ -150,6 +152,7 @@ export default function CheckoutPage() {
     const [adsConfig, setAdsConfig] = useState<{ adsId: string; adsLabel: string } | null>(null)
 
     const [stripePromise, setStripePromise] = useState<any>(null)
+    const [trackingUser, setTrackingUser] = useState<TrackingUserData | undefined>(undefined)
     const [clientSecret, setClientSecret] = useState<string>('')
     const [stripeOrderId, setStripeOrderId] = useState<string>('')
     const [locale, setLocale] = useState<Locale>(defaultLocale)
@@ -183,10 +186,33 @@ export default function CheckoutPage() {
         const saved = Cookies.get('NEXT_LOCALE') as Locale
         if (saved && dictionaries[saved]) setLocale(saved)
 
-        if (items.length > 0) {
-            fbTrackInitiateCheckout(total(), items.length)
-            gtagBeginCheckout(total(), items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })))
-        }
+        fetch('/api/user/profile').then(r => r.ok ? r.json() : null).then(profile => {
+            if (profile) {
+                const nameParts = (profile.name || '').split(' ')
+                const tu: TrackingUserData = {
+                    email: profile.email,
+                    phone: profile.phone || undefined,
+                    firstName: nameParts[0] || undefined,
+                    lastName: nameParts.slice(1).join(' ') || undefined,
+                    country: 'br',
+                    externalId: profile.id,
+                }
+                setTrackingUser(tu)
+                if (items.length > 0) {
+                    fbTrackInitiateCheckout(total(), items.length, tu)
+                    const gtu: GtagUserData = { email: tu.email, phone: tu.phone, firstName: tu.firstName, lastName: tu.lastName, country: 'BR' }
+                    gtagBeginCheckout(total(), items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })), gtu)
+                }
+            } else if (items.length > 0) {
+                fbTrackInitiateCheckout(total(), items.length)
+                gtagBeginCheckout(total(), items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })))
+            }
+        }).catch(() => {
+            if (items.length > 0) {
+                fbTrackInitiateCheckout(total(), items.length)
+                gtagBeginCheckout(total(), items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })))
+            }
+        })
 
         fetch('/api/admin/settings').then(r => r.json()).then(s => {
             setConfigs(s)
@@ -267,6 +293,14 @@ export default function CheckoutPage() {
             number: data.number || '',
             state: data.state || '',
         }
+
+        setTrackingUser(prev => prev ? {
+            ...prev,
+            city: data.city,
+            state: data.state,
+            zipCode: data.zipCode.replace(/\D/g, ''),
+            country: selectedCountry.toLowerCase(),
+        } : prev)
 
         try {
             const res = await fetch('/api/shipping', {
@@ -728,6 +762,7 @@ export default function CheckoutPage() {
                             shippingCost={shipping.value}
                             payWithPix={pixDiscount}
                             adsConfig={adsConfig}
+                            trackingUser={trackingUser}
                         />
                     )}
 
@@ -739,6 +774,7 @@ export default function CheckoutPage() {
                                 totalAmount={total() + shipping.value}
                                 items={items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity, variantId: i.variantId }))}
                                 adsConfig={adsConfig}
+                                trackingUser={trackingUser}
                             />
                         </Elements>
                     )}

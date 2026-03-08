@@ -7,15 +7,18 @@ import { useRouter } from 'next/navigation'
 import { useCart } from '@/lib/cart'
 import { fbTrackPurchase } from '@/components/tracking/FacebookPixel'
 import { gtagPurchase } from '@/components/tracking/GoogleAds'
+import type { TrackingUserData } from '@/lib/tracking'
+import type { GtagUserData } from '@/components/tracking/GoogleAds'
 
 interface Props {
     orderIdStr: string
     totalAmount: number
     items: any[]
     adsConfig: { adsId: string; adsLabel: string } | null
+    trackingUser?: TrackingUserData
 }
 
-export function StripeCheckoutForm({ orderIdStr, totalAmount, items, adsConfig }: Props) {
+export function StripeCheckoutForm({ orderIdStr, totalAmount, items, adsConfig, trackingUser }: Props) {
     const stripe = useStripe()
     const elements = useElements()
     const [loading, setLoading] = useState(false)
@@ -50,13 +53,9 @@ export function StripeCheckoutForm({ orderIdStr, totalAmount, items, adsConfig }
 
         const trackPurchase = () => {
             const productIds = items.map((i) => i.id)
-            fbTrackPurchase(orderIdStr, totalAmount, productIds)
-            fetch('/api/tracking/capi', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ event_name: 'Purchase', value: totalAmount, order_id: orderIdStr }),
-            }).catch(() => { })
-            if (adsConfig) gtagPurchase(orderIdStr, totalAmount, adsConfig.adsLabel, adsConfig.adsId, items)
+            fbTrackPurchase(orderIdStr, totalAmount, productIds, trackingUser)
+            const gtu: GtagUserData | undefined = trackingUser ? { email: trackingUser.email, phone: trackingUser.phone, firstName: trackingUser.firstName, lastName: trackingUser.lastName, city: trackingUser.city, state: trackingUser.state, zipCode: trackingUser.zipCode, country: trackingUser.country } : undefined
+            if (adsConfig) gtagPurchase(orderIdStr, totalAmount, adsConfig.adsLabel, adsConfig.adsId, items, gtu)
         }
 
         switch (paymentIntent.status) {

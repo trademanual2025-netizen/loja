@@ -1,8 +1,9 @@
 'use client'
 
 import Script from 'next/script'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
+import { generateEventId, sendCapiEvent, getMetaCookies, getFbclidFromUrl, type TrackingUserData } from '@/lib/tracking'
 
 declare global {
     interface Window {
@@ -16,7 +17,9 @@ export function FacebookPixel({ pixelId }: { pixelId: string }) {
 
     useEffect(() => {
         if (typeof window.fbq === 'function') {
-            window.fbq('track', 'PageView')
+            const eid = generateEventId()
+            window.fbq('track', 'PageView', {}, { eventID: eid })
+            sendCapiEvent({ event_name: 'PageView', event_id: eid })
         }
     }, [pathname])
 
@@ -33,7 +36,6 @@ export function FacebookPixel({ pixelId }: { pixelId: string }) {
           s.parentNode.insertBefore(t,s)}(window, document,'script',
           'https://connect.facebook.net/en_US/fbevents.js');
           fbq('init', '${pixelId}');
-          fbq('track', 'PageView');
         `}
             </Script>
             <noscript>
@@ -49,49 +51,101 @@ export function FacebookPixel({ pixelId }: { pixelId: string }) {
     )
 }
 
-// Tracking functions (call from any client component)
-export function fbTrackViewContent(product: { id: string; name: string; price: number }) {
-    if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
-        window.fbq('track', 'ViewContent', {
-            content_ids: [product.id],
-            content_name: product.name,
-            content_type: 'product',
-            value: product.price,
-            currency: 'BRL',
-        })
-    }
+export function fbTrackViewContent(
+    product: { id: string; name: string; price: number },
+    userData?: TrackingUserData,
+) {
+    if (typeof window === 'undefined' || typeof window.fbq !== 'function') return
+    const eid = generateEventId()
+    window.fbq('track', 'ViewContent', {
+        content_ids: [product.id],
+        content_name: product.name,
+        content_type: 'product',
+        value: product.price,
+        currency: 'BRL',
+    }, { eventID: eid })
+    sendCapiEvent({
+        event_name: 'ViewContent',
+        event_id: eid,
+        value: product.price,
+        currency: 'BRL',
+        content_ids: [product.id],
+        content_name: product.name,
+        content_type: 'product',
+        user_data: userData,
+    })
 }
 
-export function fbTrackAddToCart(product: { id: string; name: string; price: number }) {
-    if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
-        window.fbq('track', 'AddToCart', {
-            content_ids: [product.id],
-            content_name: product.name,
-            content_type: 'product',
-            value: product.price,
-            currency: 'BRL',
-        })
-    }
+export function fbTrackAddToCart(
+    product: { id: string; name: string; price: number },
+    userData?: TrackingUserData,
+) {
+    if (typeof window === 'undefined' || typeof window.fbq !== 'function') return
+    const eid = generateEventId()
+    window.fbq('track', 'AddToCart', {
+        content_ids: [product.id],
+        content_name: product.name,
+        content_type: 'product',
+        value: product.price,
+        currency: 'BRL',
+    }, { eventID: eid })
+    sendCapiEvent({
+        event_name: 'AddToCart',
+        event_id: eid,
+        value: product.price,
+        currency: 'BRL',
+        content_ids: [product.id],
+        content_name: product.name,
+        content_type: 'product',
+        user_data: userData,
+    })
 }
 
-export function fbTrackInitiateCheckout(value: number, numItems: number) {
-    if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
-        window.fbq('track', 'InitiateCheckout', {
-            value,
-            currency: 'BRL',
-            num_items: numItems,
-        })
-    }
+export function fbTrackInitiateCheckout(
+    value: number,
+    numItems: number,
+    userData?: TrackingUserData,
+) {
+    if (typeof window === 'undefined' || typeof window.fbq !== 'function') return
+    const eid = generateEventId()
+    window.fbq('track', 'InitiateCheckout', {
+        value,
+        currency: 'BRL',
+        num_items: numItems,
+    }, { eventID: eid })
+    sendCapiEvent({
+        event_name: 'InitiateCheckout',
+        event_id: eid,
+        value,
+        currency: 'BRL',
+        num_items: numItems,
+        user_data: userData,
+    })
 }
 
-export function fbTrackPurchase(orderId: string, value: number, productIds: string[]) {
-    if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
-        window.fbq('track', 'Purchase', {
-            value,
-            currency: 'BRL',
-            content_ids: productIds,
-            content_type: 'product',
-            order_id: orderId,
-        })
-    }
+export function fbTrackPurchase(
+    orderId: string,
+    value: number,
+    productIds: string[],
+    userData?: TrackingUserData,
+) {
+    if (typeof window === 'undefined' || typeof window.fbq !== 'function') return
+    const eid = generateEventId()
+    window.fbq('track', 'Purchase', {
+        value,
+        currency: 'BRL',
+        content_ids: productIds,
+        content_type: 'product',
+        order_id: orderId,
+    }, { eventID: eid })
+    sendCapiEvent({
+        event_name: 'Purchase',
+        event_id: eid,
+        value,
+        currency: 'BRL',
+        content_ids: productIds,
+        content_type: 'product',
+        order_id: orderId,
+        user_data: userData,
+    })
 }

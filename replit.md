@@ -96,6 +96,9 @@ Loja online de joias artesanais da marca Giovana Dias. Construída com Next.js 1
 - API `/api/orders/cancel` cancela pedido PENDING do próprio usuário e retorna itens para o carrinho
 - Componente `ChangePaymentMethod` com confirmação em 2 passos (botão → card de confirmação → execução)
 - Pedidos cancelados por troca de pagamento exibem badge "Alterou pagamento" (roxo) em vez de "Cancelado" na minha-conta
+- Tracking Meta CAPI: todos os 4 eventos (PageView, ViewContent, AddToCart, InitiateCheckout, Purchase) enviados server-side com `event_id` para deduplicação; captura cookies `_fbc`/`_fbp`; envia dados completos do usuário (email, telefone, nome, cidade, estado, CEP, país, external_id) hasheados SHA-256; API Graph v21.0
+- Tracking Google Ads: Enhanced Conversions habilitado via `allow_enhanced_conversions: true`; `user_data` (email, telefone, nome, endereço) enviado via `gtag('set', 'user_data', ...)` antes de conversões; dados não-hasheados (Google hasheia automaticamente)
+- Utilitário de tracking em `src/lib/tracking.ts`: `generateEventId()` (deduplicação), `getMetaCookies()` (fbc/fbp), `sendCapiEvent()` (envio CAPI)
 - Webhook MercadoPago trata: approved→PAID, rejected/cancelled→CANCELLED, refunded/charged_back→REFUNDED
 - Webhook Stripe trata: payment_intent.succeeded→PAID, payment_intent.payment_failed→CANCELLED, charge.refunded→REFUNDED
 - Ambos webhooks atualizam `gatewayData` com lastWebhookStatus, lastWebhookAt e statusDetail

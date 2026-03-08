@@ -120,6 +120,7 @@ model Order {
   gatewayId       String?
   gatewayData     String?
   subtotal        Float
+  discount        Float       @default(0)
   shippingCost    Float       @default(0)
   total           Float
   // Endereço de entrega (snapshot no momento da compra)

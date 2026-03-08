@@ -25,14 +25,18 @@ export async function POST(req: NextRequest) {
     const accessToken = await getSetting(SETTINGS_KEYS.MP_ACCESS_TOKEN)
     if (!accessToken) return NextResponse.json({ error: 'Mercado Pago não configurado.' }, { status: 400 })
 
-    const { items, address, shippingCost, formData } = await req.json()
+    const { items, address, shippingCost, formData, payWithPix } = await req.json()
 
     const user = await prisma.user.findUnique({ where: { id: session.id } })
     if (!user) return NextResponse.json({ error: 'Usuário não encontrado.' }, { status: 404 })
 
     const subtotal = items.reduce((s: number, i: { price: number; quantity: number }) => s + i.price * i.quantity, 0)
     const shipping = typeof shippingCost === 'number' ? shippingCost : parseFloat(shippingCost) || 0
-    const total = Math.round((subtotal + shipping) * 100) / 100
+
+    const isPix = payWithPix === true || formData?.payment_method_id === 'bank_transfer'
+    const PIX_DISCOUNT_RATE = 0.05
+    const discountAmount = isPix ? Math.round((subtotal + shipping) * PIX_DISCOUNT_RATE * 100) / 100 : 0
+    const total = Math.round((subtotal + shipping - discountAmount) * 100) / 100
 
     const recentOrder = await prisma.order.findFirst({
         where: {
@@ -116,6 +120,7 @@ export async function POST(req: NextRequest) {
                 gatewayData: JSON.stringify(gwData),
                 status: orderStatus,
                 subtotal,
+                discount: discountAmount,
                 shippingCost: shipping,
                 total,
                 ...address,

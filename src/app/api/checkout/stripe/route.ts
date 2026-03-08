@@ -12,13 +12,15 @@ export async function POST(req: NextRequest) {
     const secretKey = await getSetting(SETTINGS_KEYS.STRIPE_SECRET_KEY)
     if (!secretKey) return NextResponse.json({ error: 'Stripe não configurado.' }, { status: 400 })
 
-    const { items, shippingCost, address } = await req.json()
+    const { items, shippingCost, address, payWithPix } = await req.json()
 
     const user = await prisma.user.findUnique({ where: { id: session.id } })
     if (!user) return NextResponse.json({ error: 'Usuário não encontrado.' }, { status: 404 })
 
     const subtotal = items.reduce((s: number, i: { price: number; quantity: number }) => s + i.price * i.quantity, 0)
-    const total = subtotal + shippingCost
+    const PIX_DISCOUNT_RATE = 0.05
+    const discountAmount = payWithPix === true ? Math.round((subtotal + shippingCost) * PIX_DISCOUNT_RATE * 100) / 100 : 0
+    const total = subtotal + shippingCost - discountAmount
 
     // Reservar estoque antes de criar o pagamento
     const stockItems = items.map((i: { id: string; quantity: number; variantId?: string }) => ({
@@ -40,7 +42,10 @@ export async function POST(req: NextRequest) {
             amount: Math.round(total * 100),
             currency: 'brl',
             metadata: { userId: session.id },
-            automatic_payment_methods: { enabled: true },
+            ...(payWithPix === true
+                ? { payment_method_types: ['pix'] }
+                : { automatic_payment_methods: { enabled: true } }
+            ),
         })
 
         const gwData = {
@@ -57,6 +62,7 @@ export async function POST(req: NextRequest) {
                 gatewayData: JSON.stringify(gwData),
                 status: 'PENDING',
                 subtotal,
+                discount: discountAmount,
                 shippingCost,
                 total,
                 ...address,

@@ -161,6 +161,7 @@ export default function CheckoutPage() {
     const [detectedCountry, setDetectedCountry] = useState<string | null>(null)
     const [selectedCountry, setSelectedCountry] = useState<string>('BR')
     const [locationDetecting, setLocationDetecting] = useState(true)
+    const [pixDiscount, setPixDiscount] = useState(false)
     const lastPostalLookedUp = useRef('')
     const addressForm = useForm<AddressForm>()
 
@@ -351,12 +352,13 @@ export default function CheckoutPage() {
     async function continueToPayment() {
         setStep('payment')
         if (paymentGateway === 'stripe' && configs?.stripe_public_key) {
-            initStripeIntent()
+            initStripeIntent(pixDiscount)
         }
     }
 
-    async function initStripeIntent() {
+    async function initStripeIntent(withPixDiscount = false) {
         if (!address) return
+        setClientSecret('')
         try {
             const res = await fetch('/api/checkout/stripe', {
                 method: 'POST',
@@ -365,6 +367,7 @@ export default function CheckoutPage() {
                     items: items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity, variantId: i.variantId })),
                     address,
                     shippingCost: shipping.value,
+                    payWithPix: withPixDiscount,
                 }),
             })
             const json = await res.json()
@@ -376,6 +379,13 @@ export default function CheckoutPage() {
             }
         } catch {
             toast.error(dict.checkout.stripeConnError)
+        }
+    }
+
+    function togglePixDiscount(enabled: boolean) {
+        setPixDiscount(enabled)
+        if (paymentGateway === 'stripe' && step === 'payment') {
+            initStripeIntent(enabled)
         }
     }
 
@@ -615,15 +625,57 @@ export default function CheckoutPage() {
                             <span>{dict.checkout.shipping} ({shipping.label})</span>
                             <span>{shipping.value === 0 ? dict.checkout.freeShipping : `R$ ${shipping.value.toFixed(2).replace('.', ',')}`}</span>
                         </div>
+                        {pixDiscount && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#22c55e', marginBottom: 8, fontWeight: 600 }}>
+                                <span>Desconto PIX (5%)</span>
+                                <span>- R$ {(Math.round((total() + shipping.value) * 0.05 * 100) / 100).toFixed(2).replace('.', ',')}</span>
+                            </div>
+                        )}
                         <hr className="divider" />
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '1.1rem' }}>
                             <span>{dict.checkout.total}</span>
-                            <span style={{ color: 'var(--primary)' }}>R$ {(total() + shipping.value).toFixed(2).replace('.', ',')}</span>
+                            <span style={{ color: 'var(--primary)' }}>
+                                R$ {(pixDiscount
+                                    ? Math.round((total() + shipping.value) * 0.95 * 100) / 100
+                                    : total() + shipping.value
+                                ).toFixed(2).replace('.', ',')}
+                            </span>
                         </div>
                         {isInternational && (
                             <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 8 }}>{dict.checkout.brlNote}</p>
                         )}
                     </div>
+
+                    {/* Toggle desconto PIX — apenas para clientes BR */}
+                    {isBrazil && (
+                        <div
+                            onClick={() => togglePixDiscount(!pixDiscount)}
+                            style={{
+                                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                padding: '14px 16px', marginBottom: 20, borderRadius: 10, cursor: 'pointer',
+                                background: pixDiscount ? 'rgba(34,197,94,0.08)' : 'var(--bg-card2)',
+                                border: `1.5px solid ${pixDiscount ? '#22c55e' : 'var(--border)'}`,
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <span style={{ fontSize: '1.3rem' }}>⚡</span>
+                                <div>
+                                    <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Pagar com PIX</div>
+                                    <div style={{ fontSize: '0.78rem', color: '#22c55e', fontWeight: 600 }}>5% de desconto instantâneo</div>
+                                </div>
+                            </div>
+                            <div style={{
+                                width: 44, height: 24, borderRadius: 12, position: 'relative',
+                                background: pixDiscount ? '#22c55e' : 'var(--border)', transition: 'background 0.2s', flexShrink: 0,
+                            }}>
+                                <div style={{
+                                    width: 18, height: 18, borderRadius: '50%', background: '#fff',
+                                    position: 'absolute', top: 3, left: pixDiscount ? 23 : 3, transition: 'left 0.2s',
+                                }} />
+                            </div>
+                        </div>
+                    )}
 
                     {/* Aviso de localização / gateway */}
                     {gatewayMode === 'auto' && detectedCountry && (
@@ -647,7 +699,7 @@ export default function CheckoutPage() {
                             </button>
                             <button className={`btn ${paymentGateway === 'stripe' ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: 1 }} onClick={() => {
                                 setPaymentGateway('stripe')
-                                if (!clientSecret) initStripeIntent()
+                                if (!clientSecret) initStripeIntent(pixDiscount)
                             }}>
                                 {dict.checkout.creditCard}
                             </button>
@@ -658,10 +710,13 @@ export default function CheckoutPage() {
                     {paymentGateway === 'mp' && configs?.mp_public_key && (
                         <MercadoPagoBrick
                             publicKey={configs.mp_public_key}
-                            totalAmount={total() + shipping.value}
+                            totalAmount={pixDiscount
+                                ? Math.round((total() + shipping.value) * 0.95 * 100) / 100
+                                : total() + shipping.value}
                             items={items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity, variantId: i.variantId }))}
                             address={address}
                             shippingCost={shipping.value}
+                            payWithPix={pixDiscount}
                             adsConfig={adsConfig}
                         />
                     )}

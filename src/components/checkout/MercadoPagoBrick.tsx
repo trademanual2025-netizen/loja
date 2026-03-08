@@ -15,10 +15,11 @@ interface MPProps {
     items: any[]
     address: any
     shippingCost: number
+    payWithPix?: boolean
     adsConfig: { adsId: string; adsLabel: string } | null
 }
 
-export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shippingCost, adsConfig }: MPProps) {
+export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shippingCost, payWithPix, adsConfig }: MPProps) {
     const [isReady, setIsReady] = useState(false)
     const [isProcessing, setIsProcessing] = useState(false)
     const [pendingOrderId, setPendingOrderId] = useState<string | null>(null)
@@ -64,7 +65,7 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
             const res = await fetch('/api/checkout/mercadopago', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ items, address, shippingCost, formData }),
+                body: JSON.stringify({ items, address, shippingCost, formData, payWithPix: !!payWithPix }),
             })
             const data = await res.json()
 
@@ -235,6 +236,7 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
             )}
             <div style={{ display: isProcessing ? 'none' : 'block' }}>
                 <Payment
+                    key={`mp-${totalAmount}`}
                     initialization={initialization}
                     customization={customization as any}
                     onSubmit={onSubmit}

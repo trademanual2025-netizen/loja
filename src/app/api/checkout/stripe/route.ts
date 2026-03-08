@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
             amount: Math.round(total * 100),
             currency: 'brl',
             metadata: { userId: session.id },
-            ...(payWithPix === true
+            ...(pixApplies
                 ? { payment_method_types: ['pix'] }
                 : { automatic_payment_methods: { enabled: true } }
             ),

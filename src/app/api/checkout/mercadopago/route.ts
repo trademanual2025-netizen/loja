@@ -50,7 +50,6 @@ export async function POST(req: NextRequest) {
         }
     }
     const discountAmount = pixApplies ? Math.round((subtotal + shipping) * pixRate * 100) / 100 : 0
-    const isPix = pixApplies
     const total = Math.round((subtotal + shipping - discountAmount) * 100) / 100
 
     const recentOrder = await prisma.order.findFirst({

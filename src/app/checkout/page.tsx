@@ -393,7 +393,7 @@ export default function CheckoutPage() {
 
     function togglePixDiscount(enabled: boolean) {
         setPixDiscount(enabled)
-        if (paymentGateway === 'stripe' && step === 'payment') {
+        if (paymentGateway === 'stripe' && step === 'payment' && !clientSecret) {
             initStripeIntent(enabled)
         }
     }
@@ -655,8 +655,9 @@ export default function CheckoutPage() {
                         )}
                     </div>
 
-                    {/* Toggle desconto PIX — só aparece quando habilitado no admin e produtos elegíveis */}
-                    {pixDiscountEligible && (
+                    {/* Toggle desconto PIX — só aparece quando habilitado no admin, produtos elegíveis
+                        e, no caso do Stripe, apenas antes do formulário carregar (PaymentIntent ainda não criado) */}
+                    {pixDiscountEligible && !(paymentGateway === 'stripe' && !!clientSecret) && (
                         <div
                             onClick={() => togglePixDiscount(!pixDiscount)}
                             style={{

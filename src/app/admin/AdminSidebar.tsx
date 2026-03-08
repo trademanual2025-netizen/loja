@@ -79,11 +79,19 @@ export function AdminSidebar({ isOpen }: Props) {
                 <div style={{ padding: '18px 16px 14px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
                     {logo ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <img
-                                src={logo}
-                                alt={storeName || 'Logo'}
-                                style={{ height: 36, maxWidth: 140, objectFit: 'contain', borderRadius: 6 }}
-                            />
+                            <div style={{
+                                background: theme === 'light' ? '#1a1a2e' : 'transparent',
+                                padding: theme === 'light' ? '6px 12px' : 0,
+                                borderRadius: 8,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                            }}>
+                                <img
+                                    src={logo}
+                                    alt={storeName || 'Logo'}
+                                    style={{ height: 36, maxWidth: 140, objectFit: 'contain', borderRadius: 6 }}
+                                />
+                            </div>
                         </div>
                     ) : (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

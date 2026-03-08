@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { Save, TestTube2 } from 'lucide-react'
+import { Save, TestTube2, Download, Loader2 } from 'lucide-react'
 import WebhooksTab from '@/components/admin/WebhooksTab'
 import ShippingByRegionTab from '@/components/admin/ShippingByRegionTab'
 import WhatsAppTab from '@/components/admin/WhatsAppTab'
@@ -182,27 +182,59 @@ export default function AdminSettings() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                         <div style={{ padding: 16, background: 'rgba(99,102,241,0.1)', borderRadius: 8, border: '1px solid rgba(99,102,241,0.3)', marginBottom: 4 }}>
                             <p style={{ fontWeight: 700, marginBottom: 6 }}>🗄️ Neon PostgreSQL</p>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>O banco de dados está configurado via variável de ambiente <code>DATABASE_URL</code>. Esta é a <strong>única variável de ambiente obrigatória</strong> ao fazer deploy no Render.</p>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>O banco de dados está hospedado no <strong>Neon</strong> (PostgreSQL serverless). A conexão é feita via variável de ambiente <code>NEON_DATABASE_URL</code> configurada na <strong>Vercel</strong>.</p>
                         </div>
 
                         <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8 }}>
-                            <p style={{ fontWeight: 700, marginBottom: 12 }}>Variáveis de ambiente necessárias no Render</p>
+                            <p style={{ fontWeight: 700, marginBottom: 12 }}>Variáveis de ambiente na Vercel</p>
                             {[
-                                { key: 'DATABASE_URL', desc: 'String de conexão Neon (postgresql://...)' },
-                                { key: 'JWT_SECRET', desc: 'Qualquer string aleatória longa para autenticação' },
-                                { key: 'ADMIN_JWT_SECRET', desc: 'Outra string aleatória para o painel admin' },
+                                { key: 'NEON_DATABASE_URL', desc: 'String de conexão Neon (postgresql://...)' },
+                                { key: 'JWT_SECRET', desc: 'String secreta para autenticação de clientes' },
+                                { key: 'ADMIN_JWT_SECRET', desc: 'String secreta para autenticação do painel admin' },
                             ].map(v => (
                                 <div key={v.key} style={{ marginBottom: 10, padding: 10, background: 'var(--bg)', borderRadius: 6, border: '1px solid var(--border)' }}>
                                     <code style={{ color: 'var(--primary)', fontWeight: 700 }}>{v.key}</code>
                                     <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginTop: 3 }}>{v.desc}</p>
                                 </div>
                             ))}
-                            <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: 8 }}>Todas as outras configurações (Mercado Pago, Stripe, Pixel, Frete, etc.) são gerenciadas pelo painel admin e salvas no banco de dados.</p>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: 8 }}>Todas as outras configurações (Mercado Pago, Stripe, Pixel, Frete, etc.) são gerenciadas por este painel admin e salvas diretamente no banco de dados.</p>
                         </div>
 
-                        <F settings={settings} set={set} label="DATABASE_URL (visualizar/atualizar)" k="database_url" placeholder="postgresql://usuario:senha@ep-xxx.neon.tech/neondb?sslmode=require" type="password" />
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginTop: -8 }}>⚠️ Alterar aqui atualiza apenas a referência salva no banco. A variável de ambiente no servidor precisa ser atualizada separadamente no painel do Render.</p>
-                        <button className="btn btn-primary" onClick={() => save(['database_url'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar URL'}</button>
+                        <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8 }}>
+                            <p style={{ fontWeight: 700, marginBottom: 6 }}>💾 Backup do Banco de Dados</p>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: 14 }}>
+                                Exporte todas as tabelas do banco em formato JSON. O arquivo inclui: usuários, produtos, pedidos, leads, configurações, webhooks, templates WhatsApp e mais.
+                            </p>
+                            <button
+                                className="btn btn-primary"
+                                style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+                                onClick={async () => {
+                                    const btn = document.activeElement as HTMLButtonElement
+                                    if (btn) btn.disabled = true
+                                    try {
+                                        toast.info('Gerando backup...')
+                                        const res = await fetch('/api/admin/backup', {
+                                            headers: { Authorization: `Bearer ${document.cookie.split('admin_token=')[1]?.split(';')[0] || ''}` },
+                                        })
+                                        if (!res.ok) throw new Error('Erro ao gerar backup')
+                                        const blob = await res.blob()
+                                        const url = URL.createObjectURL(blob)
+                                        const a = document.createElement('a')
+                                        a.href = url
+                                        a.download = `backup_giovana_${new Date().toISOString().slice(0, 10)}.json`
+                                        a.click()
+                                        URL.revokeObjectURL(url)
+                                        toast.success('Backup baixado com sucesso!')
+                                    } catch {
+                                        toast.error('Erro ao gerar backup')
+                                    } finally {
+                                        if (btn) btn.disabled = false
+                                    }
+                                }}
+                            >
+                                <Download size={16} /> Baixar Backup Completo
+                            </button>
+                        </div>
                     </div>
                 )}
 

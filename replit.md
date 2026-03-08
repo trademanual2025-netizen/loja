@@ -99,6 +99,7 @@ Loja online de joias artesanais da marca Giovana Dias. Construída com Next.js 1
 - Webhook MercadoPago trata: approved→PAID, rejected/cancelled→CANCELLED, refunded/charged_back→REFUNDED
 - Webhook Stripe trata: payment_intent.succeeded→PAID, payment_intent.payment_failed→CANCELLED, charge.refunded→REFUNDED
 - Ambos webhooks atualizam `gatewayData` com lastWebhookStatus, lastWebhookAt e statusDetail
+- Backup do banco: API `/api/admin/backup` (GET, protegido com JWT) exporta todas as tabelas em JSON; botão "Baixar Backup Completo" na aba Banco de Dados do admin settings
 - Webhook field mapping: admin pode escolher quais campos enviar e personalizar nomes dos campos para compatibilidade com ferramentas externas
 - Mapeamento salvo em settings `webhook_lead_fields` e `webhook_buyer_fields` (JSON)
 - Campos organizados por grupo: meta (envelope), data, address (buyer only)

@@ -380,26 +380,71 @@ export default function AdminSettings() {
                 {/* Tracking */}
                 {tab === 'Tracking' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                        <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8, marginBottom: 8 }}>
-                            <p style={{ fontWeight: 700, marginBottom: 12 }}>🔵 Facebook Pixel</p>
+                        <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8 }}>
+                            <p style={{ fontWeight: 700, marginBottom: 4 }}>🔵 Meta Pixel + Conversions API (CAPI)</p>
+                            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 14 }}>
+                                O Pixel rastreia eventos no navegador. O CAPI envia os mesmos eventos pelo servidor com dados adicionais (IP, email, telefone, endereço) para nota maxima de correspondencia no Gerenciador de Eventos.
+                            </p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                                 <F settings={settings} set={set} label="Pixel ID" k="fb_pixel_id" placeholder="123456789012345" />
                                 <F settings={settings} set={set} label="Access Token (CAPI server-side)" k="fb_capi_token" type="password" />
                                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                                     <input type="checkbox" checked={settings.fb_pixel_enabled === 'true'} onChange={e => set('fb_pixel_enabled', e.target.checked ? 'true' : 'false')} />
-                                    <span style={{ fontSize: '0.88rem' }}>Habilitar Pixel</span>
+                                    <span style={{ fontSize: '0.88rem', fontWeight: 600 }}>Habilitar Meta Pixel + CAPI</span>
                                 </label>
                             </div>
+                            <div style={{ marginTop: 14, padding: 12, background: 'var(--bg)', borderRadius: 6, border: '1px solid var(--border)' }}>
+                                <p style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: 8, color: 'var(--primary)' }}>Eventos enviados (Browser + Servidor)</p>
+                                {[
+                                    { ev: 'PageView', desc: 'Todas as paginas visitadas' },
+                                    { ev: 'ViewContent', desc: 'Visualizou pagina de produto' },
+                                    { ev: 'AddToCart', desc: 'Adicionou produto ao carrinho' },
+                                    { ev: 'InitiateCheckout', desc: 'Entrou no checkout' },
+                                    { ev: 'Purchase', desc: 'Compra confirmada (valor, produtos, pedido)' },
+                                ].map(e => (
+                                    <div key={e.ev} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                                        <span style={{ fontSize: '0.72rem', fontWeight: 700, background: 'rgba(59,130,246,0.15)', color: '#3b82f6', padding: '1px 6px', borderRadius: 4, fontFamily: 'monospace' }}>{e.ev}</span>
+                                        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{e.desc}</span>
+                                    </div>
+                                ))}
+                                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 8, lineHeight: 1.5 }}>
+                                    Todos os eventos usam <strong>event_id</strong> para deduplicacao (Browser + CAPI nao duplicam). O CAPI envia: IP, User-Agent, email, telefone, nome, cidade, estado, CEP, pais (tudo hasheado SHA-256), cookies _fbc/_fbp e fbclid.
+                                </p>
+                            </div>
                         </div>
+
                         <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8 }}>
-                            <p style={{ fontWeight: 700, marginBottom: 12 }}>🟢 Google Ads</p>
+                            <p style={{ fontWeight: 700, marginBottom: 4 }}>🟢 Google Ads + Enhanced Conversions</p>
+                            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 14 }}>
+                                Rastreia eventos de e-commerce e envia dados do usuario para melhorar a correspondencia de conversoes.
+                            </p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                                 <F settings={settings} set={set} label="Google Ads ID" k="google_ads_id" placeholder="AW-XXXXXXXXX" />
-                                <F settings={settings} set={set} label="Conversion Label (Purchase)" k="google_ads_label" placeholder="AbCdEfGhIj" />
+                                <F settings={settings} set={set} label="Conversion Label (apenas Purchase)" k="google_ads_label" placeholder="AbCdEfGhIj" />
                                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                                     <input type="checkbox" checked={settings.google_ads_enabled === 'true'} onChange={e => set('google_ads_enabled', e.target.checked ? 'true' : 'false')} />
-                                    <span style={{ fontSize: '0.88rem' }}>Habilitar Google Ads</span>
+                                    <span style={{ fontSize: '0.88rem', fontWeight: 600 }}>Habilitar Google Ads</span>
                                 </label>
+                            </div>
+                            <div style={{ marginTop: 14, padding: 12, background: 'var(--bg)', borderRadius: 6, border: '1px solid var(--border)' }}>
+                                <p style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: 8, color: '#22c55e' }}>Eventos enviados</p>
+                                {[
+                                    { ev: 'page_view', desc: 'Todas as paginas visitadas', label: false },
+                                    { ev: 'view_item', desc: 'Visualizou pagina de produto', label: false },
+                                    { ev: 'add_to_cart', desc: 'Adicionou produto ao carrinho', label: false },
+                                    { ev: 'begin_checkout', desc: 'Entrou no checkout (com dados do usuario)', label: false },
+                                    { ev: 'purchase', desc: 'Compra confirmada (evento GA4 padrao)', label: false },
+                                    { ev: 'conversion', desc: 'Conversao Google Ads (usa o Label acima)', label: true },
+                                ].map(e => (
+                                    <div key={e.ev} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                                        <span style={{ fontSize: '0.72rem', fontWeight: 700, background: e.label ? 'rgba(234,179,8,0.15)' : 'rgba(34,197,94,0.15)', color: e.label ? '#eab308' : '#22c55e', padding: '1px 6px', borderRadius: 4, fontFamily: 'monospace' }}>{e.ev}</span>
+                                        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{e.desc}</span>
+                                        {e.label && <span style={{ fontSize: '0.68rem', background: 'rgba(234,179,8,0.15)', color: '#eab308', padding: '1px 5px', borderRadius: 3, fontWeight: 600 }}>precisa do Label</span>}
+                                    </div>
+                                ))}
+                                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 8, lineHeight: 1.5 }}>
+                                    Os eventos padrao (page_view ate purchase) <strong>nao precisam de Label</strong> — sao rastreados automaticamente pelo Google. Somente o evento <strong>conversion</strong> (usado para otimizar campanhas de Google Ads) precisa do Label configurado acima. Enhanced Conversions envia email, telefone, nome e endereco do cliente para melhorar a taxa de correspondencia.
+                                </p>
                             </div>
                         </div>
                         <button className="btn btn-primary" onClick={() => save(['fb_pixel_id', 'fb_capi_token', 'fb_pixel_enabled', 'google_ads_id', 'google_ads_label', 'google_ads_enabled'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>

@@ -9,14 +9,16 @@ import { getCookie } from 'cookies-next'
 import { dictionaries, Locale, defaultLocale, translateDb } from '@/lib/i18n'
 import { useCart } from '@/lib/cart'
 
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-    PENDING: { label: 'Aguardando', color: '#f59e0b' },
-    PAID: { label: 'Pago', color: '#22c55e' },
-    CANCELLED: { label: 'Cancelado', color: '#ef4444' },
-    REFUNDED: { label: 'Reembolsado', color: '#8b5cf6' },
-    DELIVERED: { label: 'Entregue', color: '#3b82f6' },
-    REFUND_REQUESTED: { label: 'Reembolso Solicitado', color: '#ef4444' },
-    SHIPPED: { label: 'Em Trânsito', color: '#06b6d4' },
+function getStatusLabels(dict: typeof dictionaries[typeof defaultLocale]): Record<string, { label: string; color: string }> {
+    return {
+        PENDING: { label: dict.profile.statusPending, color: '#f59e0b' },
+        PAID: { label: dict.profile.statusPaid, color: '#22c55e' },
+        CANCELLED: { label: dict.profile.statusCancelled, color: '#ef4444' },
+        REFUNDED: { label: dict.profile.statusRefunded, color: '#8b5cf6' },
+        DELIVERED: { label: dict.orderPage.statusDelivered, color: '#3b82f6' },
+        REFUND_REQUESTED: { label: dict.orderPage.statusRefundRequested, color: '#ef4444' },
+        SHIPPED: { label: dict.orderPage.statusShipped, color: '#06b6d4' },
+    }
 }
 
 interface Order {
@@ -253,8 +255,8 @@ export default function MinhaContaPage() {
                             <Link href="/loja" className="btn btn-primary">{dict.profile.exploreBtn}</Link>
                         </div>
                     ) : profile.orders.map(order => {
-                        const statusLevelKey = order.status === 'PENDING' ? 'statusPending' : order.status === 'PAID' ? 'statusPaid' : order.status === 'CANCELLED' ? 'statusCancelled' : 'statusRefunded'
-                        const statusObj = STATUS_LABELS[order.status] || { label: order.status, color: 'var(--text-muted)' }
+                        const statusLabels = getStatusLabels(dict)
+                        const statusObj = statusLabels[order.status] || { label: order.status, color: 'var(--text-muted)' }
                         let orderGd: Record<string, any> = {}
                         try { if (order.gatewayData) orderGd = JSON.parse(order.gatewayData) } catch {}
                         const wasPmChange = orderGd.cancelledReason === 'user_changed_payment_method'
@@ -270,7 +272,7 @@ export default function MinhaContaPage() {
                                         {wasPmChange ? (
                                             <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.8rem', fontWeight: 700, background: 'rgba(139,92,246,0.12)', color: '#8b5cf6' }}>{dict.profile.changedPayment}</span>
                                         ) : (
-                                            <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.8rem', fontWeight: 700, background: `${statusObj.color}22`, color: statusObj.color }}>{dict.profile[statusLevelKey] || statusObj.label}</span>
+                                            <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: '0.8rem', fontWeight: 700, background: `${statusObj.color}22`, color: statusObj.color }}>{statusObj.label}</span>
                                         )}
                                         <span style={{ fontWeight: 800, color: 'var(--primary)' }}>R$ {order.total.toFixed(2).replace('.', ',')}</span>
                                     </div>
@@ -344,11 +346,11 @@ export default function MinhaContaPage() {
                                         return (
                                             <div style={{ padding: '10px 14px', background: 'rgba(59,130,246,0.08)', borderRadius: 8, border: '1px solid rgba(59,130,246,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
                                                 <p style={{ fontSize: '0.82rem', color: '#3b82f6' }}>
-                                                    Produto com problema? Você pode solicitar um reembolso.
-                                                    {order.deliveredAt && <span style={{ marginLeft: 4, opacity: 0.8 }}>({Math.max(0, Math.ceil(7 - diffDays))}d restantes)</span>}
+                                                    {dict.refund.productIssue}
+                                                    {order.deliveredAt && <span style={{ marginLeft: 4, opacity: 0.8 }}>({Math.max(0, Math.ceil(7 - diffDays))}{dict.refund.daysRemaining})</span>}
                                                 </p>
                                                 <Link href={`/reembolso/${order.id}`} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 8, background: 'rgba(59,130,246,0.15)', color: '#3b82f6', textDecoration: 'none', fontSize: '0.82rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                                                    <RotateCcw size={13} /> Solicitar Reembolso
+                                                    <RotateCcw size={13} /> {dict.refund.requestRefund}
                                                 </Link>
                                             </div>
                                         )
@@ -356,10 +358,10 @@ export default function MinhaContaPage() {
                                     {(order.status === 'REFUND_REQUESTED' || order.status === 'REFUNDED') && (
                                         <div style={{ padding: '10px 14px', background: order.status === 'REFUNDED' ? 'rgba(139,92,246,0.08)' : 'rgba(239,68,68,0.08)', borderRadius: 8, border: `1px solid ${order.status === 'REFUNDED' ? 'rgba(139,92,246,0.25)' : 'rgba(239,68,68,0.25)'}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
                                             <p style={{ fontSize: '0.82rem', color: order.status === 'REFUNDED' ? '#8b5cf6' : '#ef4444', fontWeight: 600 }}>
-                                                {order.status === 'REFUND_REQUESTED' ? 'Reembolso em análise pela equipe.' : 'Reembolso concluído.'}
+                                                {order.status === 'REFUND_REQUESTED' ? dict.refund.inReview : dict.refund.completed}
                                             </p>
                                             <Link href={`/reembolso/${order.id}`} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 8, background: order.status === 'REFUNDED' ? 'rgba(139,92,246,0.15)' : 'rgba(239,68,68,0.15)', color: order.status === 'REFUNDED' ? '#8b5cf6' : '#ef4444', textDecoration: 'none', fontSize: '0.82rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                                                <RotateCcw size={13} /> Ver Solicitação
+                                                <RotateCcw size={13} /> {dict.refund.viewRequest}
                                             </Link>
                                         </div>
                                     )}

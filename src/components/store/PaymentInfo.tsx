@@ -5,6 +5,7 @@ import { Copy, Check, ExternalLink, Clock, QrCode, RefreshCw } from 'lucide-reac
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/lib/cart'
+import type { Dictionary } from '@/lib/i18n'
 
 interface CartItem {
     id: string
@@ -23,9 +24,10 @@ interface Props {
     createdAt: string
     orderId?: string
     orderItems?: CartItem[]
+    dict: Dictionary
 }
 
-export function PaymentInfo({ gateway, gatewayData, createdAt, orderId, orderItems }: Props) {
+export function PaymentInfo({ gateway, gatewayData, createdAt, orderId, orderItems, dict }: Props) {
     const [copied, setCopied] = useState(false)
     const [timeLeft, setTimeLeft] = useState('')
     const [expired, setExpired] = useState(false)
@@ -48,7 +50,7 @@ export function PaymentInfo({ gateway, gatewayData, createdAt, orderId, orderIte
 
             if (diff <= 0) {
                 setExpired(true)
-                setTimeLeft('Expirado')
+                setTimeLeft(dict.paymentInfo.expired)
                 return
             }
 
@@ -74,10 +76,10 @@ export function PaymentInfo({ gateway, gatewayData, createdAt, orderId, orderIte
         try {
             await navigator.clipboard.writeText(text)
             setCopied(true)
-            toast.success('Código copiado!')
+            toast.success(dict.paymentInfo.codeCopied)
             setTimeout(() => setCopied(false), 3000)
         } catch {
-            toast.error('Erro ao copiar')
+            toast.error(dict.paymentInfo.copyError)
         }
     }
 
@@ -92,15 +94,15 @@ export function PaymentInfo({ gateway, gatewayData, createdAt, orderId, orderIte
             })
             const data = await res.json()
             if (!res.ok) {
-                toast.error(data.error || 'Erro ao cancelar pedido.')
+                toast.error(data.error || dict.paymentInfo.cancelError)
                 setRegenerating(false)
                 return
             }
             setItems(data.cartItems || orderItems || [])
-            toast.success('Redirecionando para o checkout...')
+            toast.success(dict.paymentInfo.redirectingCheckout)
             router.push('/checkout')
         } catch {
-            toast.error('Erro ao processar. Tente novamente.')
+            toast.error(dict.paymentInfo.processingError)
             setRegenerating(false)
         }
     }
@@ -110,7 +112,7 @@ export function PaymentInfo({ gateway, gatewayData, createdAt, orderId, orderIte
             <div className="card" style={{ textAlign: 'left', marginBottom: 24 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
                     <QrCode size={20} color="var(--primary)" />
-                    <h3 style={{ fontWeight: 700 }}>Pagamento via Pix</h3>
+                    <h3 style={{ fontWeight: 700 }}>{dict.paymentInfo.pixTitle}</h3>
                 </div>
 
                 {!expired && gatewayData.pixQrCodeBase64 && (
@@ -127,7 +129,7 @@ export function PaymentInfo({ gateway, gatewayData, createdAt, orderId, orderIte
 
                 {!expired && gatewayData.pixQrCode && (
                     <div style={{ marginBottom: 16 }}>
-                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 8 }}>Ou copie o código Pix:</p>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 8 }}>{dict.paymentInfo.pixCopyLabel}</p>
                         <div style={{ display: 'flex', gap: 8 }}>
                             <input
                                 readOnly
@@ -145,7 +147,7 @@ export function PaymentInfo({ gateway, gatewayData, createdAt, orderId, orderIte
                                 style={{ padding: '10px 16px', gap: 6, flexShrink: 0 }}
                             >
                                 {copied ? <Check size={15} /> : <Copy size={15} />}
-                                {copied ? 'Copiado' : 'Copiar'}
+                                {copied ? dict.paymentInfo.copiedBtn : dict.paymentInfo.copyBtn}
                             </button>
                         </div>
                     </div>
@@ -161,7 +163,7 @@ export function PaymentInfo({ gateway, gatewayData, createdAt, orderId, orderIte
                         marginBottom: expired && orderId ? 12 : 0,
                     }}>
                         <Clock size={15} />
-                        {expired ? 'QR Code expirado.' : `Expira em ${timeLeft}`}
+                        {expired ? dict.paymentInfo.qrExpired : `${dict.paymentInfo.expiresIn} ${timeLeft}`}
                     </div>
                 )}
 
@@ -175,13 +177,13 @@ export function PaymentInfo({ gateway, gatewayData, createdAt, orderId, orderIte
                         {regenerating
                             ? <span className="spinner" style={{ width: 16, height: 16 }} />
                             : <RefreshCw size={16} />}
-                        {regenerating ? 'Aguarde...' : 'Gerar novo pedido'}
+                        {regenerating ? dict.paymentInfo.wait : dict.paymentInfo.generateNewOrder}
                     </button>
                 )}
 
                 {!timeLeft && !expired && (
                     <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                        Abra o app do seu banco, escaneie o QR Code ou cole o código Pix para pagar.
+                        {dict.paymentInfo.pixInstructions}
                     </p>
                 )}
             </div>
@@ -193,11 +195,11 @@ export function PaymentInfo({ gateway, gatewayData, createdAt, orderId, orderIte
             <div className="card" style={{ textAlign: 'left', marginBottom: 24 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
                     <ExternalLink size={20} color="var(--primary)" />
-                    <h3 style={{ fontWeight: 700 }}>Pagamento via Boleto</h3>
+                    <h3 style={{ fontWeight: 700 }}>{dict.paymentInfo.boletoTitle}</h3>
                 </div>
 
                 <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: 16, lineHeight: 1.6 }}>
-                    O boleto pode levar até 3 dias úteis para ser compensado após o pagamento.
+                    {dict.paymentInfo.boletoProcessing}
                 </p>
 
                 {!expired && (gatewayData.boletoUrl || gatewayData.ticketUrl) && (
@@ -209,7 +211,7 @@ export function PaymentInfo({ gateway, gatewayData, createdAt, orderId, orderIte
                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, textDecoration: 'none', marginBottom: 16 }}
                     >
                         <ExternalLink size={16} />
-                        Abrir Boleto
+                        {dict.paymentInfo.openBoleto}
                     </a>
                 )}
 
@@ -223,7 +225,7 @@ export function PaymentInfo({ gateway, gatewayData, createdAt, orderId, orderIte
                         marginBottom: expired && orderId ? 12 : 0,
                     }}>
                         <Clock size={15} />
-                        {expired ? 'Boleto vencido.' : `Vence em ${timeLeft}`}
+                        {expired ? dict.paymentInfo.boletoExpired : `${dict.paymentInfo.dueIn} ${timeLeft}`}
                     </div>
                 )}
 
@@ -237,7 +239,7 @@ export function PaymentInfo({ gateway, gatewayData, createdAt, orderId, orderIte
                         {regenerating
                             ? <span className="spinner" style={{ width: 16, height: 16 }} />
                             : <RefreshCw size={16} />}
-                        {regenerating ? 'Aguarde...' : 'Gerar novo pedido'}
+                        {regenerating ? dict.paymentInfo.wait : dict.paymentInfo.generateNewOrder}
                     </button>
                 )}
             </div>
@@ -245,14 +247,14 @@ export function PaymentInfo({ gateway, gatewayData, createdAt, orderId, orderIte
     }
 
     if (isCard && gatewayData.statusDetail) {
-        const detail = getStatusDetailLabel(gatewayData.statusDetail)
+        const detail = getStatusDetailLabel(gatewayData.statusDetail, dict)
         const isAnalysis = gatewayData.statusDetail.includes('pending')
 
         return (
             <div className="card" style={{ textAlign: 'left', marginBottom: 24 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                     <Clock size={20} color={isAnalysis ? '#eab308' : '#ef4444'} />
-                    <h3 style={{ fontWeight: 700 }}>Pagamento via Cartão</h3>
+                    <h3 style={{ fontWeight: 700 }}>{dict.paymentInfo.cardTitle}</h3>
                 </div>
                 <div style={{
                     padding: '12px 14px', borderRadius: 8, fontSize: '0.88rem',
@@ -270,33 +272,13 @@ export function PaymentInfo({ gateway, gatewayData, createdAt, orderId, orderIte
     return (
         <div className="card" style={{ textAlign: 'left', marginBottom: 24 }}>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6 }}>
-                Aguardando confirmação do pagamento. Assim que for confirmado, o status será atualizado automaticamente.
+                {dict.paymentInfo.awaitingConfirmation}
             </p>
         </div>
     )
 }
 
-function getStatusDetailLabel(detail: string): string {
-    const labels: Record<string, string> = {
-        accredited: 'Pagamento aprovado',
-        pending_contingency: 'Pagamento em processamento',
-        pending_review_manual: 'Seu pagamento está em análise manual. Isso pode levar até 2 dias úteis.',
-        pending_waiting_payment: 'Aguardando pagamento',
-        pending_waiting_transfer: 'Aguardando transferência',
-        cc_rejected_bad_filled_card_number: 'Número do cartão incorreto',
-        cc_rejected_bad_filled_date: 'Data de validade incorreta',
-        cc_rejected_bad_filled_other: 'Dados do cartão incorretos',
-        cc_rejected_bad_filled_security_code: 'Código de segurança incorreto',
-        cc_rejected_blacklist: 'Cartão não autorizado pela operadora',
-        cc_rejected_call_for_authorize: 'Ligue para a operadora do cartão para autorizar o pagamento',
-        cc_rejected_card_disabled: 'Cartão desativado. Entre em contato com a operadora',
-        cc_rejected_card_error: 'Erro no cartão. Tente outro cartão ou forma de pagamento',
-        cc_rejected_duplicated_payment: 'Pagamento duplicado detectado',
-        cc_rejected_high_risk: 'Pagamento recusado por segurança. Tente outra forma de pagamento',
-        cc_rejected_insufficient_amount: 'Saldo insuficiente no cartão',
-        cc_rejected_invalid_installments: 'Número de parcelas não suportado',
-        cc_rejected_max_attempts: 'Limite de tentativas excedido. Use outro cartão',
-        cc_rejected_other_reason: 'Pagamento recusado pela operadora do cartão',
-    }
+function getStatusDetailLabel(detail: string, dict: Dictionary): string {
+    const labels: Record<string, string> = dict.paymentStatus as Record<string, string>
     return labels[detail] || detail
 }

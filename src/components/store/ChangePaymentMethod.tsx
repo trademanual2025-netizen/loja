@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCart } from '@/lib/cart'
+import type { Dictionary } from '@/lib/i18n'
 
 interface Props {
     orderId: string
@@ -18,13 +19,15 @@ interface Props {
         variantId?: string
         variantName?: string
     }[]
+    dict: Dictionary
 }
 
-export function ChangePaymentMethod({ orderId, orderItems }: Props) {
+export function ChangePaymentMethod({ orderId, orderItems, dict }: Props) {
     const [loading, setLoading] = useState(false)
     const [confirming, setConfirming] = useState(false)
     const router = useRouter()
     const { setItems } = useCart()
+    const t = dict.changePayment
 
     async function handleChange() {
         if (!confirming) {
@@ -42,17 +45,17 @@ export function ChangePaymentMethod({ orderId, orderItems }: Props) {
 
             const data = await res.json()
             if (!res.ok) {
-                toast.error(data.error || 'Erro ao cancelar pedido.')
+                toast.error(data.error || t.cancelError)
                 setLoading(false)
                 setConfirming(false)
                 return
             }
 
             setItems(data.cartItems || orderItems)
-            toast.success('Pedido cancelado. Escolha outra forma de pagamento.')
+            toast.success(t.cancelSuccess)
             router.push('/checkout')
         } catch {
-            toast.error('Erro ao processar. Tente novamente.')
+            toast.error(t.processingError)
             setLoading(false)
             setConfirming(false)
         }
@@ -82,7 +85,7 @@ export function ChangePaymentMethod({ orderId, orderItems }: Props) {
                     }}
                 >
                     <RefreshCw size={16} />
-                    Alterar forma de pagamento
+                    {t.changeMethod}
                 </button>
             ) : (
                 <div className="card" style={{
@@ -91,7 +94,7 @@ export function ChangePaymentMethod({ orderId, orderItems }: Props) {
                     padding: '16px 20px',
                 }}>
                     <p style={{ fontSize: '0.88rem', color: 'var(--text-body)', marginBottom: 14, lineHeight: 1.6 }}>
-                        Este pedido será <strong>cancelado</strong> e os mesmos produtos serão adicionados ao seu carrinho para que você possa finalizar com outra forma de pagamento.
+                        {t.confirmText}
                     </p>
                     <div style={{ display: 'flex', gap: 10 }}>
                         <button
@@ -101,7 +104,7 @@ export function ChangePaymentMethod({ orderId, orderItems }: Props) {
                             style={{ flex: 1, padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
                         >
                             {loading ? <span className="spinner" style={{ width: 16, height: 16 }} /> : <RefreshCw size={15} />}
-                            {loading ? 'Cancelando...' : 'Confirmar e ir ao checkout'}
+                            {loading ? t.cancelling : t.confirmAndCheckout}
                         </button>
                         <button
                             onClick={() => setConfirming(false)}
@@ -109,7 +112,7 @@ export function ChangePaymentMethod({ orderId, orderItems }: Props) {
                             className="btn"
                             style={{ padding: '12px 20px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-muted)', cursor: 'pointer' }}
                         >
-                            Voltar
+                            {t.back}
                         </button>
                     </div>
                 </div>

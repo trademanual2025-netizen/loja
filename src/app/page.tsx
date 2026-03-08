@@ -46,16 +46,16 @@ export default async function LandingPage() {
       user={user}
       dict={dict}
       heroImage={landingSettings[SETTINGS_KEYS.LANDING_HERO_IMAGE] || ''}
-      heroTitle={landingSettings[SETTINGS_KEYS.LANDING_HERO_TITLE] || dict.landing.heroTitle}
-      heroSubtitle={landingSettings[SETTINGS_KEYS.LANDING_HERO_SUBTITLE] || dict.landing.heroSubtitle}
-      ctaText={landingSettings[SETTINGS_KEYS.LANDING_CTA_TEXT] || dict.landing.ctaText}
+      heroTitle={currentLocale === 'pt' ? (landingSettings[SETTINGS_KEYS.LANDING_HERO_TITLE] || dict.landing.heroTitle) : dict.landing.heroTitle}
+      heroSubtitle={currentLocale === 'pt' ? (landingSettings[SETTINGS_KEYS.LANDING_HERO_SUBTITLE] || dict.landing.heroSubtitle) : dict.landing.heroSubtitle}
+      ctaText={currentLocale === 'pt' ? (landingSettings[SETTINGS_KEYS.LANDING_CTA_TEXT] || dict.landing.ctaText) : dict.landing.ctaText}
       whatsapp={landingSettings[SETTINGS_KEYS.LANDING_WHATSAPP] || ''}
       instagram={landingSettings[SETTINGS_KEYS.LANDING_INSTAGRAM] || ''}
       email={landingSettings[SETTINGS_KEYS.LANDING_EMAIL] || ''}
       phone={landingSettings[SETTINGS_KEYS.LANDING_PHONE] || ''}
       customBannerImage={landingSettings[SETTINGS_KEYS.LANDING_CUSTOM_BANNER_IMAGE] || '/custom-jewelry-banner.png'}
-      customBannerTitle={landingSettings[SETTINGS_KEYS.LANDING_CUSTOM_BANNER_TITLE] || ''}
-      customBannerText={landingSettings[SETTINGS_KEYS.LANDING_CUSTOM_BANNER_TEXT] || ''}
+      customBannerTitle={currentLocale === 'pt' ? (landingSettings[SETTINGS_KEYS.LANDING_CUSTOM_BANNER_TITLE] || '') : ''}
+      customBannerText={currentLocale === 'pt' ? (landingSettings[SETTINGS_KEYS.LANDING_CUSTOM_BANNER_TEXT] || '') : ''}
       aboutText={sanitizeHtml(landingSettings[SETTINGS_KEYS.LANDING_ABOUT_TEXT] || '')}
     />
   )

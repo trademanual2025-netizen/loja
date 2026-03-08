@@ -35,7 +35,7 @@ export function ContactFormClient({ whatsappLink, dict }: Props) {
             if (res.ok) {
                 setSent(true)
             } else if (res.status === 429) {
-                toast.error('Muitas tentativas. Aguarde alguns minutos e tente novamente.')
+                toast.error(c.rateLimitError)
             } else {
                 toast.error(c.sendError)
             }

@@ -5,19 +5,26 @@ import { useRouter } from 'next/navigation'
 import { Send, ArrowLeft, Loader2, CheckCircle, XCircle, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import { getCookie } from 'cookies-next'
+import { dictionaries, Locale, defaultLocale } from '@/lib/i18n'
 
 interface RefundMessage { id: string; authorType: string; content: string; createdAt: string }
 interface Refund { id: string; status: string; reason: string; createdAt: string; messages: RefundMessage[] }
 
-const STATUS_INFO: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-    PENDING: { label: 'Aguardando análise', color: '#f59e0b', icon: <Clock size={18} /> },
-    APPROVED: { label: 'Reembolso aprovado', color: '#22c55e', icon: <CheckCircle size={18} /> },
-    REJECTED: { label: 'Reembolso recusado', color: '#ef4444', icon: <XCircle size={18} /> },
-}
-
 export default function ReembolsoPage({ params }: { params: Promise<{ orderId: string }> }) {
     const { orderId } = use(params)
     const router = useRouter()
+
+    const localeCookie = getCookie('NEXT_LOCALE') as Locale
+    const locale = localeCookie && dictionaries[localeCookie] ? localeCookie : defaultLocale
+    const dict = dictionaries[locale]
+    const r = dict.refund
+
+    const STATUS_INFO: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
+        PENDING: { label: r.pending, color: '#f59e0b', icon: <Clock size={18} /> },
+        APPROVED: { label: r.approved, color: '#22c55e', icon: <CheckCircle size={18} /> },
+        REJECTED: { label: r.rejected, color: '#ef4444', icon: <XCircle size={18} /> },
+    }
 
     const [refund, setRefund] = useState<Refund | null>(null)
     const [loading, setLoading] = useState(true)
@@ -28,6 +35,8 @@ export default function ReembolsoPage({ params }: { params: Promise<{ orderId: s
     const [sendingMsg, setSendingMsg] = useState(false)
     const [messages, setMessages] = useState<RefundMessage[]>([])
     const chatRef = useRef<HTMLDivElement>(null)
+
+    const dateLocale = locale === 'pt' ? 'pt-BR' : locale === 'es' ? 'es-ES' : 'en-US'
 
     async function load() {
         const res = await fetch(`/api/user/refund/${orderId}`)
@@ -59,18 +68,18 @@ export default function ReembolsoPage({ params }: { params: Promise<{ orderId: s
     }, [messages])
 
     async function submitRefund() {
-        if (!reason.trim()) { toast.error('Descreva o motivo do reembolso.'); return }
+        if (!reason.trim()) { toast.error(r.describeError); return }
         setSubmitting(true)
         const res = await fetch(`/api/user/refund/${orderId}`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason }),
         })
         const data = await res.json()
         if (res.ok) {
-            toast.success('Solicitação enviada! Aguarde a análise.')
+            toast.success(r.requestSent)
             setRefund(data)
             setMessages([])
         } else {
-            toast.error(data.error || 'Erro ao enviar solicitação.')
+            toast.error(data.error || r.sendError)
         }
         setSubmitting(false)
     }
@@ -85,7 +94,7 @@ export default function ReembolsoPage({ params }: { params: Promise<{ orderId: s
             const msg = await res.json()
             setMessages(p => [...p, msg])
             setMsgInput('')
-        } else toast.error('Erro ao enviar mensagem.')
+        } else toast.error(r.messageError)
         setSendingMsg(false)
     }
 
@@ -98,40 +107,40 @@ export default function ReembolsoPage({ params }: { params: Promise<{ orderId: s
     return (
         <div style={{ maxWidth: 640, margin: '0 auto', padding: '40px 16px 80px' }}>
             <Link href="/minha-conta" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.88rem', marginBottom: 24 }}>
-                <ArrowLeft size={15} /> Voltar para Minha Conta
+                <ArrowLeft size={15} /> {r.backToAccount}
             </Link>
 
-            <h1 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: 6 }}>Solicitação de Reembolso</h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: 28 }}>Pedido #{orderId.slice(-8).toUpperCase()}</p>
+            <h1 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: 6 }}>{r.title}</h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: 28 }}>{r.orderNumber} #{orderId.slice(-8).toUpperCase()}</p>
 
             {!refund && !canRequest && (
                 <div className="card" style={{ textAlign: 'center', padding: '48px 24px' }}>
                     <XCircle size={48} color="#ef4444" style={{ margin: '0 auto 16px' }} />
-                    <p style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: 8 }}>Solicitação não disponível</p>
+                    <p style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: 8 }}>{r.unavailable}</p>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: 20 }}>
-                        O reembolso só pode ser solicitado para pedidos com status <strong>Entregue</strong>, dentro do prazo de 7 dias após a confirmação de entrega.
+                        {r.unavailableDesc}
                     </p>
-                    <Link href="/minha-conta" className="btn btn-primary">Ver meus pedidos</Link>
+                    <Link href="/minha-conta" className="btn btn-primary">{r.viewOrders}</Link>
                 </div>
             )}
 
             {!refund && canRequest && (
                 <div className="card">
-                    <h2 style={{ fontWeight: 700, marginBottom: 8 }}>Descreva o motivo</h2>
+                    <h2 style={{ fontWeight: 700, marginBottom: 8 }}>{r.describeReason}</h2>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: 20, lineHeight: 1.6 }}>
-                        Explique detalhadamente o motivo pelo qual deseja solicitar o reembolso. Nossa equipe irá analisar e retornará em breve.
+                        {r.explainReason}
                     </p>
                     <textarea
                         className="input"
                         rows={5}
-                        placeholder="Ex: O produto chegou com defeito, a cor é diferente da anunciada..."
+                        placeholder={r.placeholder}
                         value={reason}
                         onChange={e => setReason(e.target.value)}
                         style={{ resize: 'vertical', marginBottom: 16 }}
                     />
                     <button className="btn btn-primary" onClick={submitRefund} disabled={submitting || !reason.trim()}>
                         {submitting ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : null}
-                        {submitting ? 'Enviando...' : 'Enviar Solicitação'}
+                        {submitting ? r.sending : r.sendRequest}
                     </button>
                 </div>
             )}
@@ -148,7 +157,7 @@ export default function ReembolsoPage({ params }: { params: Promise<{ orderId: s
                                     <div>
                                         <p style={{ fontWeight: 700, color: info.color }}>{info.label}</p>
                                         <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 2 }}>
-                                            Solicitado em {new Date(refund.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                                            {r.requestedOn} {new Date(refund.createdAt).toLocaleDateString(dateLocale, { day: '2-digit', month: 'long', year: 'numeric' })}
                                         </p>
                                     </div>
                                 </div>
@@ -158,19 +167,19 @@ export default function ReembolsoPage({ params }: { params: Promise<{ orderId: s
 
                     {/* Reason */}
                     <div className="card">
-                        <p style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Seu motivo</p>
+                        <p style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>{r.yourReason}</p>
                         <p style={{ fontSize: '0.9rem', lineHeight: 1.6, color: 'var(--text)' }}>{refund.reason}</p>
                     </div>
 
                     {/* Chat */}
                     <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
                         <p style={{ padding: '16px 20px 12px', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid var(--border)' }}>
-                            Conversa com o suporte
+                            {r.supportChat}
                         </p>
                         <div ref={chatRef} style={{ minHeight: 160, maxHeight: 320, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
                             {messages.length === 0 && (
                                 <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center', padding: '20px 0' }}>
-                                    Nenhuma mensagem ainda. Nossa equipe responderá em breve.
+                                    {r.noMessages}
                                 </p>
                             )}
                             {messages.map(msg => (
@@ -179,7 +188,7 @@ export default function ReembolsoPage({ params }: { params: Promise<{ orderId: s
                                         {msg.content}
                                     </div>
                                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 3 }}>
-                                        {msg.authorType === 'USER' ? 'Você' : 'Suporte'} · {new Date(msg.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                        {msg.authorType === 'USER' ? r.you : r.support} · {new Date(msg.createdAt).toLocaleTimeString(dateLocale, { hour: '2-digit', minute: '2-digit' })}
                                     </span>
                                 </div>
                             ))}
@@ -188,7 +197,7 @@ export default function ReembolsoPage({ params }: { params: Promise<{ orderId: s
                             <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', display: 'flex', gap: 8 }}>
                                 <input
                                     className="input"
-                                    placeholder="Escreva uma mensagem..."
+                                    placeholder={r.writeMessage}
                                     value={msgInput}
                                     onChange={e => setMsgInput(e.target.value)}
                                     onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}

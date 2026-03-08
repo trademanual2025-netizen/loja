@@ -83,17 +83,17 @@ export default async function PedidoPage({ params }: { params: Promise<{ id: str
                 ) : order.status === 'PENDING' ? (
                     <>
                         <Clock size={72} color="#eab308" />
-                        <h1 style={{ fontWeight: 800, fontSize: '2rem', marginBottom: 0 }}>Aguardando Pagamento</h1>
+                        <h1 style={{ fontWeight: 800, fontSize: '2rem', marginBottom: 0 }}>{dict.orderPage.awaitingPayment}</h1>
                     </>
                 ) : order.status === 'CANCELLED' ? (
                     <>
                         <AlertCircle size={72} color="#ef4444" />
-                        <h1 style={{ fontWeight: 800, fontSize: '2rem', marginBottom: 0 }}>Pedido Cancelado</h1>
+                        <h1 style={{ fontWeight: 800, fontSize: '2rem', marginBottom: 0 }}>{dict.orderPage.orderCancelled}</h1>
                     </>
                 ) : (
                     <>
                         <AlertCircle size={72} color="#8b5cf6" />
-                        <h1 style={{ fontWeight: 800, fontSize: '2rem', marginBottom: 0 }}>Status: {order.status}</h1>
+                        <h1 style={{ fontWeight: 800, fontSize: '2rem', marginBottom: 0 }}>{order.status}</h1>
                     </>
                 )}
             </div>
@@ -109,25 +109,26 @@ export default async function PedidoPage({ params }: { params: Promise<{ id: str
                     createdAt={order.createdAt.toISOString()}
                     orderId={isOwner ? order.id : undefined}
                     orderItems={isOwner ? orderItemsForCart : undefined}
+                    dict={dict}
                 />
             )}
 
             {order.status === 'PENDING' && isOwner && (
-                <ChangePaymentMethod orderId={order.id} orderItems={orderItemsForCart} />
+                <ChangePaymentMethod orderId={order.id} orderItems={orderItemsForCart} dict={dict} />
             )}
 
             {order.status === 'CANCELLED' && gatewayData.cancelledReason === 'user_changed_payment_method' && (
                 <div className="card" style={{ textAlign: 'left', marginBottom: 24, border: '1px solid rgba(139,92,246,0.3)', background: 'rgba(139,92,246,0.06)' }}>
                     <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-                        Este pedido foi cancelado porque você optou por alterar a forma de pagamento. Os produtos foram restaurados ao carrinho para finalizar um novo pedido.
+                        {dict.orderPage.cancelledReasonChanged}
                     </p>
                 </div>
             )}
 
             {order.status === 'CANCELLED' && gatewayData.statusDetail && gatewayData.cancelledReason !== 'user_changed_payment_method' && (
                 <div className="card" style={{ textAlign: 'left', marginBottom: 24, border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.06)' }}>
-                    <p style={{ fontWeight: 700, fontSize: '0.85rem', color: '#ef4444', marginBottom: 8 }}>Motivo</p>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{getStatusDetailLabel(gatewayData.statusDetail)}</p>
+                    <p style={{ fontWeight: 700, fontSize: '0.85rem', color: '#ef4444', marginBottom: 8 }}>{dict.orderPage.reason}</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{getStatusDetailLabel(gatewayData.statusDetail, dict)}</p>
                 </div>
             )}
 
@@ -146,7 +147,7 @@ export default async function PedidoPage({ params }: { params: Promise<{ id: str
                 </div>
                 {(order.discount ?? 0) > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, color: '#22c55e', fontWeight: 600 }}>
-                        <span>⚡ Desconto PIX</span>
+                        <span>⚡ {dict.orderPage.pixDiscount}</span>
                         <span>- R$ {order.discount!.toFixed(2).replace('.', ',')}</span>
                     </div>
                 )}
@@ -166,9 +167,9 @@ export default async function PedidoPage({ params }: { params: Promise<{ id: str
                 {order.trackingCode && (
                     <div style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(34,197,94,0.08)', borderRadius: 8, border: '1px solid rgba(34,197,94,0.2)' }}>
                         <p style={{ fontSize: '0.82rem', color: '#22c55e', fontWeight: 600 }}>
-                            Rastreio: <span style={{ fontFamily: 'monospace' }}>{order.trackingCode}</span>
+                            {dict.orderPage.tracking} <span style={{ fontFamily: 'monospace' }}>{order.trackingCode}</span>
                             {order.trackingUrl && (
-                                <a href={order.trackingUrl} target="_blank" rel="noopener noreferrer" style={{ marginLeft: 8, color: 'var(--primary)' }}>Rastrear →</a>
+                                <a href={order.trackingUrl} target="_blank" rel="noopener noreferrer" style={{ marginLeft: 8, color: 'var(--primary)' }}>{dict.orderPage.trackBtn}</a>
                             )}
                         </p>
                     </div>
@@ -183,27 +184,7 @@ export default async function PedidoPage({ params }: { params: Promise<{ id: str
     )
 }
 
-function getStatusDetailLabel(detail: string): string {
-    const labels: Record<string, string> = {
-        accredited: 'Pagamento aprovado',
-        pending_contingency: 'Pagamento em processamento',
-        pending_review_manual: 'Pagamento em análise manual',
-        cc_rejected_bad_filled_card_number: 'Número do cartão incorreto',
-        cc_rejected_bad_filled_date: 'Data de validade incorreta',
-        cc_rejected_bad_filled_other: 'Dados do cartão incorretos',
-        cc_rejected_bad_filled_security_code: 'Código de segurança incorreto',
-        cc_rejected_blacklist: 'Cartão não autorizado',
-        cc_rejected_call_for_authorize: 'Ligue para a operadora do cartão para autorizar',
-        cc_rejected_card_disabled: 'Cartão desativado. Ligue para a operadora',
-        cc_rejected_card_error: 'Erro no cartão. Tente outro cartão',
-        cc_rejected_duplicated_payment: 'Pagamento duplicado. Já existe uma transação com este valor',
-        cc_rejected_high_risk: 'Pagamento recusado por risco de fraude',
-        cc_rejected_insufficient_amount: 'Saldo insuficiente no cartão',
-        cc_rejected_invalid_installments: 'Número de parcelas inválido',
-        cc_rejected_max_attempts: 'Limite de tentativas excedido. Use outro cartão',
-        cc_rejected_other_reason: 'Pagamento recusado pela operadora',
-        pending_waiting_payment: 'Aguardando pagamento',
-        pending_waiting_transfer: 'Aguardando transferência',
-    }
-    return labels[detail] || detail
+function getStatusDetailLabel(detail: string, dict: typeof dictionaries[Locale]): string {
+    const ps = dict.paymentStatus as Record<string, string>
+    return ps[detail] || detail
 }

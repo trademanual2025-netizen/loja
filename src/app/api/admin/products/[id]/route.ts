@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { autoTranslateProduct } from '@/lib/translate'
 
 // GET /api/admin/products/[id]
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -50,16 +51,32 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
         const validOptions = (options || []).filter((o: any) => o.name?.trim())
 
-        // 1. Update basic product info
+        const existing = await prisma.product.findUnique({ where: { id }, select: { name: true, nameEn: true, nameEs: true, description: true, descriptionEn: true, descriptionEs: true } })
+
+        const finalName = name || existing?.name
+        const finalDescription = description !== undefined ? description : existing?.description
+
+        const nameChanged = name && name !== existing?.name
+        const descChanged = description !== undefined && description !== existing?.description
+
+        const translations = await autoTranslateProduct({
+            name: finalName,
+            nameEn: nameChanged ? (nameEn || null) : (nameEn !== undefined ? (nameEn || null) : existing?.nameEn),
+            nameEs: nameChanged ? (nameEs || null) : (nameEs !== undefined ? (nameEs || null) : existing?.nameEs),
+            description: finalDescription,
+            descriptionEn: descChanged ? (descriptionEn || null) : (descriptionEn !== undefined ? (descriptionEn || null) : existing?.descriptionEn),
+            descriptionEs: descChanged ? (descriptionEs || null) : (descriptionEs !== undefined ? (descriptionEs || null) : existing?.descriptionEs),
+        })
+
         const product = await prisma.product.update({
             where: { id },
             data: {
                 ...(name && { name }),
-                ...(nameEn !== undefined && { nameEn: nameEn || null }),
-                ...(nameEs !== undefined && { nameEs: nameEs || null }),
+                nameEn: translations.nameEn,
+                nameEs: translations.nameEs,
                 ...(description !== undefined && { description }),
-                ...(descriptionEn !== undefined && { descriptionEn: descriptionEn || null }),
-                ...(descriptionEs !== undefined && { descriptionEs: descriptionEs || null }),
+                descriptionEn: translations.descriptionEn,
+                descriptionEs: translations.descriptionEs,
                 ...(price !== undefined && { price: safeParseFloat(price) || 0 }),
                 ...(comparePrice !== undefined && { comparePrice: safeParseFloat(comparePrice) }),
                 ...(stock !== undefined && { stock: safeParseInt(stock) }),

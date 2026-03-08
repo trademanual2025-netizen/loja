@@ -45,6 +45,7 @@ export default function AdminProductsPage() {
     const [categories, setCategories] = useState<Category[]>([])
     const [uploading, setUploading] = useState(false)
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+    const [translating, setTranslating] = useState(false)
     const fileRef = useRef<HTMLInputElement>(null)
     const bannerRef = useRef<HTMLInputElement>(null)
     const LIMIT = 20
@@ -242,7 +243,10 @@ export default function AdminProductsPage() {
         <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
                 <h1 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Produtos</h1>
-                <button className="btn btn-primary" onClick={openCreate}><Plus size={16} /> Novo Produto</button>
+                <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="btn" onClick={async () => { setTranslating(true); try { const r = await fetch('/api/admin/products/translate-all', { method: 'POST' }); const d = await r.json(); if (r.ok) toast.success(`${d.translated} produto(s) traduzido(s)`); else toast.error(d.error); } catch { toast.error('Erro ao traduzir'); } finally { setTranslating(false) } }} disabled={translating} style={{ opacity: translating ? 0.6 : 1 }}>{translating ? <><Loader2 size={16} className="spin" /> Traduzindo...</> : 'Traduzir Todos'}</button>
+                    <button className="btn btn-primary" onClick={openCreate}><Plus size={16} /> Novo Produto</button>
+                </div>
             </div>
 
             {/* Search */}

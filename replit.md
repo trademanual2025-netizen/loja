@@ -1,7 +1,7 @@
 # Giovana Dias Joias - E-commerce Next.js
 
 ## Visão Geral
-Loja online de joias artesanais da marca Giovana Dias. Construída com Next.js 16, Prisma 7, PostgreSQL (Neon) e TailwindCSS 4. Suporta 3 idiomas (PT/EN/ES): UI via dicionário em `src/lib/i18n.ts`, produtos via campos `nameEn/nameEs/descriptionEn/descriptionEs` no model Product (editáveis no admin). Busca funciona em todos os idiomas.
+Loja online de joias artesanais da marca Giovana Dias. Construída com Next.js 16, Prisma 7, PostgreSQL (Neon) e TailwindCSS 4. Suporta 3 idiomas (PT/EN/ES): UI via dicionário em `src/lib/i18n.ts`, produtos traduzidos automaticamente via `src/lib/translate.ts` (google-translate-api-x) ao criar/editar — campos `nameEn/nameEs/descriptionEn/descriptionEs` preenchidos automaticamente se vazios. Traduções manuais são preservadas. Botão "Traduzir Todos" no admin para traduzir produtos existentes em lote.
 
 ## Estrutura
 - `src/app/` - Páginas e rotas da aplicação (Next.js App Router)

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { autoTranslateProduct } from '@/lib/translate'
 
 // GET /api/admin/products — lista todos os produtos (com inativos)
 export async function GET(req: NextRequest) {
@@ -61,10 +62,12 @@ export async function POST(req: NextRequest) {
         return isNaN(parsed) ? 0 : parsed
     }
 
+    const translations = await autoTranslateProduct({ name, nameEn, nameEs, description, descriptionEn, descriptionEs })
+
     const product = await prisma.product.create({
         data: {
-            name, nameEn: nameEn || null, nameEs: nameEs || null,
-            slug, description, descriptionEn: descriptionEn || null, descriptionEs: descriptionEs || null,
+            name, nameEn: translations.nameEn, nameEs: translations.nameEs,
+            slug, description, descriptionEn: translations.descriptionEn, descriptionEs: translations.descriptionEs,
             price: safeParseFloat(price) || 0,
             comparePrice: safeParseFloat(comparePrice),
             stock: safeParseInt(stock), images: images || [],

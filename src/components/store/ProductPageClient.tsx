@@ -8,7 +8,7 @@ import { ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react'
 import Image from 'next/image'
 import Cookies from 'js-cookie'
 import { triggerCartNotification } from './CartNotification'
-import { dictionaries, Locale, defaultLocale, translateDb } from '@/lib/i18n'
+import { dictionaries, Locale, defaultLocale } from '@/lib/i18n'
 
 interface ProductOption { name: string; values: string[] }
 interface ProductVariant { id: string; name: string; price: number | null; stock: number; sku: string | null; image: string | null }

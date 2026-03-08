@@ -96,10 +96,23 @@ export default function AdminSettings() {
     const [tab, setTab] = useState('Banco de Dados')
     const [settings, setSettings] = useState<Record<string, string>>({})
     const [saving, setSaving] = useState(false)
+    const [allProducts, setAllProducts] = useState<Array<{ id: string; name: string }>>([])
 
     useEffect(() => {
         fetch('/api/admin/settings').then(r => r.json()).then(setSettings)
+        fetch('/api/admin/products?limit=200').then(r => r.json()).then((data: any) => {
+            const list = Array.isArray(data) ? data : (data.products || [])
+            setAllProducts(list.map((p: any) => ({ id: p.id, name: p.name })))
+        }).catch(() => {})
     }, [])
+
+    function togglePixProduct(productId: string) {
+        const current = (settings.pix_discount_products || '').split(',').filter(Boolean)
+        const next = current.includes(productId)
+            ? current.filter(id => id !== productId)
+            : [...current, productId]
+        set('pix_discount_products', next.join(','))
+    }
 
     function set(key: string, value: string) {
         setSettings(p => ({ ...p, [key]: value }))
@@ -264,7 +277,71 @@ export default function AdminSettings() {
                                 ))}
                             </div>
                         </div>
-                        <button className="btn btn-primary" onClick={() => save(['mp_public_key', 'mp_access_token', 'mp_webhook_secret', 'mp_enabled', 'stripe_public_key', 'stripe_secret_key', 'stripe_webhook_secret', 'stripe_enabled', 'payment_gateway_mode'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
+                        {/* Desconto PIX */}
+                        <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8 }}>
+                            <p style={{ fontWeight: 700, marginBottom: 4 }}>⚡ Desconto PIX</p>
+                            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 12 }}>
+                                Ofereça desconto automático para clientes que pagam com PIX.
+                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                                    <input type="checkbox" checked={settings.pix_discount_enabled === 'true'} onChange={e => set('pix_discount_enabled', e.target.checked ? 'true' : 'false')} />
+                                    <span style={{ fontSize: '0.88rem', fontWeight: 600 }}>Habilitar desconto PIX</span>
+                                </label>
+                                {settings.pix_discount_enabled === 'true' && (
+                                    <>
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label className="form-label">Percentual de desconto (%)</label>
+                                            <input
+                                                className="input"
+                                                type="number"
+                                                min="1" max="50" step="0.5"
+                                                placeholder="5"
+                                                value={settings.pix_discount_rate || '5'}
+                                                onChange={e => set('pix_discount_rate', e.target.value)}
+                                                style={{ maxWidth: 120 }}
+                                            />
+                                        </div>
+                                        <div>
+                                            <p style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: 8 }}>Aplicar desconto em:</p>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                                {[
+                                                    { value: 'all', label: 'Todos os produtos' },
+                                                    { value: 'selected', label: 'Produtos específicos' },
+                                                ].map(opt => (
+                                                    <label key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: '8px 12px', borderRadius: 8, border: `1px solid ${(settings.pix_discount_scope || 'all') === opt.value ? 'var(--primary)' : 'var(--border)'}`, background: (settings.pix_discount_scope || 'all') === opt.value ? 'rgba(99,102,241,0.08)' : 'var(--bg)' }}>
+                                                        <input type="radio" name="pix_scope" checked={(settings.pix_discount_scope || 'all') === opt.value} onChange={() => set('pix_discount_scope', opt.value)} />
+                                                        <span style={{ fontSize: '0.88rem' }}>{opt.label}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        {(settings.pix_discount_scope || 'all') === 'selected' && (
+                                            <div>
+                                                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 10 }}>
+                                                    Selecione os produtos que terão desconto PIX ({(settings.pix_discount_products || '').split(',').filter(Boolean).length} selecionados):
+                                                </p>
+                                                <div style={{ maxHeight: 260, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4, padding: 2 }}>
+                                                    {allProducts.map(p => {
+                                                        const selected = (settings.pix_discount_products || '').split(',').includes(p.id)
+                                                        return (
+                                                            <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: '6px 10px', borderRadius: 6, background: selected ? 'rgba(34,197,94,0.08)' : 'var(--bg)', border: `1px solid ${selected ? '#22c55e' : 'var(--border)'}`, fontSize: '0.85rem', transition: 'all 0.15s' }}>
+                                                                <input type="checkbox" checked={selected} onChange={() => togglePixProduct(p.id)} />
+                                                                <span>{p.name}</span>
+                                                            </label>
+                                                        )
+                                                    })}
+                                                    {allProducts.length === 0 && (
+                                                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', padding: 8 }}>Carregando produtos...</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                        <button className="btn btn-primary" onClick={() => save(['mp_public_key', 'mp_access_token', 'mp_webhook_secret', 'mp_enabled', 'stripe_public_key', 'stripe_secret_key', 'stripe_webhook_secret', 'stripe_enabled', 'payment_gateway_mode', 'pix_discount_enabled', 'pix_discount_rate', 'pix_discount_scope', 'pix_discount_products'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
                     </div>
                 )}
 

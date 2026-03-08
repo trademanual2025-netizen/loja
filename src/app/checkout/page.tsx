@@ -169,6 +169,15 @@ export default function CheckoutPage() {
     const isBrazil = selectedCountry === 'BR'
     const isInternational = !isBrazil
 
+    const pixDiscountEnabled = configs?.pix_discount_enabled === 'true'
+    const pixDiscountRate = parseFloat(configs?.pix_discount_rate || '5')
+    const pixDiscountScope = configs?.pix_discount_scope || 'all'
+    const pixDiscountProductIds = (configs?.pix_discount_products || '').split(',').filter(Boolean)
+    const pixDiscountEligible = pixDiscountEnabled && isBrazil && (
+        pixDiscountScope === 'all' ||
+        items.every(i => pixDiscountProductIds.includes(i.id))
+    )
+
     useEffect(() => {
         setMounted(true)
         const saved = Cookies.get('NEXT_LOCALE') as Locale
@@ -625,18 +634,18 @@ export default function CheckoutPage() {
                             <span>{dict.checkout.shipping} ({shipping.label})</span>
                             <span>{shipping.value === 0 ? dict.checkout.freeShipping : `R$ ${shipping.value.toFixed(2).replace('.', ',')}`}</span>
                         </div>
-                        {pixDiscount && (
+                        {pixDiscount && pixDiscountEligible && (
                             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#22c55e', marginBottom: 8, fontWeight: 600 }}>
-                                <span>Desconto PIX (5%)</span>
-                                <span>- R$ {(Math.round((total() + shipping.value) * 0.05 * 100) / 100).toFixed(2).replace('.', ',')}</span>
+                                <span>Desconto PIX ({pixDiscountRate}%)</span>
+                                <span>- R$ {(Math.round((total() + shipping.value) * (pixDiscountRate / 100) * 100) / 100).toFixed(2).replace('.', ',')}</span>
                             </div>
                         )}
                         <hr className="divider" />
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '1.1rem' }}>
                             <span>{dict.checkout.total}</span>
                             <span style={{ color: 'var(--primary)' }}>
-                                R$ {(pixDiscount
-                                    ? Math.round((total() + shipping.value) * 0.95 * 100) / 100
+                                R$ {(pixDiscount && pixDiscountEligible
+                                    ? Math.round((total() + shipping.value) * (1 - pixDiscountRate / 100) * 100) / 100
                                     : total() + shipping.value
                                 ).toFixed(2).replace('.', ',')}
                             </span>
@@ -646,8 +655,8 @@ export default function CheckoutPage() {
                         )}
                     </div>
 
-                    {/* Toggle desconto PIX — apenas para clientes BR */}
-                    {isBrazil && (
+                    {/* Toggle desconto PIX — só aparece quando habilitado no admin e produtos elegíveis */}
+                    {pixDiscountEligible && (
                         <div
                             onClick={() => togglePixDiscount(!pixDiscount)}
                             style={{
@@ -662,7 +671,7 @@ export default function CheckoutPage() {
                                 <span style={{ fontSize: '1.3rem' }}>⚡</span>
                                 <div>
                                     <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Pagar com PIX</div>
-                                    <div style={{ fontSize: '0.78rem', color: '#22c55e', fontWeight: 600 }}>5% de desconto instantâneo</div>
+                                    <div style={{ fontSize: '0.78rem', color: '#22c55e', fontWeight: 600 }}>{pixDiscountRate}% de desconto instantâneo</div>
                                 </div>
                             </div>
                             <div style={{
@@ -710,8 +719,8 @@ export default function CheckoutPage() {
                     {paymentGateway === 'mp' && configs?.mp_public_key && (
                         <MercadoPagoBrick
                             publicKey={configs.mp_public_key}
-                            totalAmount={pixDiscount
-                                ? Math.round((total() + shipping.value) * 0.95 * 100) / 100
+                            totalAmount={pixDiscount && pixDiscountEligible
+                                ? Math.round((total() + shipping.value) * (1 - pixDiscountRate / 100) * 100) / 100
                                 : total() + shipping.value}
                             items={items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity, variantId: i.variantId }))}
                             address={address}

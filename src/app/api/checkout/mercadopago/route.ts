@@ -33,9 +33,24 @@ export async function POST(req: NextRequest) {
     const subtotal = items.reduce((s: number, i: { price: number; quantity: number }) => s + i.price * i.quantity, 0)
     const shipping = typeof shippingCost === 'number' ? shippingCost : parseFloat(shippingCost) || 0
 
-    const isPix = payWithPix === true || formData?.payment_method_id === 'bank_transfer'
-    const PIX_DISCOUNT_RATE = 0.05
-    const discountAmount = isPix ? Math.round((subtotal + shipping) * PIX_DISCOUNT_RATE * 100) / 100 : 0
+    const pixEnabled = await getSetting(SETTINGS_KEYS.PIX_DISCOUNT_ENABLED)
+    const pixRateStr = await getSetting(SETTINGS_KEYS.PIX_DISCOUNT_RATE)
+    const pixScope = await getSetting(SETTINGS_KEYS.PIX_DISCOUNT_SCOPE)
+    const pixProducts = await getSetting(SETTINGS_KEYS.PIX_DISCOUNT_PRODUCTS)
+    const pixRate = Math.min(50, Math.max(0, parseFloat(pixRateStr || '5'))) / 100
+
+    const requestedPix = payWithPix === true || formData?.payment_method_id === 'bank_transfer'
+    let pixApplies = false
+    if (requestedPix && pixEnabled === 'true') {
+        if (pixScope === 'selected' && pixProducts) {
+            const allowed = pixProducts.split(',').filter(Boolean)
+            pixApplies = items.every((i: { id: string }) => allowed.includes(i.id))
+        } else {
+            pixApplies = true
+        }
+    }
+    const discountAmount = pixApplies ? Math.round((subtotal + shipping) * pixRate * 100) / 100 : 0
+    const isPix = pixApplies
     const total = Math.round((subtotal + shipping - discountAmount) * 100) / 100
 
     const recentOrder = await prisma.order.findFirst({

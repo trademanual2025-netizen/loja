@@ -18,8 +18,23 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Usuário não encontrado.' }, { status: 404 })
 
     const subtotal = items.reduce((s: number, i: { price: number; quantity: number }) => s + i.price * i.quantity, 0)
-    const PIX_DISCOUNT_RATE = 0.05
-    const discountAmount = payWithPix === true ? Math.round((subtotal + shippingCost) * PIX_DISCOUNT_RATE * 100) / 100 : 0
+
+    const pixEnabled = await getSetting(SETTINGS_KEYS.PIX_DISCOUNT_ENABLED)
+    const pixRateStr = await getSetting(SETTINGS_KEYS.PIX_DISCOUNT_RATE)
+    const pixScope = await getSetting(SETTINGS_KEYS.PIX_DISCOUNT_SCOPE)
+    const pixProductsSetting = await getSetting(SETTINGS_KEYS.PIX_DISCOUNT_PRODUCTS)
+    const pixRate = Math.min(50, Math.max(0, parseFloat(pixRateStr || '5'))) / 100
+
+    let pixApplies = false
+    if (payWithPix === true && pixEnabled === 'true') {
+        if (pixScope === 'selected' && pixProductsSetting) {
+            const allowed = pixProductsSetting.split(',').filter(Boolean)
+            pixApplies = items.every((i: { id: string }) => allowed.includes(i.id))
+        } else {
+            pixApplies = true
+        }
+    }
+    const discountAmount = pixApplies ? Math.round((subtotal + shippingCost) * pixRate * 100) / 100 : 0
     const total = subtotal + shippingCost - discountAmount
 
     // Reservar estoque antes de criar o pagamento

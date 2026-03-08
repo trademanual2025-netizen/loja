@@ -132,4 +132,8 @@ export const SETTINGS_KEYS = {
     SMTP_USER: 'smtp_user',
     SMTP_PASS: 'smtp_pass',
     SMTP_FROM: 'smtp_from',
+    PIX_DISCOUNT_ENABLED: 'pix_discount_enabled',
+    PIX_DISCOUNT_RATE: 'pix_discount_rate',
+    PIX_DISCOUNT_SCOPE: 'pix_discount_scope',
+    PIX_DISCOUNT_PRODUCTS: 'pix_discount_products',
 } as const

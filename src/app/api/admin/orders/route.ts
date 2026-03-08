@@ -16,6 +16,8 @@ export async function GET(req: NextRequest) {
             select: {
                 id: true,
                 status: true,
+                subtotal: true,
+                discount: true,
                 total: true,
                 shippingCost: true,
                 gateway: true,

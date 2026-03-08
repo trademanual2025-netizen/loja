@@ -19,6 +19,8 @@ export default async function PedidoPage({ params }: { params: Promise<{ id: str
         select: {
             id: true,
             status: true,
+            subtotal: true,
+            discount: true,
             total: true,
             shippingCost: true,
             gateway: true,
@@ -142,6 +144,12 @@ export default async function PedidoPage({ params }: { params: Promise<{ id: str
                     <span>{dict.order.shipping}</span>
                     <span>{order.shippingCost === 0 ? dict.checkout.freeShipping : `R$ ${order.shippingCost.toFixed(2).replace('.', ',')}`}</span>
                 </div>
+                {(order.discount ?? 0) > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, color: '#22c55e', fontWeight: 600 }}>
+                        <span>⚡ Desconto PIX</span>
+                        <span>- R$ {order.discount!.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '1.1rem' }}>
                     <span>{dict.order.total}</span>
                     <span style={{ color: 'var(--primary)' }}>R$ {order.total.toFixed(2).replace('.', ',')}</span>

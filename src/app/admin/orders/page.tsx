@@ -9,6 +9,8 @@ interface OrderItem { product: { name: string }; variant?: { name: string }; qua
 interface Order {
     id: string
     status: string
+    subtotal: number
+    discount: number
     total: number
     shippingCost: number
     gateway: string
@@ -155,7 +157,12 @@ export default function AdminOrdersPage() {
                                             </td>
                                             <td style={{ padding: '12px 16px', color: 'var(--text-muted)' }}>{o.items.length} item{o.items.length !== 1 ? 's' : ''}</td>
                                             <td style={{ padding: '12px 16px', color: 'var(--text-muted)' }}>R$ {(o.shippingCost ?? 0).toFixed(2).replace('.', ',')}</td>
-                                            <td style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--primary)' }}>R$ {o.total.toFixed(2).replace('.', ',')}</td>
+                                            <td style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--primary)' }}>
+                                                R$ {o.total.toFixed(2).replace('.', ',')}
+                                                {(o.discount ?? 0) > 0 && (
+                                                    <span title={`Desconto PIX: R$ ${o.discount.toFixed(2).replace('.', ',')}`} style={{ marginLeft: 6, fontSize: '0.7rem', background: 'rgba(34,197,94,0.15)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 4, padding: '1px 5px', fontWeight: 600 }}>⚡ PIX</span>
+                                                )}
+                                            </td>
                                             <td style={{ padding: '12px 16px' }}><span className={`badge ${STATUS_BADGES[o.status]}`}>{STATUS_LABELS[o.status]}</span></td>
                                             <td style={{ padding: '12px 16px', color: 'var(--text-muted)', fontSize: '0.8rem' }}>{new Date(o.createdAt).toLocaleDateString('pt-BR')}</td>
                                             <td style={{ padding: '12px 16px' }}>

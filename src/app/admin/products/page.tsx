@@ -286,7 +286,7 @@ export default function AdminProductsPage() {
                                             {p.comparePrice && <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>R$ {p.comparePrice.toFixed(2).replace('.', ',')}</p>}
                                         </td>
                                         <td style={{ padding: '12px 16px' }}>
-                                            <span className={`badge ${p.stock > 0 ? 'badge-green' : 'badge-red'}`}>{p.stock} un.</span>
+                                            <span className={`badge ${p.stock > 0 ? 'badge-green' : 'badge-red'}`} style={{ whiteSpace: 'nowrap' }}>{p.stock} un.</span>
                                         </td>
                                         <td style={{ padding: '12px 16px', color: 'var(--text-muted)', fontSize: '0.82rem' }}>{p.category?.name || '—'}</td>
                                         <td style={{ padding: '12px 16px' }}>

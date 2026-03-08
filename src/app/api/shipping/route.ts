@@ -8,8 +8,18 @@ interface CartItemInput {
 }
 
 export async function POST(req: NextRequest) {
+    let state = 'SP'
+    let country: string | undefined
+    let locale: string | undefined
+
     try {
-        const { state, subtotal, zipCode, items, country, locale } = await req.json()
+        const body = await req.json()
+        state = body.state || 'SP'
+        country = body.country
+        locale = body.locale
+        const subtotal = parseFloat(body.subtotal || '0')
+        const zipCode = body.zipCode
+        const items = body.items
 
         let packageWeight: number | undefined
         let packageHeight: number | undefined
@@ -57,8 +67,8 @@ export async function POST(req: NextRequest) {
         }
 
         const options = await calculateShipping(
-            state || 'SP',
-            parseFloat(subtotal || '0'),
+            state,
+            subtotal,
             zipCode,
             packageWeight,
             packageHeight,
@@ -70,11 +80,16 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ options })
     } catch (e) {
         console.error('[Shipping Route] Erro:', e)
-        return NextResponse.json({
-            options: [
-                { label: 'PAC (8 dias úteis)', value: 24.90, days: 8 },
-                { label: 'SEDEX (4 dias úteis)', value: 42.90, days: 4 },
-            ]
-        })
+        try {
+            const options = await calculateShipping(state, 0, undefined, undefined, undefined, undefined, undefined, country, locale)
+            return NextResponse.json({ options })
+        } catch {
+            return NextResponse.json({
+                options: [
+                    { label: 'PAC (8 dias úteis)', value: 24.90, days: 8 },
+                    { label: 'SEDEX (4 dias úteis)', value: 42.90, days: 4 },
+                ]
+            })
+        }
     }
 }

@@ -8,6 +8,14 @@ export interface ShippingOption {
     daysText?: string
 }
 
+interface ShippingRule {
+    id: string
+    country: string
+    state: string
+    rate: number
+    freeAbove: number
+}
+
 const SEDEX_CODE = '04014'
 const PAC_CODE = '04510'
 
@@ -179,6 +187,20 @@ function cepToState(cep: string): string {
     return 'SP'
 }
 
+function findRuleRate(rules: ShippingRule[], country: string, state: string, subtotal: number): ShippingOption[] | null {
+    const exactMatch = rules.find(r => r.country === country && r.state && r.state === state)
+    const countryMatch = rules.find(r => r.country === country && !r.state)
+    const rule = exactMatch || countryMatch
+
+    if (!rule) return null
+
+    if (rule.freeAbove > 0 && subtotal >= rule.freeAbove) {
+        return [{ label: 'Frete Grátis', value: 0 }]
+    }
+
+    return [{ label: 'Entrega para sua região', value: rule.rate }]
+}
+
 export function calculateInternationalShipping(country: string, locale?: string): ShippingOption[] {
     const c = getCountry(country)
     const rates = SHIPPING_RATES[c.continent]
@@ -201,14 +223,56 @@ export async function calculateShipping(
     country?: string,
     locale?: string,
 ): Promise<ShippingOption[]> {
-    if (country && country !== 'BR') {
-        return calculateInternationalShipping(country, locale)
-    }
     try {
         const mode = (await getSetting(SETTINGS_KEYS.SHIPPING_MODE)) ?? 'free'
 
         if (mode === 'free') {
             return [{ label: 'Frete Grátis', value: 0 }]
+        }
+
+        if (mode === 'by_state') {
+            const tableJson = await getSetting(SETTINGS_KEYS.SHIPPING_STATE_TABLE)
+            if (tableJson) {
+                try {
+                    const parsed = JSON.parse(tableJson)
+
+                    if (Array.isArray(parsed)) {
+                        const rules = parsed as ShippingRule[]
+                        const destCountry = country || 'BR'
+                        const destState = state || ''
+
+                        const result = findRuleRate(rules, destCountry, destState, subtotal)
+                        if (result) return result
+
+                        if (destCountry !== 'BR') {
+                            return calculateInternationalShipping(destCountry, locale)
+                        }
+
+                        const originCep = await getSetting(SETTINGS_KEYS.SHIPPING_ORIGIN_CEP)
+                        const originState = originCep ? cepToState(originCep) : 'SP'
+                        return calcByRegion(originState, destState)
+                    }
+
+                    const table = parsed as Record<string, number>
+                    const val = table[state] ?? table['DEFAULT']
+                    if (val !== undefined) {
+                        return [{ label: 'Entrega para sua região', value: val }]
+                    }
+                } catch {
+                    console.warn('[Shipping] Erro ao parsear tabela de frete')
+                }
+            }
+
+            if (country && country !== 'BR') {
+                return calculateInternationalShipping(country, locale)
+            }
+            const originCep = await getSetting(SETTINGS_KEYS.SHIPPING_ORIGIN_CEP)
+            const originState = originCep ? cepToState(originCep) : 'SP'
+            return calcByRegion(originState, state)
+        }
+
+        if (country && country !== 'BR') {
+            return calculateInternationalShipping(country, locale)
         }
 
         const freeAbove = parseFloat((await getSetting(SETTINGS_KEYS.SHIPPING_FREE_ABOVE)) ?? '0')
@@ -219,19 +283,6 @@ export async function calculateShipping(
         if (mode === 'fixed') {
             const fixedValue = parseFloat((await getSetting(SETTINGS_KEYS.SHIPPING_FIXED_VALUE)) ?? '0')
             return [{ label: 'Entrega Padrão', value: fixedValue }]
-        }
-
-        if (mode === 'by_state') {
-            const tableJson = await getSetting(SETTINGS_KEYS.SHIPPING_STATE_TABLE)
-            if (tableJson) {
-                try {
-                    const table: Record<string, number> = JSON.parse(tableJson)
-                    const val = table[state] ?? table['DEFAULT'] ?? 0
-                    return [{ label: 'Entrega para seu estado', value: val }]
-                } catch {
-                    return calcByRegion('SP', state)
-                }
-            }
         }
 
         if (mode === 'correios') {
@@ -279,9 +330,13 @@ export async function calculateShipping(
             return calcByRegion(originState, state)
         }
 
-        return calcByRegion('SP', state)
+        const originCep = await getSetting(SETTINGS_KEYS.SHIPPING_ORIGIN_CEP)
+        const originState = originCep ? cepToState(originCep) : 'SP'
+        return calcByRegion(originState, state)
     } catch (e) {
-        console.error('[Shipping] Erro inesperado, usando fallback por região:', e)
-        return calcByRegion('SP', state)
+        console.error('[Shipping] Erro inesperado:', e)
+        const originCep = await getSetting(SETTINGS_KEYS.SHIPPING_ORIGIN_CEP).catch(() => null)
+        const originState = originCep ? cepToState(originCep) : 'SP'
+        return calcByRegion(originState, state)
     }
 }

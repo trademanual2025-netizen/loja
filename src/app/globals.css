@@ -524,10 +524,18 @@ body {
 }
 
 /* Related Product Cards */
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
 .related-card-link {
   text-decoration: none;
   color: inherit;
   display: flex;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .related-card {
@@ -539,6 +547,7 @@ body {
   display: flex;
   flex-direction: column;
   width: 100%;
+  min-width: 0;
 }
 
 .related-card-image {
@@ -761,8 +770,8 @@ body {
   }
 
   .related-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
 
   .related-card-info {
@@ -846,8 +855,8 @@ body {
   }
 
   .related-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 8px !important;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
   }
 
   .related-card-info {

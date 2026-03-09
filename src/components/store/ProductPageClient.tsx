@@ -222,27 +222,27 @@ export function ProductPageClient({ product, dict, relatedProducts = [], install
                         {relatedProducts.slice(0, 8).map(rp => {
                             const rpDiscount = rp.comparePrice ? Math.round((1 - rp.price / rp.comparePrice) * 100) : 0
                             return (
-                                <a key={rp.id} href={`/produto/${rp.slug}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex' }}>
-                                    <div style={{ background: 'var(--bg-card)', borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)', transition: 'transform 0.2s, box-shadow 0.2s', display: 'flex', flexDirection: 'column', width: '100%' }}
+                                <a key={rp.id} href={`/produto/${rp.slug}`} className="related-card-link">
+                                    <div className="related-card"
                                         onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)' }}
                                         onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = ''; (e.currentTarget as HTMLDivElement).style.boxShadow = '' }}
                                     >
-                                        <div style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden', background: 'var(--bg-card2)', flexShrink: 0 }}>
+                                        <div className="related-card-image">
                                             {rp.image ? (
                                                 <Image src={rp.image} alt={rp.name} fill sizes="(max-width: 768px) 50vw, 25vw" style={{ objectFit: 'cover' }} />
                                             ) : (
-                                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>{dict.noImage}</div>
+                                                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>{dict.noImage}</div>
                                             )}
                                             {rpDiscount > 0 && (
-                                                <span style={{ position: 'absolute', top: 8, left: 8, background: 'var(--error)', color: 'white', padding: '2px 8px', borderRadius: 6, fontSize: '0.75rem', fontWeight: 700 }}>-{rpDiscount}%</span>
+                                                <span style={{ position: 'absolute', top: 8, left: 8, background: 'var(--error)', color: 'white', padding: '2px 8px', borderRadius: 6, fontSize: '0.75rem', fontWeight: 700, zIndex: 1 }}>-{rpDiscount}%</span>
                                             )}
                                         </div>
-                                        <div style={{ padding: 'clamp(8px, 2vw, 14px) clamp(8px, 2vw, 14px)', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                            <p style={{ fontWeight: 600, fontSize: 'clamp(0.75rem, 2vw, 0.88rem)', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rp.name}</p>
+                                        <div className="related-card-info">
+                                            <p className="related-card-name">{rp.name}</p>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                                                <span style={{ fontWeight: 700, color: 'var(--primary)', fontSize: 'clamp(0.8rem, 2vw, 0.95rem)' }}>R$ {rp.price.toFixed(2).replace('.', ',')}</span>
+                                                <span className="related-card-price">R$ {rp.price.toFixed(2).replace('.', ',')}</span>
                                                 {rp.comparePrice && (
-                                                    <span style={{ fontSize: 'clamp(0.65rem, 1.5vw, 0.78rem)', color: 'var(--text-muted)', textDecoration: 'line-through' }}>R$ {rp.comparePrice.toFixed(2).replace('.', ',')}</span>
+                                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>R$ {rp.comparePrice.toFixed(2).replace('.', ',')}</span>
                                                 )}
                                             </div>
                                         </div>

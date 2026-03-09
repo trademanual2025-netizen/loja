@@ -195,7 +195,7 @@ export function ProductFilter({ initialProducts, initialTotal, initialPages, cat
                         <p style={{ fontSize: '1.2rem' }}>{dict.store.noProducts}</p>
                     </div>
                 ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 'clamp(12px, 2vw, 24px)' }}>
+                    <div className="product-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(160px, 45vw), 1fr))', gap: 'clamp(8px, 2vw, 24px)' }}>
                         {products.map((product) => (
                             <ProductCard key={product.id} product={product} dict={dict.product} locale={locale} installments={installments} installmentsMinValue={installmentsMinValue} />
                         ))}

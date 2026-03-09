@@ -92,7 +92,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 50%, var(--bg) 100%)' }} />
                 </div>
             )}
-            <main style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 16px 60px' }}>
+            <main style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(20px, 4vw, 40px) clamp(12px, 3vw, 16px) clamp(30px, 5vw, 60px)' }}>
                 <ProductPageClient
                     product={{
                         id: product.id,

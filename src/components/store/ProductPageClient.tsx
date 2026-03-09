@@ -100,7 +100,7 @@ export function ProductPageClient({ product, dict, relatedProducts = [], install
     const discount = product.comparePrice ? Math.round((1 - displayPrice / product.comparePrice) * 100) : 0
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'start' }}>
+        <div className="product-detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'start' }}>
             {/* Galeria */}
             <div>
                 <div style={{ position: 'relative', aspectRatio: '1', background: 'var(--bg-card)', borderRadius: 12, overflow: 'hidden', marginBottom: 12 }}>
@@ -139,9 +139,9 @@ export function ProductPageClient({ product, dict, relatedProducts = [], install
             {/* Info */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                 <div>
-                    <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: 16, color: 'var(--text-title)' }}>{product.name}</h1>
+                    <h1 className="product-detail-title" style={{ fontSize: '2rem', fontWeight: 800, marginBottom: 16, color: 'var(--text-title)' }}>{product.name}</h1>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                        <span style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--primary)' }}>
+                        <span className="product-detail-price" style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--primary)' }}>
                             R$ {displayPrice.toFixed(2).replace('.', ',')}
                         </span>
                         {product.comparePrice && (
@@ -212,14 +212,13 @@ export function ProductPageClient({ product, dict, relatedProducts = [], install
                 </div>
             </div>
 
-            <style>{`@media(max-width:768px){div[style*='grid-template-columns: 1fr 1fr']{grid-template-columns:1fr!important}}`}</style>
 
             {relatedProducts.length > 0 && (
                 <div style={{ gridColumn: '1 / -1', marginTop: 48, borderTop: '1px solid var(--border)', paddingTop: 40 }}>
                     <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: 24, color: 'var(--text-title)' }}>
                         {dict.relatedTitle}
                     </h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
+                    <div className="related-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
                         {relatedProducts.slice(0, 8).map(rp => {
                             const rpDiscount = rp.comparePrice ? Math.round((1 - rp.price / rp.comparePrice) * 100) : 0
                             return (
@@ -252,7 +251,6 @@ export function ProductPageClient({ product, dict, relatedProducts = [], install
                             )
                         })}
                     </div>
-                    <style>{`@media(max-width:768px){div[style*='repeat(4, 1fr)']{grid-template-columns:repeat(2,1fr)!important}}`}</style>
                 </div>
             )}
         </div>

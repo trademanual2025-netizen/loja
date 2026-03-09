@@ -100,7 +100,7 @@ export function ProductPageClient({ product, dict, relatedProducts = [], install
     const discount = product.comparePrice ? Math.round((1 - displayPrice / product.comparePrice) * 100) : 0
 
     return (
-        <div className="product-detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'start' }}>
+        <div className="product-detail-grid">
             {/* Galeria */}
             <div>
                 <div style={{ position: 'relative', aspectRatio: '1', background: 'var(--bg-card)', borderRadius: 12, overflow: 'hidden', marginBottom: 12 }}>
@@ -139,9 +139,9 @@ export function ProductPageClient({ product, dict, relatedProducts = [], install
             {/* Info */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                 <div>
-                    <h1 className="product-detail-title" style={{ fontSize: '2rem', fontWeight: 800, marginBottom: 16, color: 'var(--text-title)' }}>{product.name}</h1>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                        <span className="product-detail-price" style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--primary)' }}>
+                    <h1 className="product-detail-title">{product.name}</h1>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+                        <span className="product-detail-price">
                             R$ {displayPrice.toFixed(2).replace('.', ',')}
                         </span>
                         {product.comparePrice && (
@@ -166,22 +166,12 @@ export function ProductPageClient({ product, dict, relatedProducts = [], install
                 {product.options && product.options.map((option, idx) => (
                     <div key={idx}>
                         <p style={{ fontWeight: 600, marginBottom: 12, fontSize: '0.9rem' }}>{option.name}: <span style={{ color: 'var(--primary)' }}>{selectedOptions[option.name]}</span></p>
-                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <div className="variant-options">
                             {option.values.map(val => (
                                 <button
                                     key={val}
                                     onClick={() => setSelectedOptions(prev => ({ ...prev, [option.name]: val }))}
-                                    style={{
-                                        padding: '8px 16px',
-                                        borderRadius: 8,
-                                        border: `1px solid ${selectedOptions[option.name] === val ? 'var(--primary)' : 'var(--border)'}`,
-                                        background: selectedOptions[option.name] === val ? 'var(--primary)' : 'var(--bg-card)',
-                                        color: selectedOptions[option.name] === val ? 'white' : 'var(--text-body)',
-                                        cursor: 'pointer',
-                                        fontSize: '0.88rem',
-                                        fontWeight: 600,
-                                        transition: 'all 0.2s'
-                                    }}
+                                    className={`variant-btn${selectedOptions[option.name] === val ? ' variant-btn-active' : ''}`}
                                 >
                                     {val}
                                 </button>

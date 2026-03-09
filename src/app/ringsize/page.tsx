@@ -136,7 +136,7 @@ export default async function RingSizePage() {
                             {r.tableTitle}
                         </h2>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40, alignItems: 'start' }}>
+                        <div className="responsive-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40, alignItems: 'start' }}>
 
                             <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(200,160,80,0.14)' }}>
                                 <div style={{
@@ -181,11 +181,13 @@ export default async function RingSizePage() {
             <StoreFooter storeName={storeName} dict={dict} footerText={storeSettings[SETTINGS_KEYS.STORE_FOOTER_TEXT] || undefined} />
 
             <style>{`
-                @media (max-width: 700px) {
+                @media (max-width: 1024px) {
                     div[style*="repeat(auto-fit, minmax(220px"] {
                         grid-template-columns: 1fr 1fr !important;
                     }
-                    .ringsize-grid {
+                }
+                @media (max-width: 480px) {
+                    div[style*="repeat(auto-fit, minmax(220px"] {
                         grid-template-columns: 1fr !important;
                     }
                 }

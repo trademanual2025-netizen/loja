@@ -31,7 +31,7 @@ export default function ProductLoading() {
                     0% { background-position: 200% 0; }
                     100% { background-position: -200% 0; }
                 }
-                @media(max-width:768px) {
+                @media(max-width:1024px) {
                     div[style*='grid-template-columns: 1fr 1fr'] { grid-template-columns: 1fr !important; }
                 }
             `}</style>

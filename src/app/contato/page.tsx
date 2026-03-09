@@ -83,7 +83,7 @@ export default async function ContatoPage() {
 
                 {/* Conteúdo — adapta ao tema */}
                 <div style={{ maxWidth: 1040, margin: '0 auto', padding: '64px 20px 0' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 64, alignItems: 'start' }}>
+                    <div className="responsive-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 64, alignItems: 'start' }}>
 
                         <div>
                             <h2 style={{ fontSize: '0.68rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: 'rgba(200,160,80,0.8)', marginBottom: 24, fontWeight: 600 }}>
@@ -170,7 +170,7 @@ export default async function ContatoPage() {
             <StoreFooter storeName={storeName} dict={dict} footerText={storeSettings[SETTINGS_KEYS.STORE_FOOTER_TEXT] || undefined} />
 
             <style>{`
-                @media (max-width: 768px) {
+                @media (max-width: 1024px) {
                     div[style*="grid-template-columns: 1fr 1.2fr"] {
                         grid-template-columns: 1fr !important;
                         gap: 40px !important;

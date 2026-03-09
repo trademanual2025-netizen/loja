@@ -176,7 +176,7 @@ export function LandingPageClient({
                     grid-template-rows: repeat(2, 1fr);
                     gap: 3px; overflow: hidden;
                 }
-                @media (max-width: 700px) {
+                @media (max-width: 1024px) {
                     .custom-banner { flex-direction: column; border-radius: 12px; }
                     .custom-banner-text { max-width: 100%; padding: 22px 20px 18px; background: linear-gradient(180deg, #0d0a06 70%, rgba(13,10,6,0.95) 100%); }
                     .custom-banner-grid { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 110px); }

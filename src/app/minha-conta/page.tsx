@@ -192,7 +192,7 @@ export default function MinhaContaPage() {
                 <div className="card fade-in">
                     <h3 style={{ fontWeight: 700, marginBottom: 20 }}>{dict.profile.personalData}</h3>
                     <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                        <div className="responsive-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                             <div className="form-group">
                                 <label className="form-label">{dict.profile.name} *</label>
                                 <input className="input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
@@ -204,7 +204,7 @@ export default function MinhaContaPage() {
                         </div>
                         <hr className="divider" />
                         <h4 style={{ fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 6 }}><MapPin size={15} /> {dict.profile.addressTitle}</h4>
-                        <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr 80px', gap: 12 }}>
+                        <div className="responsive-grid-2" style={{ display: 'grid', gridTemplateColumns: '160px 1fr 80px', gap: 12 }}>
                             <div className="form-group">
                                 <label className="form-label">{dict.profile.zipCode}</label>
                                 <input className="input" value={form.zipCode} onChange={e => setForm(f => ({ ...f, zipCode: e.target.value }))} placeholder="00000-000" />
@@ -218,7 +218,7 @@ export default function MinhaContaPage() {
                                 <input className="input" value={form.number} onChange={e => setForm(f => ({ ...f, number: e.target.value }))} />
                             </div>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                        <div className="responsive-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
                             <div className="form-group">
                                 <label className="form-label">{dict.profile.complement}</label>
                                 <input className="input" value={form.complement} onChange={e => setForm(f => ({ ...f, complement: e.target.value }))} />

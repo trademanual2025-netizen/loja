@@ -103,6 +103,7 @@ body {
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 /* Scrollbar */
@@ -762,6 +763,18 @@ body {
 /* -------------------------------------------------------------------------- */
 /* RESPONSIVE OVERRIDES - FIXING BUILD ERRORS & REFINING MOBILE               */
 /* -------------------------------------------------------------------------- */
+
+@media (max-width: 1024px) {
+  .product-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .related-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
 
 @media (max-width: 768px) {
   .cart-grid {

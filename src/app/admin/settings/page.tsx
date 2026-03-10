@@ -623,16 +623,12 @@ export default function AdminSettings() {
                 {/* SEO */}
                 {tab === 'SEO' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                        <div style={{ padding: 16, background: 'rgba(99,102,241,0.1)', borderRadius: 8, border: '1px solid rgba(99,102,241,0.3)', marginBottom: 4 }}>
+                        <div style={{ padding: 16, background: 'rgba(99,102,241,0.1)', borderRadius: 8, border: '1px solid rgba(99,102,241,0.3)' }}>
                             <p style={{ fontWeight: 700, marginBottom: 6 }}>🔍 Otimização para Buscadores (SEO)</p>
                             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Essas configurações definem como a página inicial da sua loja aparece no Google e quando compartilhada em redes sociais (WhatsApp, Facebook, etc).</p>
                         </div>
-                        <F settings={settings} set={set} label="Meta Title (Título da Página)" k="seo_meta_title" placeholder="Velour | Moda Elegante" help="Título ideal: entre 50 e 60 caracteres." />
-                        <F settings={settings} set={set} label="Meta Description (Descrição)" k="seo_meta_description" type="textarea" placeholder="Encontre as melhores peças..." help="Resumo da loja. Ideal: até 160 caracteres." />
-                        <ImageF label="Imagem de Compartilhamento (OG Image)" k="seo_og_image" help="Imagem que aparece ao enviar o link (ex: WhatsApp). Recomendado: Retangular 1200x630px." settings={settings} uploadFile={uploadFile} />
-                        <button className="btn btn-primary" onClick={() => save(['seo_meta_title', 'seo_meta_description', 'seo_og_image'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
 
-                        <div style={{ padding: 16, background: 'rgba(34,197,94,0.1)', borderRadius: 8, border: '1px solid rgba(34,197,94,0.3)', marginTop: 16 }}>
+                        <div style={{ padding: 16, background: 'rgba(34,197,94,0.1)', borderRadius: 8, border: '1px solid rgba(34,197,94,0.3)' }}>
                             <p style={{ fontWeight: 700, marginBottom: 6 }}>🗺️ Sitemap & Robots</p>
                             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: 12 }}>O sitemap é gerado automaticamente com todas as páginas e produtos ativos. Envie a URL abaixo no Google Search Console para indexação.</p>
                             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -641,6 +637,24 @@ export default function AdminSettings() {
                             </div>
                             <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: 8 }}>Dica: Acesse <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>Google Search Console</a> → Sitemaps → adicione a URL do sitemap para acelerar a indexação.</p>
                         </div>
+
+                        <div style={{ padding: 16, background: 'rgba(245,158,11,0.1)', borderRadius: 8, border: '1px solid rgba(245,158,11,0.3)' }}>
+                            <p style={{ fontWeight: 700, marginBottom: 6 }}>✅ SEO Ativo</p>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: 4 }}>Sua loja já conta com otimizações avançadas de SEO:</p>
+                            <ul style={{ color: 'var(--text-muted)', fontSize: '0.82rem', paddingLeft: 20, margin: '6px 0 0' }}>
+                                <li>Títulos únicos e meta descriptions em cada página</li>
+                                <li>Dados estruturados (JSON-LD): Organização, Produto, Breadcrumbs, Navegação</li>
+                                <li>Sitelinks orgânicos: Loja, Nossa Marca, Guia do Anel, Contato</li>
+                                <li>Caixa de busca nos resultados do Google (SearchAction)</li>
+                                <li>Open Graph e Twitter Cards para compartilhamento social</li>
+                                <li>Tradução automática de produtos e categorias (PT/EN/ES)</li>
+                            </ul>
+                        </div>
+
+                        <F settings={settings} set={set} label="Meta Title (Título da Página)" k="seo_meta_title" placeholder="Giovana Dias Joias — Joias Artesanais" help="Título ideal: entre 50 e 60 caracteres. Aparece na aba do navegador e no Google." />
+                        <F settings={settings} set={set} label="Meta Description (Descrição)" k="seo_meta_description" type="textarea" placeholder="Joias autênticas para pessoas autênticas. Conheça as coleções exclusivas..." help="Resumo da loja. Ideal: até 160 caracteres. Aparece abaixo do título no Google." />
+                        <ImageF label="Imagem de Compartilhamento (OG Image)" k="seo_og_image" help="Imagem que aparece ao enviar o link (ex: WhatsApp). Recomendado: Retangular 1200x630px." settings={settings} uploadFile={uploadFile} />
+                        <button className="btn btn-primary" onClick={() => save(['seo_meta_title', 'seo_meta_description', 'seo_og_image'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
                     </div>
                 )}
 

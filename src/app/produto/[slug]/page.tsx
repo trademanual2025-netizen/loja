@@ -7,8 +7,49 @@ import { StoreFooter } from '@/components/store/StoreFooter'
 import { ProductPageClient } from '@/components/store/ProductPageClient'
 import { cookies } from 'next/headers'
 import { dictionaries, Locale, defaultLocale, translateDb } from '@/lib/i18n'
+import type { Metadata } from 'next'
 
 export const revalidate = 30
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params
+    const product = await prisma.product.findUnique({
+        where: { slug },
+        select: { name: true, nameEn: true, nameEs: true, description: true, descriptionEn: true, descriptionEs: true, price: true, images: true, active: true },
+    })
+    if (!product || !product.active) {
+        return { title: 'Produto não encontrado — Giovana Dias Joias' }
+    }
+
+    const cookieStore = await cookies()
+    const localeCookie = cookieStore.get('NEXT_LOCALE')?.value as Locale
+    const currentLocale = (localeCookie && dictionaries[localeCookie]) ? localeCookie : defaultLocale
+
+    const name = currentLocale === 'en' ? (product.nameEn || product.name) : currentLocale === 'es' ? (product.nameEs || product.name) : product.name
+    const desc = currentLocale === 'en' ? (product.descriptionEn || product.description) : currentLocale === 'es' ? (product.descriptionEs || product.description) : product.description
+    const priceFormatted = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(product.price))
+    const title = `${name} — ${priceFormatted}`
+    const plainDesc = desc ? desc.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ').replace(/\s+/g, ' ').trim() : ''
+    const description = plainDesc ? plainDesc.substring(0, 160) : `${name} — Joia artesanal exclusiva por Giovana Dias.`
+    const image = product.images[0] || undefined
+
+    return {
+        title,
+        description,
+        openGraph: {
+            title,
+            description,
+            type: 'website',
+            ...(image ? { images: [{ url: image }] } : {}),
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title,
+            description,
+            ...(image ? { images: [image] } : {}),
+        },
+    }
+}
 
 export async function generateStaticParams() {
     const products = await prisma.product.findMany({
@@ -79,8 +120,63 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     const currentLocale = (localeCookie && dictionaries[localeCookie]) ? localeCookie : defaultLocale
     const dict = dictionaries[currentLocale]
 
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://giovanadiasjewelry.com.br')
+    const productName = currentLocale === 'en' ? (product.nameEn || product.name) : currentLocale === 'es' ? (product.nameEs || product.name) : product.name
+    const productDescription = currentLocale === 'en' ? (product.descriptionEn || product.description || '') : currentLocale === 'es' ? (product.descriptionEs || product.description || '') : (product.description || '')
+
+    const productJsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: productName,
+        description: productDescription.replace(/<[^>]*>/g, '').substring(0, 500),
+        image: product.images.length > 0 ? product.images : undefined,
+        sku: product.slug,
+        brand: {
+            '@type': 'Brand',
+            name: storeName,
+        },
+        offers: {
+            '@type': 'Offer',
+            url: `${baseUrl}/produto/${product.slug}`,
+            priceCurrency: 'BRL',
+            price: Number(product.price).toFixed(2),
+            availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            seller: {
+                '@type': 'Organization',
+                name: storeName,
+            },
+        },
+    }
+
+    const breadcrumbJsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            {
+                '@type': 'ListItem',
+                position: 1,
+                name: dict.nav.home,
+                item: baseUrl,
+            },
+            {
+                '@type': 'ListItem',
+                position: 2,
+                name: dict.nav.store,
+                item: `${baseUrl}/loja`,
+            },
+            {
+                '@type': 'ListItem',
+                position: 3,
+                name: productName,
+                item: `${baseUrl}/produto/${product.slug}`,
+            },
+        ],
+    }
+
     return (
         <>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
             <StoreHeader storeName={storeName} logoUrl={logoUrl} user={user} dict={dict} />
             {product.bannerUrl && (
                 <div style={{ width: '100%', maxHeight: 'clamp(200px, 40vw, 400px)', overflow: 'hidden', position: 'relative' }}>

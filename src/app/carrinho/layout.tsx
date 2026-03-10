@@ -5,6 +5,18 @@ import { StoreFooter } from '@/components/store/StoreFooter'
 import { cookies } from 'next/headers'
 import { dictionaries, defaultLocale, Locale } from '@/lib/i18n'
 
+export async function generateMetadata() {
+    const cookieStore = await cookies()
+    const localeCookie = cookieStore.get('NEXT_LOCALE')?.value as Locale
+    const currentLocale = (localeCookie && dictionaries[localeCookie]) ? localeCookie : defaultLocale
+    const dict = dictionaries[currentLocale] || dictionaries[defaultLocale]
+
+    return {
+        title: dict.cart.title,
+        description: dict.cart.emptyDescription,
+    }
+}
+
 export default async function CarrinhoLayout({ children }: { children: React.ReactNode }) {
     const [settings, authUser] = await Promise.all([
         getSettings([SETTINGS_KEYS.STORE_NAME, SETTINGS_KEYS.STORE_LOGO, SETTINGS_KEYS.STORE_FOOTER_TEXT]),

@@ -631,6 +631,16 @@ export default function AdminSettings() {
                         <F settings={settings} set={set} label="Meta Description (Descrição)" k="seo_meta_description" type="textarea" placeholder="Encontre as melhores peças..." help="Resumo da loja. Ideal: até 160 caracteres." />
                         <ImageF label="Imagem de Compartilhamento (OG Image)" k="seo_og_image" help="Imagem que aparece ao enviar o link (ex: WhatsApp). Recomendado: Retangular 1200x630px." settings={settings} uploadFile={uploadFile} />
                         <button className="btn btn-primary" onClick={() => save(['seo_meta_title', 'seo_meta_description', 'seo_og_image'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
+
+                        <div style={{ padding: 16, background: 'rgba(34,197,94,0.1)', borderRadius: 8, border: '1px solid rgba(34,197,94,0.3)', marginTop: 16 }}>
+                            <p style={{ fontWeight: 700, marginBottom: 6 }}>🗺️ Sitemap & Robots</p>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: 12 }}>O sitemap é gerado automaticamente com todas as páginas e produtos ativos. Envie a URL abaixo no Google Search Console para indexação.</p>
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="btn" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.85rem' }}>📄 Ver Sitemap (sitemap.xml)</a>
+                                <a href="/robots.txt" target="_blank" rel="noopener noreferrer" className="btn" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.85rem' }}>🤖 Ver Robots.txt</a>
+                            </div>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: 8 }}>Dica: Acesse <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>Google Search Console</a> → Sitemaps → adicione a URL do sitemap para acelerar a indexação.</p>
+                        </div>
                     </div>
                 )}
 

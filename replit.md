@@ -1,133 +1,64 @@
 # Giovana Dias Joias - E-commerce Next.js
 
-## Visão Geral
-Loja online de joias artesanais da marca Giovana Dias. Construída com Next.js 16, Prisma 7, PostgreSQL (Neon) e TailwindCSS 4. Suporta 3 idiomas (PT/EN/ES): UI via dicionário em `src/lib/i18n.ts`, produtos e categorias traduzidos automaticamente via `src/lib/translate.ts` (google-translate-api-x) ao criar/editar — campos `nameEn/nameEs/descriptionEn/descriptionEs` preenchidos automaticamente se vazios. Categorias também possuem `nameEn/nameEs` com tradução automática via `autoTranslateCategory()`. Traduções manuais são preservadas. Botão "Traduzir Todos" no admin para traduzir produtos existentes em lote. Endpoint `/api/admin/categories/translate-all` para traduzir categorias em lote. Todas as páginas da loja (landing, pedido, reembolso, minha-conta, pagamento, etc.) usam traduções i18n — nenhum texto fixo em português para o cliente. Seções i18n: nav, store, product, auth, cart, profile, order, checkout, footer, settings, landing, paymentStatus, paymentInfo, changePayment, refund, orderPage, ringsize, contactPage, brand. Textos da landing page vindos do DB (heroTitle, heroSubtitle, ctaText, customBanner) só são usados em PT; para EN/ES usa-se o dicionário.
+## Overview
+Giovana Dias Joias is an e-commerce platform for handmade jewelry, built with Next.js, Prisma, PostgreSQL, and TailwindCSS. The platform supports three languages (PT/EN/ES) with automated and manual translation features for products, categories, and UI. Key features include comprehensive SEO, robust security, and integrations with major payment gateways like Stripe and MercadoPago. The system aims to provide a seamless shopping experience for customers and efficient management tools for administrators, including order processing, inventory, and detailed analytics.
 
-## Estrutura
-- `src/app/` - Páginas e rotas da aplicação (Next.js App Router)
-  - `src/app/page.tsx` - Landing page institucional (página principal `/`)
-  - `src/app/loja/` - Loja de produtos (`/loja`)
-  - `src/app/api/` - Rotas de API (auth, admin, checkout, webhooks)
-  - `src/app/admin/` - Painel administrativo
-  - `src/app/auth/` - Login/cadastro de usuários
-  - `src/app/carrinho/` - Carrinho de compras
-  - `src/app/checkout/` - Finalização de compra
-  - `src/app/embed/` - Widget para embed em outros sites
-  - `src/app/minha-conta/` - Área do usuário
-  - `src/app/pedido/[id]/` - Detalhes do pedido
-  - `src/app/produto/[slug]/` - Página de produto
-- `src/lib/` - Módulos utilitários (prisma, auth, admin-auth, config, cart, i18n, inventory, shipping, webhooks, countries)
-- `src/components/` - Componentes React compartilhados
-- `src/middleware.ts` - Middleware do Next.js (verifica cookie admin, define x-pathname header)
-- `src/app/error.tsx` - Error boundary global
-- `prisma/` - Schema do banco de dados
-- `prisma.config.ts` - Configuração do Prisma (usa NEON_DATABASE_URL)
+## User Preferences
+- **Communication Style**: I prefer clear and concise language.
+- **Workflow**: I want an iterative development process.
+- **Interaction**: Ask for confirmation before making significant changes to the codebase or architectural decisions.
+- **Explanations**: Provide detailed explanations for complex implementations.
+- **Codebase Changes**:
+  - Do not make changes to the `public/` directory unless explicitly instructed.
+  - Prioritize maintaining the existing file structure in `src/app/api/` and `src/app/admin/`.
+  - Any new external dependencies must be discussed and approved first.
+  - Do not alter the core logic within `src/lib/admin-auth.ts` or `src/lib/tracking.ts` without explicit instruction.
 
-## Banco de Dados
-- PostgreSQL hospedado no Neon (externo ao Replit)
-- Conexão via env var `NEON_DATABASE_URL`
-- O `channel_binding=require` é removido automaticamente no código (incompatível com a lib `pg` do Node.js)
-- Prisma 7 com adapter `@prisma/adapter-pg`
+## System Architecture
 
-## Segurança
-- Senhas hasheadas com bcrypt (10 rounds) — login compatível com SHA-256 legado (migra automaticamente)
-- JWT sem fallback hardcoded — falha se JWT_SECRET/ADMIN_JWT_SECRET não estiver configurado
-- Middleware (`src/middleware.ts`) faz pré-verificação de cookie em rotas `/admin/*` — redireciona para login se ausente
-- Verificação real do JWT (ADMIN_JWT_SECRET) é feita em Node.js runtime: `src/app/admin/layout.tsx` (server component) e `src/lib/admin-auth.ts`
-- `src/app/admin/AdminLayoutClient.tsx` contém todo o UI do painel admin (client component)
-- Edge Runtime não tem acesso a env vars — toda autenticação JWT fica no runtime Node.js
-- Verificação de assinatura HMAC no webhook do MercadoPago (se `mp_webhook_secret` configurado)
-- Webhook do Stripe já verificava assinatura nativamente
-- Verificação de conta ativa no login e no getAuthUser
+### UI/UX Decisions
+- **Color Scheme**: Based on the brand's visual identity.
+- **Templates**: Utilizes a custom `ThemeProvider` for independent theming between the store and admin panels.
+- **Design Approach**: Responsive design using TailwindCSS, ensuring optimal display across devices. Iconography is handled by Lucide-React.
+- **Language Support**: UI texts are managed via a dictionary in `src/lib/i18n.ts`. Product and category data support PT/EN/ES, with automatic translation fallback for empty fields.
+- **Landing Page**: Dynamic content from the database for hero section, CTA, and custom banners, configurable via the admin panel.
 
-## Dependências Principais
-- Next.js 16, React 19, TailwindCSS 4
-- Prisma 7 com adapter PostgreSQL
-- bcryptjs (hash de senhas), jsonwebtoken (JWT)
-- Stripe e MercadoPago (pagamentos)
-- sonner (notificações), zustand (estado), lucide-react (ícones)
+### Technical Implementations
+- **Framework**: Next.js 16 with App Router.
+- **Styling**: TailwindCSS 4.
+- **State Management**: Zustand for client-side state.
+- **Notifications**: Sonner for toast notifications.
+- **Database**: PostgreSQL (Neon) accessed via Prisma 7.
+- **Authentication**: JWT-based authentication for users and administrators. Passwords are hashed with bcrypt.
+- **Internationalization**: Three-language support (PT/EN/ES) with automated translation of product/category data and dynamic UI text based on user locale.
+- **SEO**: Dynamic sitemaps, robots.txt, `generateMetadata` for pages, JSON-LD for product and organization data, and configurable SEO settings in the admin panel.
+- **Payment Gateways**: Integration with Stripe and MercadoPago, including webhook handling and payment status updates. Automatic region detection for gateway selection (MercadoPago for Brazil, Stripe internationally).
+- **Shipping**: Real-time shipping calculation using Correios API with multi-layered fallbacks (regional pricing, fixed rates). Supports product-specific dimensions and dynamic package volume calculation.
+- **Cart Management**: Server-synced cart for logged-in users, storing items in `cartData` JSON field in the User model.
+- **Order Processing**: Detailed order tracking, payment information display (including PIX QR codes), and user-initiated order cancellation for payment method changes.
+- **Refund System**: A dedicated refund request and management system with a two-way chat between users and administrators.
+- **Tracking**: Server-side tracking for Meta CAPI (PageView, ViewContent, AddToCart, InitiateCheckout, Purchase) and Google Ads Enhanced Conversions, ensuring data accuracy and deduplication.
+- **WhatsApp Integration**: Via Evolution API for automated messaging and customer support, configurable from the admin panel.
+- **Admin Panel**: Comprehensive dashboard for product, order, user, settings management, and data backup.
 
-## Variáveis de Ambiente
-- `NEON_DATABASE_URL` - URL do PostgreSQL Neon (env var compartilhada)
-- `JWT_SECRET` - Chave para tokens JWT de usuários
-- `ADMIN_JWT_SECRET` - Chave para tokens JWT de admin
+### System Design Choices
+- **Data Fetching**: Prisma queries optimize performance by using `select` for specific fields and HTTP caching for listing endpoints.
+- **Security**: Robust authentication with JWTs and bcrypt, HMAC signature verification for webhooks, and secure handling of environment variables.
+- **Performance**: Aggregated database queries, caching strategies for frequently accessed data (e.g., user status, settings), and parallelized API calls. Connection pooling for PostgreSQL.
+- **Error Handling**: Global error boundary (`src/app/error.tsx`).
+- **Webhook Field Mapping**: Customizable webhook payload fields for integration with external tools.
+- **Product Variants**: Support for individual images per product variant, enhancing product display.
+- **Product Display**: Configurable products per page, sorting options, and installment display on product cards and pages.
 
-## Comandos
-- `npm run dev` - Servidor de desenvolvimento na porta 5000
-- `npm run build` - Build de produção
-- `npx prisma generate` - Gerar client Prisma
-- `npx prisma db push` - Sincronizar schema com banco
-
-## Performance
-- Queries Prisma usam `select` em vez de `include` para buscar apenas campos necessários
-- API `/api/products` retorna apenas 7 campos do produto (id, name, slug, price, comparePrice, images, stock)
-- Cache HTTP nos endpoints de listagem (`s-maxage=30, stale-while-revalidate=60`)
-- Settings do banco com cache per-key e TTL de 60s (`src/lib/config.ts`)
-- `getAuthUser` cacheia status `active` do usuário por 60s (evita query ao banco a cada page load)
-- Admin dashboard usa `prisma.order.aggregate()` para receita (em vez de buscar todos os pedidos pagos)
-- Página de produto paraleliza queries (produto + settings + auth + cookies em Promise.all)
-- Pool de conexões pg limitado a 5 conexões com idle timeout de 30s
-
-## Notas Técnicas
-- Next.js 16 usa `middleware.ts` (com `export default`) — `proxy.ts` foi removido (causava conflito)
-- `allowedDevOrigins` vai na raiz do next.config (não em experimental)
-- `devIndicators: false` desativa indicador de rota no dev mode
-- Fonte Inter carregada via `next/font/google` (não via `<link>` manual no `<head>`)
-- ThemeProvider customizado (sem next-themes) para evitar hydration mismatch; suporta `storageKey` e `applyTo` (html ou wrapper) para independência loja vs admin
-- Tema da loja salvo em localStorage key `theme` (aplica no `<html>`), tema do admin em `admin-theme` (aplica em wrapper div) — totalmente independentes
-- PostgreSQL: `uselibpqcompat=true` + `sslmode=no-verify` para suprimir warning de SSL do pg v9
-- `channel_binding=require` removido da URL de conexão (incompatível com lib pg)
-- Estoque validado antes de decremento para evitar valores negativos
-- Cálculo de frete nunca falha: se Correios indisponível, usa tabela de preços por região (PAC/SEDEX)
-- Fallback em 3 camadas: Correios → cálculo por região → valores fixos padrão
-- Timeout de 8s na API dos Correios para não travar checkout
-- Helper `cepToState()` converte CEP em estado para fallback regional
-- Cada produto pode ter peso/dimensões próprias (weight, height, width, length no model Product)
-- Frete calcula peso/volume total do pacote somando itens do carrinho (peso soma, altura/largura máxima, comprimento soma)
-- Se produto não tem dimensões, usa valores padrão das configurações da loja
-- Mínimos dos Correios: 0.3kg, 2cm altura, 11cm largura, 16cm comprimento
-- Carrinho do cliente sincronizado com servidor via `/api/user/sync-cart` (debounce 2s)
-- Campo `cartData` (JSON) no model User armazena itens do carrinho do usuário logado
-- Admin Leads exibe produtos do carrinho de cada lead com detalhes (nome, imagem, variante, quantidade, total)
-- Campo `gatewayData` (JSON string) no model Order armazena dados do gateway de pagamento (PIX QR code, boleto URL, validade, status_detail)
-- Componente `PaymentInfo` exibe dados de pagamento na página do pedido (QR Code Pix com cópia, link boleto, status cartão, countdown de expiração)
-- Página minha-conta mostra indicadores de pagamento pendente (Pix/Boleto) com link para ver dados de pagamento
-- Pedidos pendentes podem ser cancelados pelo usuário para alterar forma de pagamento: cancela o pedido, restaura itens no carrinho e redireciona ao checkout
-- API `/api/orders/cancel` cancela pedido PENDING do próprio usuário e retorna itens para o carrinho
-- Componente `ChangePaymentMethod` com confirmação em 2 passos (botão → card de confirmação → execução)
-- Pedidos cancelados por troca de pagamento exibem badge "Alterou pagamento" (roxo) em vez de "Cancelado" na minha-conta
-- Tracking Meta CAPI: todos os 4 eventos (PageView, ViewContent, AddToCart, InitiateCheckout, Purchase) enviados server-side com `event_id` para deduplicação; captura cookies `_fbc`/`_fbp`; envia dados completos do usuário (email, telefone, nome, cidade, estado, CEP, país, external_id) hasheados SHA-256; API Graph v21.0
-- Tracking Google Ads: Enhanced Conversions habilitado via `allow_enhanced_conversions: true`; `user_data` (email, telefone, nome, endereço) enviado via `gtag('set', 'user_data', ...)` antes de conversões; dados não-hasheados (Google hasheia automaticamente)
-- Utilitário de tracking em `src/lib/tracking.ts`: `generateEventId()` (deduplicação), `getMetaCookies()` (fbc/fbp), `sendCapiEvent()` (envio CAPI)
-- Webhook MercadoPago trata: approved→PAID, rejected/cancelled→CANCELLED, refunded/charged_back→REFUNDED
-- Webhook Stripe trata: payment_intent.succeeded→PAID, payment_intent.payment_failed→CANCELLED, charge.refunded→REFUNDED
-- Ambos webhooks atualizam `gatewayData` com lastWebhookStatus, lastWebhookAt e statusDetail
-- Backup do banco: API `/api/admin/backup` (GET, protegido com JWT) exporta todas as tabelas em JSON; botão "Baixar Backup Completo" na aba Banco de Dados do admin settings
-- Webhook field mapping: admin pode escolher quais campos enviar e personalizar nomes dos campos para compatibilidade com ferramentas externas
-- Mapeamento salvo em settings `webhook_lead_fields` e `webhook_buyer_fields` (JSON)
-- Campos organizados por grupo: meta (envelope), data, address (buyer only)
-- Definições de campos compartilhadas em `src/lib/webhook-fields.ts` (safe for client import)
-- Componente `WebhooksTab` em `src/components/admin/WebhooksTab.tsx` com preview JSON em tempo real
-- Variantes de produto suportam imagem individual (`image` field em ProductVariant) — ao selecionar variante na loja, galeria troca para foto da variante
-- Admin: tabela de variantes tem coluna "Foto" com upload inline; storefront: `allImages` combina imagens do produto + variante selecionada
-- Detecção automática de região para gateway de pagamento: setting `payment_gateway_mode` com valores `manual` (padrão), `auto`, `mp_only`, `stripe_only`
-- Modo `auto`: detecta país do visitante via ipapi.co (fallback ip2c.org), Brasil→MercadoPago, internacional→Stripe
-- Configurado na aba Pagamentos do admin settings, seção "Modo de Gateway"
-- Produtos relacionados exibidos na página do produto: busca até 8 produtos da mesma categoria (ou recentes se sem categoria); renderizado como grid 4 colunas (2 em mobile) com hover effect
-- Paginação na loja: componente ProductFilter com controle de páginas, scroll suave, contador de produtos/páginas
-- Ordenação: 5 opções (mais recentes, menor preço, maior preço, A-Z, Z-A) — API `/api/products` aceita `sort` param
-- Produtos por página configurável no admin: setting `store_products_per_page` (12/16/20/24/32/48), padrão 24
-- Parcelas nos cards: setting `store_installments` (0/2/3/4/6/10/12x) e `store_installments_min_value` — exibe "ou 3x de R$ X,XX" nos cards e na página do produto
-- Configurações de exibição na aba Loja do admin: seção "Exibição de Produtos" com produtos por página, parcelas e valor mínimo
-- Landing page institucional em `/`: hero com imagem, título, subtítulo, botão CTA; seção de banners (WhatsApp/Loja); seção Sobre; footer com contato e redes sociais
-- Loja movida de `/` para `/loja`; StoreHeader logo linka para `/loja`
-- Configurações da landing page na aba "Landing Page" do admin: hero (imagem/título/subtítulo/CTA), banner customizado, texto sobre, contato (WhatsApp/telefone/Instagram/e-mail)
-- Integração WhatsApp via Evolution API: aba "WhatsApp" em Configurações → campos para URL da API, API Key e nome da instância; QR Code para escanear no admin; polling automático de 3s para detectar conexão; rotas proxy em `/api/admin/whatsapp/{status,qrcode,disconnect}`; settings keys: `evolution_api_url`, `evolution_api_key`, `evolution_instance_name`
-- Settings keys: `landing_hero_image`, `landing_hero_title`, `landing_hero_subtitle`, `landing_cta_text`, `landing_whatsapp`, `landing_instagram`, `landing_email`, `landing_phone`, `landing_custom_banner_image`, `landing_custom_banner_title`, `landing_custom_banner_text`, `landing_about_text`
-- Componente: `src/components/store/LandingPageClient.tsx`
-- Sistema de Reembolso: status DELIVERED e REFUND_REQUESTED adicionados ao OrderStatus; campo `deliveredAt` no Order (preenchido automaticamente ao marcar como Entregue); modelos `RefundRequest` e `RefundMessage` no schema
-- Fluxo do reembolso: admin marca pedido como Entregue → usuário tem 7 dias para solicitar em `/reembolso/[orderId]` → admin avalia em `/admin/reembolsos` com chat bidirecional → Aprovado (status REFUNDED) ou Recusado (volta DELIVERED)
-- API `/api/user/refund/[orderId]` (GET/POST) e `/api/user/refund/[orderId]/messages` (POST) para o usuário
-- API `/api/admin/refunds` (GET), `/api/admin/refunds/[id]` (PATCH), `/api/admin/refunds/[id]/messages` (POST) para o admin
-- Minha conta mostra botão "Solicitar Reembolso" em azul para pedidos Entregues com prazo restante; badge "Reembolso em análise" ou "Reembolso concluído" para os outros status
-- AdminSidebar tem link "Reembolsos" (ícone RotateCcw); admin orders tem link direto para /admin/reembolsos em pedidos com REFUND_REQUESTED
+## External Dependencies
+- **Database**: PostgreSQL (Neon)
+- **ORM**: Prisma
+- **Payments**: Stripe, MercadoPago
+- **Authentication**: bcryptjs, jsonwebtoken
+- **UI Icons**: Lucide-React
+- **Notifications**: Sonner
+- **State Management**: Zustand
+- **Translation API**: google-translate-api-x (for automated content translation)
+- **IP Geolocation**: ipapi.co, ip2c.org (for payment gateway auto-detection)
+- **Shipping Calculation**: Correios API
+- **WhatsApp API**: Evolution API

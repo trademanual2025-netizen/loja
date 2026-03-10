@@ -11,7 +11,7 @@ export async function generateMetadata() {
     const currentLocale = (localeCookie && dictionaries[localeCookie]) ? localeCookie : defaultLocale
     const dict = dictionaries[currentLocale]
     return {
-        title: `${dict.ringsize.pageTitle} — Giovana Dias`,
+        title: dict.ringsize.pageTitle,
         description: dict.ringsize.subtitle,
     }
 }

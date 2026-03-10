@@ -5,6 +5,44 @@ import { cookies } from 'next/headers'
 import { dictionaries, defaultLocale, Locale } from '@/lib/i18n'
 import { LandingPageClient } from '@/components/store/LandingPageClient'
 import { sanitizeHtml } from '@/lib/sanitize'
+import type { Metadata } from 'next'
+
+export async function generateMetadata(): Promise<Metadata> {
+    const [seoSettings, cookieStore] = await Promise.all([
+        getSettings([SETTINGS_KEYS.SEO_META_TITLE, SETTINGS_KEYS.SEO_META_DESCRIPTION, SETTINGS_KEYS.SEO_OG_IMAGE, SETTINGS_KEYS.STORE_NAME]),
+        cookies(),
+    ])
+
+    const localeCookie = cookieStore.get('NEXT_LOCALE')?.value as Locale
+    const currentLocale = (localeCookie && dictionaries[localeCookie]) ? localeCookie : defaultLocale
+
+    const storeName = seoSettings[SETTINGS_KEYS.STORE_NAME] || 'Giovana Dias Joias'
+    const title = seoSettings[SETTINGS_KEYS.SEO_META_TITLE] || `${storeName} — Joias Artesanais`
+    const defaultDescs: Record<Locale, string> = {
+        pt: 'Joias artesanais exclusivas feitas à mão por Giovana Dias. Peças autorais em prata e ouro.',
+        en: 'Exclusive handcrafted jewelry by Giovana Dias. Artisan pieces in silver and gold.',
+        es: 'Joyas artesanales exclusivas hechas a mano por Giovana Dias. Piezas autorales en plata y oro.',
+    }
+    const description = seoSettings[SETTINGS_KEYS.SEO_META_DESCRIPTION] || defaultDescs[currentLocale]
+    const ogImage = seoSettings[SETTINGS_KEYS.SEO_OG_IMAGE] || undefined
+
+    return {
+        title: { absolute: title },
+        description,
+        openGraph: {
+            title,
+            description,
+            type: 'website',
+            ...(ogImage ? { images: [{ url: ogImage }] } : {}),
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title,
+            description,
+            ...(ogImage ? { images: [ogImage] } : {}),
+        },
+    }
+}
 
 export const revalidate = 60
 

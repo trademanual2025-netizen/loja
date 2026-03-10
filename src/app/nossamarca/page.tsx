@@ -5,9 +5,27 @@ import { StoreFooter } from '@/components/store/StoreFooter'
 import { cookies } from 'next/headers'
 import { dictionaries, defaultLocale, Locale } from '@/lib/i18n'
 
-export const metadata = {
-    title: 'Nossa Marca',
-    description: 'Conheça a história de Giovana Dias e a essência por trás de cada joia artesanal.',
+export async function generateMetadata() {
+    const cookieStore = await cookies()
+    const localeCookie = cookieStore.get('NEXT_LOCALE')?.value as Locale
+    const currentLocale = (localeCookie && dictionaries[localeCookie]) ? localeCookie : defaultLocale
+
+    const titles: Record<Locale, string> = {
+        pt: 'Nossa Marca — A História por Trás das Joias',
+        en: 'Our Brand — The Story Behind the Jewelry',
+        es: 'Nuestra Marca — La Historia Detrás de las Joyas',
+    }
+    const descriptions: Record<Locale, string> = {
+        pt: 'Conheça a história de Giovana Dias e a essência por trás de cada joia artesanal.',
+        en: 'Discover the story of Giovana Dias and the essence behind each handcrafted jewel.',
+        es: 'Conoce la historia de Giovana Dias y la esencia detrás de cada joya artesanal.',
+    }
+
+    return {
+        title: titles[currentLocale],
+        description: descriptions[currentLocale],
+        openGraph: { title: titles[currentLocale], description: descriptions[currentLocale] },
+    }
 }
 
 export default async function NossaMarcaPage() {

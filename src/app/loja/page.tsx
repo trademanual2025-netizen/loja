@@ -6,6 +6,30 @@ import { ProductFilter } from '@/components/store/ProductFilter'
 import { StoreFooter } from '@/components/store/StoreFooter'
 import { cookies } from 'next/headers'
 import { dictionaries, defaultLocale, Locale, translateDb } from '@/lib/i18n'
+import type { Metadata } from 'next'
+
+export async function generateMetadata(): Promise<Metadata> {
+    const cookieStore = await cookies()
+    const localeCookie = cookieStore.get('NEXT_LOCALE')?.value as Locale
+    const currentLocale = (localeCookie && dictionaries[localeCookie]) ? localeCookie : defaultLocale
+
+    const titles: Record<Locale, string> = {
+        pt: 'Loja — Joias Artesanais Exclusivas',
+        en: 'Store — Exclusive Handcrafted Jewelry',
+        es: 'Tienda — Joyas Artesanales Exclusivas',
+    }
+    const descriptions: Record<Locale, string> = {
+        pt: 'Explore nossa coleção exclusiva de joias artesanais feitas à mão por Giovana Dias.',
+        en: 'Explore our exclusive collection of handcrafted jewelry by Giovana Dias.',
+        es: 'Explora nuestra colección exclusiva de joyas artesanales hechas a mano por Giovana Dias.',
+    }
+
+    return {
+        title: titles[currentLocale],
+        description: descriptions[currentLocale],
+        openGraph: { title: titles[currentLocale], description: descriptions[currentLocale] },
+    }
+}
 
 export const revalidate = 60
 

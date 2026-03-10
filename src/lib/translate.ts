@@ -49,6 +49,24 @@ export async function autoTranslateProduct(data: {
     return result
 }
 
+export async function autoTranslateCategory(data: {
+    name: string
+    nameEn?: string | null
+    nameEs?: string | null
+}): Promise<{ nameEn: string | null; nameEs: string | null }> {
+    const result = { nameEn: data.nameEn || null, nameEs: data.nameEs || null }
+    if (!data.name) return result
+    const tasks: Promise<void>[] = []
+    if (!result.nameEn) {
+        tasks.push(translateText(data.name, 'en').then(t => { result.nameEn = t }))
+    }
+    if (!result.nameEs) {
+        tasks.push(translateText(data.name, 'es').then(t => { result.nameEs = t }))
+    }
+    await Promise.allSettled(tasks)
+    return result
+}
+
 async function translateText(text: string, to: string): Promise<string | null> {
     try {
         const res = await translate(text, { from: 'pt', to })

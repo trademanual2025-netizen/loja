@@ -8,6 +8,8 @@ import { Locale, translateDb } from '@/lib/i18n'
 interface Category {
     id: string
     name: string
+    nameEn?: string | null
+    nameEs?: string | null
     slug: string
 }
 
@@ -161,7 +163,7 @@ export function ProductFilter({ initialProducts, initialTotal, initialPages, cat
                 >
                     <option value="">{dict.store.categoryAll}</option>
                     {categories.map((c) => (
-                        <option key={c.id} value={c.slug}>{translateDb(c.name, locale)}</option>
+                        <option key={c.id} value={c.slug}>{locale === 'en' && c.nameEn ? c.nameEn : locale === 'es' && c.nameEs ? c.nameEs : c.name}</option>
                     ))}
                 </select>
                 <select

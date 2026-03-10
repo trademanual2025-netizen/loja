@@ -43,6 +43,8 @@ model User {
 model Category {
   id        String    @id @default(cuid())
   name      String
+  nameEn    String?
+  nameEs    String?
   slug      String    @unique
   createdAt DateTime  @default(now())
   products  Product[]

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { autoTranslateCategory } from '@/lib/translate'
 
 export async function GET() {
     const categories = await prisma.category.findMany({
@@ -18,6 +19,8 @@ export async function POST(req: NextRequest) {
     const existing = await prisma.category.findUnique({ where: { slug: generatedSlug } })
     if (existing) return NextResponse.json({ error: 'Já existe uma categoria com esse slug.' }, { status: 409 })
 
-    const category = await prisma.category.create({ data: { name, slug: generatedSlug } })
+    const translations = await autoTranslateCategory({ name })
+
+    const category = await prisma.category.create({ data: { name, nameEn: translations.nameEn, nameEs: translations.nameEs, slug: generatedSlug } })
     return NextResponse.json(category)
 }

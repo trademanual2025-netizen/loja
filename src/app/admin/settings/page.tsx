@@ -624,7 +624,7 @@ export default function AdminSettings() {
                 {tab === 'SEO' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                         <div style={{ padding: 16, background: 'rgba(99,102,241,0.1)', borderRadius: 8, border: '1px solid rgba(99,102,241,0.3)' }}>
-                            <p style={{ fontWeight: 700, marginBottom: 6 }}>🔍 Otimização para Buscadores (SEO)</p>
+                            <p style={{ fontWeight: 700, marginBottom: 6 }}>🔍 SEO — Giovana Dias Joias</p>
                             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Essas configurações definem como a página inicial da sua loja aparece no Google e quando compartilhada em redes sociais (WhatsApp, Facebook, etc).</p>
                         </div>
 

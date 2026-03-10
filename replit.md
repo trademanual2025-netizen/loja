@@ -20,7 +20,7 @@ Giovana Dias Joias is an e-commerce platform for handmade jewelry, built with Ne
 - **Color Scheme**: Based on the brand's visual identity.
 - **Templates**: Utilizes a custom `ThemeProvider` for independent theming between the store and admin panels.
 - **Design Approach**: Responsive design using TailwindCSS, ensuring optimal display across devices. Iconography is handled by Lucide-React.
-- **Language Support**: UI texts are managed via a dictionary in `src/lib/i18n.ts`. Product and category data support PT/EN/ES, with automatic translation fallback for empty fields.
+- **Language Support**: UI texts are managed via a dictionary in `src/lib/i18n.ts`. Product and category data support PT/EN/ES, with automatic translation fallback for empty fields. Store banner title/subtitle also support per-locale fields (`store_banner_title_en`, `store_banner_title_es`, `store_banner_subtitle_en`, `store_banner_subtitle_es`) stored in the Settings table.
 - **Landing Page**: Dynamic content from the database for hero section, CTA, and custom banners, configurable via the admin panel.
 
 ### Technical Implementations

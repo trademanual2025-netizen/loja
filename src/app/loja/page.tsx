@@ -5,7 +5,7 @@ import { StoreHeader } from '@/components/store/StoreHeader'
 import { ProductFilter } from '@/components/store/ProductFilter'
 import { StoreFooter } from '@/components/store/StoreFooter'
 import { cookies } from 'next/headers'
-import { dictionaries, defaultLocale, Locale, translateDb } from '@/lib/i18n'
+import { dictionaries, defaultLocale, Locale } from '@/lib/i18n'
 import type { Metadata } from 'next'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -85,7 +85,11 @@ export default async function LojaPage({
       SETTINGS_KEYS.STORE_LOGO,
       SETTINGS_KEYS.STORE_BANNER_URL,
       SETTINGS_KEYS.STORE_BANNER_TITLE,
+      SETTINGS_KEYS.STORE_BANNER_TITLE_EN,
+      SETTINGS_KEYS.STORE_BANNER_TITLE_ES,
       SETTINGS_KEYS.STORE_BANNER_SUBTITLE,
+      SETTINGS_KEYS.STORE_BANNER_SUBTITLE_EN,
+      SETTINGS_KEYS.STORE_BANNER_SUBTITLE_ES,
       SETTINGS_KEYS.STORE_PRODUCTS_PER_PAGE,
       SETTINGS_KEYS.STORE_INSTALLMENTS,
       SETTINGS_KEYS.STORE_INSTALLMENTS_MIN_VALUE,
@@ -103,11 +107,23 @@ export default async function LojaPage({
   const currentLocale = (localeCookie && dictionaries[localeCookie]) ? localeCookie : defaultLocale
   const dict = dictionaries[currentLocale]
 
-  const storeName = storeSettings[SETTINGS_KEYS.STORE_NAME] || 'Velour'
+  const storeName = storeSettings[SETTINGS_KEYS.STORE_NAME] || 'Giovana Dias Joias'
   const logoUrl = storeSettings[SETTINGS_KEYS.STORE_LOGO] || null
   const bannerUrl = storeSettings[SETTINGS_KEYS.STORE_BANNER_URL] || null
-  const bannerTitle = storeSettings[SETTINGS_KEYS.STORE_BANNER_TITLE] || storeName
-  const bannerSubtitle = storeSettings[SETTINGS_KEYS.STORE_BANNER_SUBTITLE] || dict.store.bannerSubtitle
+
+  const bannerTitlePt = storeSettings[SETTINGS_KEYS.STORE_BANNER_TITLE] || storeName
+  const bannerTitle = currentLocale === 'en'
+    ? (storeSettings[SETTINGS_KEYS.STORE_BANNER_TITLE_EN] || bannerTitlePt)
+    : currentLocale === 'es'
+    ? (storeSettings[SETTINGS_KEYS.STORE_BANNER_TITLE_ES] || bannerTitlePt)
+    : bannerTitlePt
+
+  const bannerSubtitlePt = storeSettings[SETTINGS_KEYS.STORE_BANNER_SUBTITLE] || dict.store.bannerSubtitle
+  const bannerSubtitle = currentLocale === 'en'
+    ? (storeSettings[SETTINGS_KEYS.STORE_BANNER_SUBTITLE_EN] || bannerSubtitlePt)
+    : currentLocale === 'es'
+    ? (storeSettings[SETTINGS_KEYS.STORE_BANNER_SUBTITLE_ES] || bannerSubtitlePt)
+    : bannerSubtitlePt
 
   return (
     <>
@@ -118,20 +134,20 @@ export default async function LojaPage({
             <img src={bannerUrl} alt={bannerTitle} style={{ width: '100%', height: 'clamp(200px, 40vw, 360px)', objectFit: 'cover', display: 'block' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.2) 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(16px, 5vw, 40px)' }}>
               <h1 style={{ fontSize: 'clamp(1.5rem, 6vw, 3.2rem)', fontWeight: 800, color: 'white', marginBottom: 8, textShadow: '0 2px 12px rgba(0,0,0,0.5)', maxWidth: '80%' }}>
-                {translateDb(bannerTitle, currentLocale)}
+                {bannerTitle}
               </h1>
               <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 'clamp(0.85rem, 2vw, 1.1rem)', maxWidth: 400 }}>
-                {translateDb(bannerSubtitle, currentLocale)}
+                {bannerSubtitle}
               </p>
             </div>
           </section>
         ) : (
           <section style={{ padding: '40px 0 30px', textAlign: 'center' }}>
             <h1 style={{ fontSize: 'clamp(1.8rem, 8vw, 3.5rem)', fontWeight: 800, background: 'linear-gradient(135deg,var(--primary),#a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: 12 }}>
-              {translateDb(bannerTitle, currentLocale)}
+              {bannerTitle}
             </h1>
             <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>
-              {translateDb(bannerSubtitle, currentLocale)}
+              {bannerSubtitle}
             </p>
           </section>
         )}

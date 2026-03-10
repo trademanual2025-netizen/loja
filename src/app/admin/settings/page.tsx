@@ -665,10 +665,14 @@ export default function AdminSettings() {
                             <p style={{ fontWeight: 700, marginBottom: 6 }}>🖼️ Banner Principal (Loja)</p>
                             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Se um banner for enviado, a página da loja (<code>/loja</code>) mostrará um Hero Cinema com a imagem de fundo, título e descrição por cima.</p>
                         </div>
-                        <F settings={settings} set={set} label="Título do Banner" k="store_banner_title" placeholder="Nova Coleção Primavera" />
-                        <F settings={settings} set={set} label="Subtítulo do Banner" k="store_banner_subtitle" type="textarea" placeholder="Descubra a nova linha..." />
+                        <F settings={settings} set={set} label="Título do Banner (PT)" k="store_banner_title" placeholder="Nova Coleção Primavera" />
+                        <F settings={settings} set={set} label="Título do Banner (EN)" k="store_banner_title_en" placeholder="New Spring Collection" help="Tradução em inglês. Se vazio, o texto em português será exibido." />
+                        <F settings={settings} set={set} label="Título do Banner (ES)" k="store_banner_title_es" placeholder="Nueva Colección Primavera" help="Tradução em espanhol. Se vazio, o texto em português será exibido." />
+                        <F settings={settings} set={set} label="Subtítulo do Banner (PT)" k="store_banner_subtitle" type="textarea" placeholder="Descubra a nova linha..." />
+                        <F settings={settings} set={set} label="Subtítulo do Banner (EN)" k="store_banner_subtitle_en" type="textarea" placeholder="Discover the new line..." help="Tradução em inglês. Se vazio, o texto em português será exibido." />
+                        <F settings={settings} set={set} label="Subtítulo do Banner (ES)" k="store_banner_subtitle_es" type="textarea" placeholder="Descubre la nueva línea..." help="Tradução em espanhol. Se vazio, o texto em português será exibido." />
                         <ImageF label="Imagem de Fundo (Banner)" k="store_banner_url" help="Recomendado: 1920x600 pixels, alta qualidade." settings={settings} uploadFile={uploadFile} />
-                        <button className="btn btn-primary" onClick={() => save(['store_banner_title', 'store_banner_subtitle', 'store_banner_url'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
+                        <button className="btn btn-primary" onClick={() => save(['store_banner_title', 'store_banner_title_en', 'store_banner_title_es', 'store_banner_subtitle', 'store_banner_subtitle_en', 'store_banner_subtitle_es', 'store_banner_url'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
                     </div>
                 )}
 

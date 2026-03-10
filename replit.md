@@ -31,7 +31,7 @@ Giovana Dias Joias is an e-commerce platform for handmade jewelry, built with Ne
 - **Database**: PostgreSQL (Neon) accessed via Prisma 7.
 - **Authentication**: JWT-based authentication for users and administrators. Passwords are hashed with bcrypt.
 - **Internationalization**: Three-language support (PT/EN/ES) with automated translation of product/category data and dynamic UI text based on user locale.
-- **SEO**: Dynamic sitemaps, robots.txt, `generateMetadata` for pages, JSON-LD for product and organization data, and configurable SEO settings in the admin panel.
+- **SEO**: Dynamic sitemaps, robots.txt, `generateMetadata` for all pages (including layout), JSON-LD for product and organization data, and configurable SEO settings in the admin panel. Settings are invalidated via `revalidateTag('settings')` on save.
 - **Payment Gateways**: Integration with Stripe and MercadoPago, including webhook handling and payment status updates. Automatic region detection for gateway selection (MercadoPago for Brazil, Stripe internationally).
 - **Shipping**: Real-time shipping calculation using Correios API with multi-layered fallbacks (regional pricing, fixed rates). Supports product-specific dimensions and dynamic package volume calculation.
 - **Cart Management**: Server-synced cart for logged-in users, storing items in `cartData` JSON field in the User model.
@@ -42,7 +42,8 @@ Giovana Dias Joias is an e-commerce platform for handmade jewelry, built with Ne
 - **Admin Panel**: Comprehensive dashboard for product, order, user, settings management, and data backup.
 
 ### System Design Choices
-- **Data Fetching**: Prisma queries optimize performance by using `select` for specific fields and HTTP caching for listing endpoints.
+- **Data Fetching**: Prisma queries optimize performance by using `select` for specific fields and HTTP caching for listing endpoints. Note: Neon DB uses `PrismaPg` adapter with `uselibpqcompat=true`; raw `pg` queries cannot access tables directly — always use Prisma client for DB operations.
+- **Admin Settings Pipeline**: Settings are saved via POST `/api/admin/settings` → stored in `Settings` table → cache invalidated via `revalidateTag('settings')` + `clearSettingsCache()` → pages revalidated via `revalidatePath`. All color CSS variables (--primary, --btn-buy, --btn-header, --text, --bg, --bg-card, --text-title, --icon-cart) are applied as inline styles on `<html>` in layout.tsx.
 - **Security**: Robust authentication with JWTs and bcrypt, HMAC signature verification for webhooks, and secure handling of environment variables.
 - **Performance**: Aggregated database queries, caching strategies for frequently accessed data (e.g., user status, settings), and parallelized API calls. Connection pooling for PostgreSQL.
 - **Error Handling**: Global error boundary (`src/app/error.tsx`).

@@ -85,7 +85,7 @@ type ThemeColors = {
 }
 
 const PRESET_THEMES: { name: string; colors: ThemeColors }[] = [
-    { name: 'Velour Classic', colors: { store_primary_color: '#6366f1', store_bg_color: '#0a0a0f', store_bg_card_color: '#12121a', store_text_color: '#f1f1f8', store_text_title: '#ffffff', store_btn_buy: '#6366f1', store_btn_header: '#6366f1', store_icon_cart: '#f1f1f8' } },
+    { name: 'Índigo Clássico', colors: { store_primary_color: '#6366f1', store_bg_color: '#0a0a0f', store_bg_card_color: '#12121a', store_text_color: '#f1f1f8', store_text_title: '#ffffff', store_btn_buy: '#6366f1', store_btn_header: '#6366f1', store_icon_cart: '#f1f1f8' } },
     { name: 'Light Minimal', colors: { store_primary_color: '#111827', store_bg_color: '#fafafa', store_bg_card_color: '#ffffff', store_text_color: '#334155', store_text_title: '#0f172a', store_btn_buy: '#111827', store_btn_header: '#111827', store_icon_cart: '#111827' } },
     { name: 'Glamour Gold', colors: { store_primary_color: '#d4af37', store_bg_color: '#000000', store_bg_card_color: '#0a0a0a', store_text_color: '#fafafa', store_text_title: '#ffffff', store_btn_buy: '#d4af37', store_btn_header: '#d4af37', store_icon_cart: '#d4af37' } },
     { name: 'Nature Green', colors: { store_primary_color: '#4d7c5f', store_bg_color: '#fdfbf7', store_bg_card_color: '#ffffff', store_text_color: '#14532d', store_text_title: '#064e3b', store_btn_buy: '#4d7c5f', store_btn_header: '#4d7c5f', store_icon_cart: '#4d7c5f' } },

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { clearSettingsCache } from '@/lib/config'
 import { revalidatePath } from 'next/cache'
+import { revalidateTag } from 'next/cache'
 
 export async function GET() {
     const settings = await prisma.settings.findMany()
@@ -24,10 +25,14 @@ export async function POST(req: NextRequest) {
     )
 
     clearSettingsCache(Object.keys(body))
+    revalidateTag('settings')
 
     revalidatePath('/', 'layout')
     revalidatePath('/loja', 'page')
     revalidatePath('/nossamarca', 'page')
+    revalidatePath('/contato', 'page')
+    revalidatePath('/ringsize', 'page')
+    revalidatePath('/carrinho', 'layout')
 
     return NextResponse.json({ ok: true })
 }

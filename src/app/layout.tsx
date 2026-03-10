@@ -20,13 +20,20 @@ const inter = Inter({
   preload: true,
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Giovana Dias Joias — Joias Artesanais",
-    template: "%s | Giovana Dias Joias",
-  },
-  description: "Joias autênticas para pessoas autênticas. Conheça as coleções exclusivas da Giovana Dias Joias.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getLayoutSettings();
+  const storeName = settings[SETTINGS_KEYS.STORE_NAME] || "Giovana Dias Joias";
+  const metaTitle = settings[SETTINGS_KEYS.SEO_META_TITLE] || `${storeName} — Joias Artesanais`;
+  const metaDesc = settings[SETTINGS_KEYS.SEO_META_DESCRIPTION] || `Joias autênticas para pessoas autênticas. Conheça as coleções exclusivas da ${storeName}.`;
+
+  return {
+    title: {
+      default: metaTitle,
+      template: `%s | ${storeName}`,
+    },
+    description: metaDesc,
+  };
+}
 
 export const viewport = {
   width: 'device-width',
@@ -92,9 +99,14 @@ export default async function RootLayout({
 
   const storeName = settings[SETTINGS_KEYS.STORE_NAME] || "Giovana Dias Joias";
   const logoUrl = settings[SETTINGS_KEYS.STORE_LOGO] || "";
-  const primaryColor = settings[SETTINGS_KEYS.STORE_PRIMARY_COLOR] || "#6366f1";
-  const btnBuyColor = settings[SETTINGS_KEYS.STORE_BTN_BUY] || primaryColor;
-  const btnHeaderColor = settings[SETTINGS_KEYS.STORE_BTN_HEADER] || primaryColor;
+  const primaryColor = settings[SETTINGS_KEYS.STORE_PRIMARY_COLOR] || "";
+  const btnBuyColor = settings[SETTINGS_KEYS.STORE_BTN_BUY] || "";
+  const btnHeaderColor = settings[SETTINGS_KEYS.STORE_BTN_HEADER] || "";
+  const textColor = settings[SETTINGS_KEYS.STORE_TEXT_COLOR] || "";
+  const bgColor = settings[SETTINGS_KEYS.STORE_BG_COLOR] || "";
+  const bgCardColor = settings[SETTINGS_KEYS.STORE_BG_CARD_COLOR] || "";
+  const textTitleColor = settings[SETTINGS_KEYS.STORE_TEXT_TITLE] || "";
+  const iconCartColor = settings[SETTINGS_KEYS.STORE_ICON_CART] || "";
   const favicon = settings[SETTINGS_KEYS.STORE_FAVICON] || "";
   const metaTitle = settings[SETTINGS_KEYS.SEO_META_TITLE] || `${storeName} — Joias Artesanais`;
   const metaDesc = settings[SETTINGS_KEYS.SEO_META_DESCRIPTION] || `Joias autênticas para pessoas autênticas. Conheça as coleções exclusivas da ${storeName}.`;
@@ -168,11 +180,14 @@ export default async function RootLayout({
       suppressHydrationWarning
       data-scroll-behavior="smooth"
       style={{
-        // Only brand/accent colors in inline styles — theme bg/text are CSS-controlled
-        ["--primary" as string]: primaryColor,
-        ["--primary-dark" as string]: primaryColor,
-        ["--btn-buy" as string]: btnBuyColor,
-        ["--btn-header" as string]: btnHeaderColor,
+        ...(primaryColor ? { ["--primary" as string]: primaryColor, ["--primary-dark" as string]: primaryColor } : {}),
+        ...(btnBuyColor ? { ["--btn-buy" as string]: btnBuyColor } : {}),
+        ...(btnHeaderColor ? { ["--btn-header" as string]: btnHeaderColor } : {}),
+        ...(textColor ? { ["--text" as string]: textColor } : {}),
+        ...(bgColor ? { ["--bg" as string]: bgColor } : {}),
+        ...(bgCardColor ? { ["--bg-card" as string]: bgCardColor } : {}),
+        ...(textTitleColor ? { ["--text-title" as string]: textTitleColor } : {}),
+        ...(iconCartColor ? { ["--icon-cart" as string]: iconCartColor } : {}),
       } as React.CSSProperties}
     >
       <head>

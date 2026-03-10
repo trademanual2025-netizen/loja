@@ -34,7 +34,7 @@ export default async function CarrinhoLayout({ children }: { children: React.Rea
         <>
             <StoreHeader storeName={storeName} logoUrl={logoUrl} user={user} dict={dict} />
             {children}
-            <StoreFooter storeName={storeName} dict={dict} footerText={footerText} />
+            <StoreFooter storeName={storeName} dict={dict} footerText={footerText} logoUrl={logoUrl} />
         </>
     )
 }

@@ -167,7 +167,7 @@ export default async function ContatoPage() {
                 </div>
             </main>
 
-            <StoreFooter storeName={storeName} dict={dict} footerText={storeSettings[SETTINGS_KEYS.STORE_FOOTER_TEXT] || undefined} />
+            <StoreFooter storeName={storeName} dict={dict} footerText={storeSettings[SETTINGS_KEYS.STORE_FOOTER_TEXT] || undefined} logoUrl={logoUrl} />
 
             <style>{`
                 @media (max-width: 1024px) {

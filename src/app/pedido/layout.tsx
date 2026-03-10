@@ -22,7 +22,7 @@ export default async function PedidoLayout({ children }: { children: React.React
         <>
             <StoreHeader storeName={storeName} logoUrl={logoUrl} user={user} dict={dict} />
             {children}
-            <StoreFooter storeName={storeName} dict={dict} footerText={footerText} />
+            <StoreFooter storeName={storeName} dict={dict} footerText={footerText} logoUrl={logoUrl} />
         </>
     )
 }

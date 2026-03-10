@@ -1157,6 +1157,12 @@ export const dbTranslations: Record<Locale, Record<string, string>> = {
         'Vestidos': 'Dresses',
         'Casacos e Jaquetas': 'Coats & Jackets',
         'Acessórios': 'Accessories',
+        'Joias': 'Jewelry',
+        'Casco de Tartaruga': 'Turtle Shell',
+        'Memória do Mar': 'Memory of the Sea',
+        'Metal Power': 'Metal Power',
+        'Tribal': 'Tribal',
+        'COLLAB - Carla Nicolait': 'COLLAB - Carla Nicolait',
     },
     es: {
         'Produtos selecionados com qualidade e cuidado': 'Productos seleccionados con calidad y cuidado',
@@ -1187,6 +1193,12 @@ export const dbTranslations: Record<Locale, Record<string, string>> = {
         'Vestidos': 'Vestidos',
         'Casacos e Jaquetas': 'Abrigos y Chaquetas',
         'Acessórios': 'Accesorios',
+        'Joias': 'Joyas',
+        'Casco de Tartaruga': 'Caparazón de Tortuga',
+        'Memória do Mar': 'Memoria del Mar',
+        'Metal Power': 'Metal Power',
+        'Tribal': 'Tribal',
+        'COLLAB - Carla Nicolait': 'COLLAB - Carla Nicolait',
     }
 }
 

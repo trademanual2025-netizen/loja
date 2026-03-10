@@ -38,23 +38,26 @@ export function StoreFooter({ storeName, dict, footerText, logoUrl }: Props) {
     const hasContact = phone || whatsapp || email
     const hasSocial = instagramLink || whatsappLink
 
+    const headingStyle: React.CSSProperties = { color: 'var(--footer-heading)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }
+    const linkStyle: React.CSSProperties = { color: 'var(--text-muted)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }
+
     return (
         <footer style={{ background: 'var(--bg-card)', borderTop: '1px solid var(--border)', padding: '50px 20px 30px' }}>
             <div style={{ maxWidth: 1000, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 40, marginBottom: 40 }}>
                 {hasContact && (
                     <div>
-                        <h4 style={{ color: 'rgba(200,160,80,0.8)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>{t.contact}</h4>
+                        <h4 style={headingStyle}>{t.contact}</h4>
                         {(phone || whatsapp) && (
-                            <a href={whatsappLink || `tel:${(phone || whatsapp).replace(/\D/g, '')}`} target={whatsappLink ? '_blank' : undefined} rel="noopener noreferrer" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: 6, display: 'block', textDecoration: 'none' }}>
+                            <a href={whatsappLink || `tel:${(phone || whatsapp).replace(/\D/g, '')}`} target={whatsappLink ? '_blank' : undefined} rel="noopener noreferrer" style={linkStyle}>
                                 {t.phoneWhatsapp}: {phone || whatsapp}
                             </a>
                         )}
                         {email && (
-                            <a href={`mailto:${email}`} style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: 6, display: 'block', textDecoration: 'none' }}>{email}</a>
+                            <a href={`mailto:${email}`} style={linkStyle}>{email}</a>
                         )}
                         {whatsappLink && (
                             <a href={whatsappLink} target="_blank" rel="noopener noreferrer"
-                                style={{ color: 'rgba(200,160,80,0.8)', fontSize: '0.85rem', textDecoration: 'none' }}>
+                                style={{ color: 'var(--footer-accent)', fontSize: '0.85rem', textDecoration: 'none' }}>
                                 {t.talkToUs}
                             </a>
                         )}
@@ -62,16 +65,16 @@ export function StoreFooter({ storeName, dict, footerText, logoUrl }: Props) {
                 )}
 
                 <div>
-                    <h4 style={{ color: 'rgba(200,160,80,0.8)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>{t.institutional}</h4>
-                    <Link href="/loja" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{t.virtualStore}</Link>
-                    <Link href="/nossamarca" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{dict.nav?.ourBrand}</Link>
-                    <Link href="/ringsize" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{dict.nav?.ringSize}</Link>
-                    <Link href="/contato" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{dict.nav?.contact}</Link>
+                    <h4 style={headingStyle}>{t.institutional}</h4>
+                    <Link href="/loja" style={linkStyle}>{t.virtualStore}</Link>
+                    <Link href="/nossamarca" style={linkStyle}>{dict.nav?.ourBrand}</Link>
+                    <Link href="/ringsize" style={linkStyle}>{dict.nav?.ringSize}</Link>
+                    <Link href="/contato" style={linkStyle}>{dict.nav?.contact}</Link>
                 </div>
 
                 {hasSocial && (
                     <div>
-                        <h4 style={{ color: 'rgba(200,160,80,0.8)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>{t.socialMedia}</h4>
+                        <h4 style={headingStyle}>{t.socialMedia}</h4>
                         <div style={{ display: 'flex', gap: 12 }}>
                             {instagramLink && (
                                 <a href={instagramLink} target="_blank" rel="noopener noreferrer"
@@ -92,10 +95,10 @@ export function StoreFooter({ storeName, dict, footerText, logoUrl }: Props) {
                 )}
 
                 <div>
-                    <h4 style={{ color: 'rgba(200,160,80,0.8)', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>{t.account}</h4>
-                    <Link href="/minha-conta" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{t.myData}</Link>
-                    <Link href="/minha-conta#pedidos" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{t.myOrders}</Link>
-                    <Link href="/carrinho" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textDecoration: 'none', display: 'block', marginBottom: 6 }}>{dict.store.cart}</Link>
+                    <h4 style={headingStyle}>{t.account}</h4>
+                    <Link href="/minha-conta" style={linkStyle}>{t.myData}</Link>
+                    <Link href="/minha-conta#pedidos" style={linkStyle}>{t.myOrders}</Link>
+                    <Link href="/carrinho" style={linkStyle}>{dict.store.cart}</Link>
                 </div>
             </div>
 

@@ -6,7 +6,7 @@ import { SETTINGS_KEYS } from "@/lib/config";
 import { FacebookPixel } from "@/components/tracking/FacebookPixel";
 import { GoogleAds } from "@/components/tracking/GoogleAds";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { Toaster } from "sonner";
+import { ThemedToaster } from "@/components/ThemedToaster";
 import { CartSync } from "@/components/store/CartSync";
 import { CartNotification } from "@/components/store/CartNotification";
 import { NavigationProgress } from "@/components/NavigationProgress";
@@ -183,15 +183,19 @@ export default async function RootLayout({
         ...(primaryColor ? { ["--primary" as string]: primaryColor, ["--primary-dark" as string]: primaryColor } : {}),
         ...(btnBuyColor ? { ["--btn-buy" as string]: btnBuyColor } : {}),
         ...(btnHeaderColor ? { ["--btn-header" as string]: btnHeaderColor } : {}),
-        ...(textColor ? { ["--text" as string]: textColor } : {}),
-        ...(bgColor ? { ["--bg" as string]: bgColor } : {}),
-        ...(bgCardColor ? { ["--bg-card" as string]: bgCardColor } : {}),
-        ...(textTitleColor ? { ["--text-title" as string]: textTitleColor } : {}),
-        ...(iconCartColor ? { ["--icon-cart" as string]: iconCartColor } : {}),
       } as React.CSSProperties}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}})()` }} />
+        <style dangerouslySetInnerHTML={{ __html: `
+          [data-theme='dark'] {
+            ${textColor ? `--text: ${textColor};` : ''}
+            ${bgColor ? `--bg: ${bgColor};` : ''}
+            ${bgCardColor ? `--bg-card: ${bgCardColor};` : ''}
+            ${textTitleColor ? `--text-title: ${textTitleColor};` : ''}
+            ${iconCartColor ? `--icon-cart: ${iconCartColor};` : ''}
+          }
+        ` }} />
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
@@ -214,7 +218,7 @@ export default async function RootLayout({
           <NavigationProgress />
           {fbEnabled && fbPixelId && <FacebookPixel pixelId={fbPixelId} />}
           {googleEnabled && googleAdsId && <GoogleAds adsId={googleAdsId} />}
-          <Toaster theme="dark" position="bottom-center" />
+          <ThemedToaster />
           <CartSync />
           <CartNotification />
           {children}

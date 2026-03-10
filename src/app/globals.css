@@ -42,6 +42,10 @@
   --text-muted: #64748b;
   --success: #22c55e;
   --error: #ef4444;
+  --footer-heading: #8b6914;
+  --footer-accent: #8b6914;
+  --landing-bg: #f0f4f8;
+  --landing-text: #0f172a;
 
   --badge-green-bg: #dcfce7;
   --badge-green-text: #15803d;
@@ -65,6 +69,10 @@
   --text-title: #ffffff;
   --icon-cart: #e8e8f5;
   --text-muted: #7878a0;
+  --footer-heading: rgba(200,160,80,0.8);
+  --footer-accent: rgba(200,160,80,0.8);
+  --landing-bg: #0a0a0a;
+  --landing-text: #ffffff;
 
   /* Badges - Dark Mode */
   --badge-green-bg: #052e16;

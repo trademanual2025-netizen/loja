@@ -175,6 +175,7 @@ export function LandingPageClient({
                     grid-template-columns: repeat(3, 1fr);
                     grid-template-rows: repeat(2, 1fr);
                     gap: 3px; overflow: hidden;
+                    position: relative; z-index: 2;
                 }
                 @media (max-width: 1024px) {
                     .custom-banner { flex-direction: column; border-radius: 12px; }
@@ -300,7 +301,7 @@ export function LandingPageClient({
                                     { src: '/produtos/brinco-coral.png', pos: 'center', slug: 'brinco-coral-com-rubi-cravado-brinco-jardim-silencioso' },
                                     { src: '/produtos/colar-dente.png', pos: 'center', slug: 'colar-amuleto-dente-de-crocodilo' },
                                 ].map((img, i) => (
-                                    <a key={i} href={`/produto/${img.slug}`} style={{ overflow: 'hidden', position: 'relative', display: 'block', cursor: 'pointer' }}>
+                                    <a key={i} href={`/produto/${img.slug}`} style={{ overflow: 'hidden', position: 'relative', display: 'block', cursor: 'pointer', pointerEvents: 'auto' }}>
                                         <img
                                             src={img.src}
                                             alt=""

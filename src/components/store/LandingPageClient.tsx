@@ -301,11 +301,16 @@ export function LandingPageClient({
                                     { src: '/produtos/brinco-coral.png', pos: 'center', slug: 'brinco-coral-com-rubi-cravado-brinco-jardim-silencioso' },
                                     { src: '/produtos/colar-dente.png', pos: 'center', slug: 'colar-amuleto-dente-de-crocodilo' },
                                 ].map((img, i) => (
-                                    <a key={i} href={`/produto/${img.slug}`} style={{ overflow: 'hidden', position: 'relative', display: 'block', cursor: 'pointer', pointerEvents: 'auto' }}>
+                                    <a
+                                        key={i}
+                                        href={`/produto/${img.slug}`}
+                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/produto/${img.slug}`; }}
+                                        style={{ overflow: 'hidden', position: 'relative', display: 'block', cursor: 'pointer', pointerEvents: 'auto', zIndex: 10 }}
+                                    >
                                         <img
                                             src={img.src}
                                             alt=""
-                                            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: img.pos, display: 'block', transition: 'transform 0.5s' }}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: img.pos, display: 'block', transition: 'transform 0.5s', pointerEvents: 'none' }}
                                             onMouseEnter={e => { (e.currentTarget as HTMLImageElement).style.transform = 'scale(1.08)' }}
                                             onMouseLeave={e => { (e.currentTarget as HTMLImageElement).style.transform = 'scale(1)' }}
                                         />

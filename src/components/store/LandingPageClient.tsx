@@ -177,6 +177,16 @@ export function LandingPageClient({
                     gap: 3px; overflow: hidden;
                     position: relative; z-index: 2;
                 }
+                .banner-product-link {
+                    overflow: hidden; position: relative; display: block; cursor: pointer;
+                }
+                .banner-product-link img {
+                    width: 100%; height: 100%; object-fit: cover; display: block;
+                    transition: transform 0.5s;
+                }
+                .banner-product-link:hover img {
+                    transform: scale(1.08);
+                }
                 @media (max-width: 1024px) {
                     .custom-banner { flex-direction: column; border-radius: 12px; }
                     .custom-banner-text { max-width: 100%; padding: 22px 20px 18px; background: linear-gradient(180deg, #0d0a06 70%, rgba(13,10,6,0.95) 100%); }
@@ -293,29 +303,24 @@ export function LandingPageClient({
                             </div>
 
                             <div className="custom-banner-grid">
-                                {[
-                                    { src: '/produtos/colar-placa.png', pos: 'center', slug: 'choker-amuleto-dente-de-javali' },
-                                    { src: '/produtos/brinco-sol.png', pos: 'center', slug: 'brinco-concha-expressiva-brinco-memoria-do-mar' },
-                                    { src: '/produtos/anel-sementes.png', pos: 'center', slug: 'anel-coral' },
-                                    { src: '/produtos/anel-martelado.png', pos: 'center top', slug: 'anel-quadrado-textura-coral-anel-falesia' },
-                                    { src: '/produtos/brinco-coral.png', pos: 'center', slug: 'brinco-coral-com-rubi-cravado-brinco-jardim-silencioso' },
-                                    { src: '/produtos/colar-dente.png', pos: 'center', slug: 'colar-amuleto-dente-de-crocodilo' },
-                                ].map((img, i) => (
-                                    <a
-                                        key={i}
-                                        href={`/produto/${img.slug}`}
-                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/produto/${img.slug}`; }}
-                                        style={{ overflow: 'hidden', position: 'relative', display: 'block', cursor: 'pointer', pointerEvents: 'auto', zIndex: 10 }}
-                                    >
-                                        <img
-                                            src={img.src}
-                                            alt=""
-                                            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: img.pos, display: 'block', transition: 'transform 0.5s', pointerEvents: 'none' }}
-                                            onMouseEnter={e => { (e.currentTarget as HTMLImageElement).style.transform = 'scale(1.08)' }}
-                                            onMouseLeave={e => { (e.currentTarget as HTMLImageElement).style.transform = 'scale(1)' }}
-                                        />
-                                    </a>
-                                ))}
+                                <a className="banner-product-link" href="/produto/choker-amuleto-dente-de-javali">
+                                    <img src="/produtos/colar-placa.png" alt="Produto" style={{ objectPosition: 'center' }} />
+                                </a>
+                                <a className="banner-product-link" href="/produto/brinco-concha-expressiva-brinco-memoria-do-mar">
+                                    <img src="/produtos/brinco-sol.png" alt="Produto" style={{ objectPosition: 'center' }} />
+                                </a>
+                                <a className="banner-product-link" href="/produto/anel-coral">
+                                    <img src="/produtos/anel-sementes.png" alt="Produto" style={{ objectPosition: 'center' }} />
+                                </a>
+                                <a className="banner-product-link" href="/produto/anel-quadrado-textura-coral-anel-falesia">
+                                    <img src="/produtos/anel-martelado.png" alt="Produto" style={{ objectPosition: 'center top' }} />
+                                </a>
+                                <a className="banner-product-link" href="/produto/brinco-coral-com-rubi-cravado-brinco-jardim-silencioso">
+                                    <img src="/produtos/brinco-coral.png" alt="Produto" style={{ objectPosition: 'center' }} />
+                                </a>
+                                <a className="banner-product-link" href="/produto/colar-amuleto-dente-de-crocodilo">
+                                    <img src="/produtos/colar-dente.png" alt="Produto" style={{ objectPosition: 'center' }} />
+                                </a>
                             </div>
                         </div>
                     </section>

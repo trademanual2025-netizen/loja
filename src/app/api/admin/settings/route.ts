@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     )
 
     clearSettingsCache(Object.keys(body))
-    revalidateTag('settings')
+    revalidateTag('settings', { expire: 300 })
 
     revalidatePath('/', 'layout')
     revalidatePath('/loja', 'page')

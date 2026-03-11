@@ -300,7 +300,7 @@ export function LandingPageClient({
                                     { src: '/produtos/brinco-coral.png', pos: 'center', slug: 'brinco-coral-com-rubi-cravado-brinco-jardim-silencioso' },
                                     { src: '/produtos/colar-dente.png', pos: 'center', slug: 'colar-amuleto-dente-de-crocodilo' },
                                 ].map((img, i) => (
-                                    <Link key={i} href={`/produto/${img.slug}`} style={{ overflow: 'hidden', position: 'relative', display: 'block' }}>
+                                    <a key={i} href={`/produto/${img.slug}`} style={{ overflow: 'hidden', position: 'relative', display: 'block', cursor: 'pointer' }}>
                                         <img
                                             src={img.src}
                                             alt=""
@@ -308,7 +308,7 @@ export function LandingPageClient({
                                             onMouseEnter={e => { (e.currentTarget as HTMLImageElement).style.transform = 'scale(1.08)' }}
                                             onMouseLeave={e => { (e.currentTarget as HTMLImageElement).style.transform = 'scale(1)' }}
                                         />
-                                    </Link>
+                                    </a>
                                 ))}
                             </div>
                         </div>

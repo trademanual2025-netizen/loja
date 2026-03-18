@@ -69,7 +69,11 @@ async function getProducts(search?: string, category?: string, limit = 24) {
 }
 
 async function getCategories() {
-  return prisma.category.findMany({ orderBy: { name: 'asc' } })
+  const categories = await prisma.category.findMany({
+    orderBy: { name: 'asc' },
+    include: { _count: { select: { products: { where: { active: true } } } } },
+  })
+  return categories.filter(c => c._count.products > 0)
 }
 
 export default async function LojaPage({

@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
                     }
                 }
 
-                if (totalWeight > 0) packageWeight = totalWeight
+                if (totalWeight > 0) packageWeight = totalWeight / 1000
                 if (maxHeight > 0) packageHeight = maxHeight
                 if (maxWidth > 0) packageWidth = maxWidth
                 if (totalLength > 0) packageLength = Math.min(totalLength, 100)

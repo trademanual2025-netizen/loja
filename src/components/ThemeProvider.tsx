@@ -13,16 +13,6 @@ export function useTheme() {
     return useContext(ThemeContext)
 }
 
-function getInitialTheme(storageKey: string): Theme {
-    if (typeof window !== 'undefined') {
-        try {
-            const saved = localStorage.getItem(storageKey)
-            if (saved === 'light' || saved === 'dark') return saved
-        } catch {}
-    }
-    return 'dark'
-}
-
 export function ThemeProvider({
     children,
     storageKey = 'theme',
@@ -32,7 +22,7 @@ export function ThemeProvider({
     storageKey?: string
     applyTo?: 'html' | 'wrapper'
 }) {
-    const [theme, setThemeState] = useState<Theme>(() => getInitialTheme(storageKey))
+    const [theme, setThemeState] = useState<Theme>('dark')
 
     useEffect(() => {
         const saved = localStorage.getItem(storageKey) as Theme | null

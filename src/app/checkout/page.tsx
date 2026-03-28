@@ -786,12 +786,17 @@ export default function CheckoutPage() {
                                     colorText: '#e8e8f5',
                                     colorTextSecondary: '#a0a0c0',
                                     colorTextPlaceholder: '#7878a0',
-                                    colorInputBackground: '#17172a',
-                                    colorInputText: '#e8e8f5',
-                                    colorInputBorder: '#252538',
-                                    colorInputPlaceholder: '#7878a0',
                                     colorDanger: '#f87171',
                                     borderRadius: '8px',
+                                },
+                                rules: {
+                                    '.Input': {
+                                        backgroundColor: '#17172a',
+                                        color: '#e8e8f5',
+                                        borderColor: '#252538',
+                                    },
+                                    '.Input::placeholder': { color: '#7878a0' },
+                                    '.Label': { color: '#a0a0c0' },
                                 },
                             } : {
                                 theme: 'stripe',

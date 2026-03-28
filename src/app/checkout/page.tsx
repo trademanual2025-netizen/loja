@@ -776,8 +776,6 @@ export default function CheckoutPage() {
                             payWithPix={pixDiscount}
                             adsConfig={adsConfig}
                             trackingUser={trackingUser}
-                            installments={installments}
-                            onInstallmentsChange={setInstallments}
                         />
                     )}
 

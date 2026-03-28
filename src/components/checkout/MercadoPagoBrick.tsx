@@ -20,11 +20,9 @@ interface MPProps {
     payWithPix?: boolean
     adsConfig: { adsId: string; adsLabel: string } | null
     trackingUser?: TrackingUserData
-    installments: number
-    onInstallmentsChange: (n: number) => void
 }
 
-export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shippingCost, payWithPix, adsConfig, trackingUser, installments, onInstallmentsChange }: MPProps) {
+export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shippingCost, payWithPix, adsConfig, trackingUser }: MPProps) {
     const [isReady, setIsReady] = useState(false)
     const [isProcessing, setIsProcessing] = useState(false)
     const [pendingOrderId, setPendingOrderId] = useState<string | null>(null)
@@ -163,33 +161,6 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
 
     return (
         <div>
-            {!payWithPix && (
-                <div style={{ padding: '14px 16px', background: 'var(--bg-card2)', borderRadius: 10, border: '1px solid var(--border)', marginBottom: 16 }}>
-                    <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 8, letterSpacing: '0.04em' }}>
-                        NÚMERO DE PARCELAS
-                    </label>
-                    <select
-                        value={installments}
-                        onChange={e => onInstallmentsChange(Number(e.target.value))}
-                        style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: '0.95rem', cursor: 'pointer', fontWeight: 500 }}
-                    >
-                        {Array.from({ length: 12 }, (_, i) => i + 1).map(n => {
-                            const val = Math.ceil(totalAmount / n * 100) / 100
-                            return (
-                                <option key={n} value={n}>
-                                    {n === 1 ? `1x de R$ ${val.toFixed(2).replace('.', ',')} (à vista)` : `${n}x de R$ ${val.toFixed(2).replace('.', ',')}`}
-                                </option>
-                            )
-                        })}
-                    </select>
-                    {installments > 1 && (
-                        <div style={{ marginTop: 6, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                            Parcelamento sujeito a juros conforme bandeira do cartão
-                        </div>
-                    )}
-                </div>
-            )}
-
             {isProcessing && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '40px 20px' }}>
                     <span className="spinner" />

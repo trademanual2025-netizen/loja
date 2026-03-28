@@ -20,9 +20,11 @@ interface MPProps {
     payWithPix?: boolean
     adsConfig: { adsId: string; adsLabel: string } | null
     trackingUser?: TrackingUserData
+    installments: number
+    onInstallmentsChange: (n: number) => void
 }
 
-export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shippingCost, payWithPix, adsConfig, trackingUser }: MPProps) {
+export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shippingCost, payWithPix, adsConfig, trackingUser, installments, onInstallmentsChange }: MPProps) {
     const [isReady, setIsReady] = useState(false)
     const [isProcessing, setIsProcessing] = useState(false)
     const [pendingOrderId, setPendingOrderId] = useState<string | null>(null)
@@ -42,23 +44,22 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
 
     if (!isReady) return <div className="spinner" />
 
-    const initialization = {
-        amount: totalAmount,
-    }
+    const initialization = { amount: totalAmount }
 
-    const customization = {
-        paymentMethods: {
-            creditCard: 'all',
-            debitCard: 'all',
-            ticket: 'all',        // Boleto
-            bankTransfer: 'all',  // Pix
-        },
-        visual: {
-            style: {
-                theme: 'default',
-            }
+    const customization = payWithPix
+        ? {
+            paymentMethods: { bankTransfer: 'all' },
+            visual: { style: { theme: 'default' } },
         }
-    }
+        : {
+            paymentMethods: {
+                creditCard: 'all',
+                debitCard: 'all',
+                ticket: 'all',
+                bankTransfer: 'all',
+            },
+            visual: { style: { theme: 'default' } },
+        }
 
     const onSubmit = async ({ selectedPaymentMethod, formData }: any) => {
         if (isProcessing) return
@@ -117,53 +118,16 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
         return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 {pendingStatus === 'pix' && pixData && (
-                    <div style={{
-                        padding: '24px',
-                        background: 'var(--bg-card2)',
-                        border: '1px solid var(--border)',
-                        borderRadius: 12,
-                        textAlign: 'center',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: 16,
-                    }}>
+                    <div style={{ padding: '24px', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 12, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
                         <p style={{ fontWeight: 700, fontSize: '1.1rem' }}>Pix gerado com sucesso!</p>
                         <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Escaneie o QR Code abaixo ou copie o código Pix para pagar.</p>
                         {pixData.qrCodeBase64 && (
-                            <img
-                                src={`data:image/png;base64,${pixData.qrCodeBase64}`}
-                                alt="QR Code Pix"
-                                style={{ width: 220, height: 220, borderRadius: 8, background: '#fff', padding: 8 }}
-                            />
+                            <img src={`data:image/png;base64,${pixData.qrCodeBase64}`} alt="QR Code Pix" style={{ width: 220, height: 220, borderRadius: 8, background: '#fff', padding: 8 }} />
                         )}
                         {pixData.qrCode && (
                             <div style={{ width: '100%', maxWidth: 400 }}>
-                                <textarea
-                                    readOnly
-                                    value={pixData.qrCode}
-                                    style={{
-                                        width: '100%',
-                                        padding: 10,
-                                        borderRadius: 8,
-                                        border: '1px solid var(--border)',
-                                        background: 'var(--bg-card)',
-                                        color: 'var(--text)',
-                                        fontSize: '0.75rem',
-                                        resize: 'none',
-                                        height: 60,
-                                    }}
-                                />
-                                <button
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(pixData.qrCode || '')
-                                        setPixCopied(true)
-                                        toast.success('Código Pix copiado!')
-                                        setTimeout(() => setPixCopied(false), 3000)
-                                    }}
-                                    className="btn btn-primary"
-                                    style={{ marginTop: 8, width: '100%' }}
-                                >
+                                <textarea readOnly value={pixData.qrCode} style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: '0.75rem', resize: 'none', height: 60 }} />
+                                <button onClick={() => { navigator.clipboard.writeText(pixData.qrCode || ''); setPixCopied(true); toast.success('Código Pix copiado!'); setTimeout(() => setPixCopied(false), 3000) }} className="btn btn-primary" style={{ marginTop: 8, width: '100%' }}>
                                     {pixCopied ? 'Copiado!' : 'Copiar código Pix'}
                                 </button>
                             </div>
@@ -172,48 +136,20 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
                 )}
 
                 {pendingStatus === 'boleto' && (
-                    <div style={{
-                        padding: '24px',
-                        background: 'var(--bg-card2)',
-                        border: '1px solid var(--border)',
-                        borderRadius: 12,
-                        textAlign: 'center',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: 16,
-                    }}>
+                    <div style={{ padding: '24px', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 12, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
                         <p style={{ fontWeight: 700, fontSize: '1.1rem' }}>Boleto gerado com sucesso!</p>
                         <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Clique abaixo para visualizar e pagar o boleto.</p>
-                        {boletoUrl && (
-                            <a href={boletoUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ width: '100%', maxWidth: 300 }}>
-                                Abrir Boleto
-                            </a>
-                        )}
+                        {boletoUrl && <a href={boletoUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ width: '100%', maxWidth: 300 }}>Abrir Boleto</a>}
                     </div>
                 )}
 
                 {pendingStatus === 'other' && (
-                    <div style={{
-                        padding: '20px',
-                        background: 'var(--bg-card2)',
-                        border: '1px solid var(--border)',
-                        borderRadius: 12,
-                        textAlign: 'center',
-                    }}>
+                    <div style={{ padding: '20px', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 12, textAlign: 'center' }}>
                         <p style={{ fontWeight: 700 }}>Pagamento em processamento...</p>
                     </div>
                 )}
 
-                <div style={{
-                    padding: '16px 20px',
-                    background: 'var(--bg-card2)',
-                    border: '1px solid var(--border)',
-                    borderRadius: 10,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 10,
-                }}>
+                <div style={{ padding: '16px 20px', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
                     <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                         Seu pedido foi registrado. O status será atualizado automaticamente após a confirmação do pagamento.
                     </p>
@@ -227,6 +163,33 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
 
     return (
         <div>
+            {!payWithPix && (
+                <div style={{ padding: '14px 16px', background: 'var(--bg-card2)', borderRadius: 10, border: '1px solid var(--border)', marginBottom: 16 }}>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 8, letterSpacing: '0.04em' }}>
+                        NÚMERO DE PARCELAS
+                    </label>
+                    <select
+                        value={installments}
+                        onChange={e => onInstallmentsChange(Number(e.target.value))}
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', fontSize: '0.95rem', cursor: 'pointer', fontWeight: 500 }}
+                    >
+                        {Array.from({ length: 12 }, (_, i) => i + 1).map(n => {
+                            const val = Math.ceil(totalAmount / n * 100) / 100
+                            return (
+                                <option key={n} value={n}>
+                                    {n === 1 ? `1x de R$ ${val.toFixed(2).replace('.', ',')} (à vista)` : `${n}x de R$ ${val.toFixed(2).replace('.', ',')}`}
+                                </option>
+                            )
+                        })}
+                    </select>
+                    {installments > 1 && (
+                        <div style={{ marginTop: 6, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                            Parcelamento sujeito a juros conforme bandeira do cartão
+                        </div>
+                    )}
+                </div>
+            )}
+
             {isProcessing && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '40px 20px' }}>
                     <span className="spinner" />
@@ -235,7 +198,7 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
             )}
             <div style={{ display: isProcessing ? 'none' : 'block' }}>
                 <Payment
-                    key={`mp-${totalAmount}`}
+                    key={`mp-${totalAmount}-${payWithPix}`}
                     initialization={initialization}
                     customization={customization as any}
                     onSubmit={onSubmit}

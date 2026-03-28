@@ -16,9 +16,12 @@ interface Props {
     items: any[]
     adsConfig: { adsId: string; adsLabel: string } | null
     trackingUser?: TrackingUserData
+    installments: number
+    paymentIntentId: string
+    onInstallmentsChange: (n: number) => void
 }
 
-export function StripeCheckoutForm({ orderIdStr, totalAmount, items, adsConfig, trackingUser }: Props) {
+export function StripeCheckoutForm({ orderIdStr, totalAmount, items, adsConfig, trackingUser, installments, paymentIntentId, onInstallmentsChange }: Props) {
     const stripe = useStripe()
     const elements = useElements()
     const [loading, setLoading] = useState(false)
@@ -33,7 +36,16 @@ export function StripeCheckoutForm({ orderIdStr, totalAmount, items, adsConfig, 
         setLoading(true)
         setProcessingMsg(null)
 
-        // confirmPayment: com redirect:'if_required', permanece na página para cartão/pix/boleto
+        if (installments > 1 && paymentIntentId) {
+            try {
+                await fetch('/api/checkout/stripe/update-intent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paymentIntentId, installments }),
+                })
+            } catch { }
+        }
+
         const { error, paymentIntent } = await stripe.confirmPayment({
             elements,
             redirect: 'if_required',
@@ -60,32 +72,23 @@ export function StripeCheckoutForm({ orderIdStr, totalAmount, items, adsConfig, 
 
         switch (paymentIntent.status) {
             case 'succeeded':
-                // Cartão aprovado imediatamente
                 trackPurchase()
                 clearCart()
                 router.push(`/pedido/${orderIdStr}`)
                 break
-
             case 'processing':
-                // Boleto ou Pix aguardando confirmação assíncrona
                 trackPurchase()
                 clearCart()
                 setProcessingMsg('Pagamento em processamento. Você receberá a confirmação por email.')
                 setTimeout(() => router.push(`/pedido/${orderIdStr}`), 3000)
                 break
-
             case 'requires_payment_method':
-                // Cartão recusado ou método inválido
                 toast.error('Pagamento recusado. Tente outro método de pagamento.')
                 break
-
             case 'requires_action':
-                // Stripe está pedindo ação adicional (ex: 3D Secure) - o SDK cuida disso automaticamente
                 setProcessingMsg('Complete a autenticação na janela que foi aberta.')
                 break
-
             default:
-                // Fallback: qualquer outro status → redirecionar para ver o pedido
                 clearCart()
                 router.push(`/pedido/${orderIdStr}`)
         }
@@ -93,28 +96,49 @@ export function StripeCheckoutForm({ orderIdStr, totalAmount, items, adsConfig, 
         setLoading(false)
     }
 
+    const installmentValue = Math.ceil(totalAmount / installments * 100) / 100
+
     return (
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {/* PaymentElement exibe automaticamente os métodos habilitados no Dashboard:
-                Cartão de Crédito/Débito (com parcelamento se configurado), Pix, Boleto */}
+            <div style={{ padding: '14px 16px', background: 'var(--bg-card2)', borderRadius: 10, border: '1px solid var(--border)' }}>
+                <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 8, letterSpacing: '0.04em' }}>
+                    NÚMERO DE PARCELAS
+                </label>
+                <select
+                    value={installments}
+                    onChange={e => onInstallmentsChange(Number(e.target.value))}
+                    style={{
+                        width: '100%', padding: '10px 12px', borderRadius: 8,
+                        border: '1px solid var(--border)', background: 'var(--bg-card)',
+                        color: 'var(--text)', fontSize: '0.95rem', cursor: 'pointer',
+                        fontWeight: 500,
+                    }}
+                >
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map(n => {
+                        const val = Math.ceil(totalAmount / n * 100) / 100
+                        return (
+                            <option key={n} value={n}>
+                                {n === 1
+                                    ? `1x de R$ ${val.toFixed(2).replace('.', ',')} (à vista)`
+                                    : `${n}x de R$ ${val.toFixed(2).replace('.', ',')}`
+                                }
+                            </option>
+                        )
+                    })}
+                </select>
+                {installments > 1 && (
+                    <div style={{ marginTop: 6, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                        Total: R$ {totalAmount.toFixed(2).replace('.', ',')} · Juros conforme bandeira do cartão
+                    </div>
+                )}
+            </div>
+
             <div style={{ padding: 16, background: 'var(--bg-card)', borderRadius: 10, border: '1px solid var(--border)' }}>
-                <PaymentElement options={{
-                    layout: 'tabs',
-                    defaultValues: {
-                        billingDetails: {}
-                    }
-                }} />
+                <PaymentElement options={{ layout: 'tabs', defaultValues: { billingDetails: {} } }} />
             </div>
 
             {processingMsg && (
-                <div style={{
-                    padding: '12px 16px',
-                    background: 'var(--bg-card2)',
-                    borderRadius: 8,
-                    border: '1px solid var(--border)',
-                    fontSize: '0.88rem',
-                    color: 'var(--text-muted)',
-                }}>
+                <div style={{ padding: '12px 16px', background: 'var(--bg-card2)', borderRadius: 8, border: '1px solid var(--border)', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
                     ⏳ {processingMsg}
                 </div>
             )}
@@ -122,7 +146,7 @@ export function StripeCheckoutForm({ orderIdStr, totalAmount, items, adsConfig, 
             <button className="btn btn-primary" disabled={!stripe || loading || !!processingMsg} style={{ width: '100%' }}>
                 {loading
                     ? <span className="spinner" />
-                    : `🔒 Pagar R$ ${totalAmount.toFixed(2).replace('.', ',')}`
+                    : `🔒 Pagar ${installments > 1 ? `${installments}x de R$ ${installmentValue.toFixed(2).replace('.', ',')}` : `R$ ${totalAmount.toFixed(2).replace('.', ',')}`}`
                 }
             </button>
 

@@ -166,6 +166,7 @@ export default function CheckoutPage() {
     const [locationDetecting, setLocationDetecting] = useState(true)
     const [pixDiscount, setPixDiscount] = useState(false)
     const [isDark, setIsDark] = useState(false)
+    const [installments, setInstallments] = useState(1)
     const lastPostalLookedUp = useRef('')
     const addressForm = useForm<AddressForm>()
 
@@ -435,8 +436,12 @@ export default function CheckoutPage() {
 
     function togglePixDiscount(enabled: boolean) {
         setPixDiscount(enabled)
-        if (paymentGateway === 'stripe' && step === 'payment' && !clientSecret) {
-            initStripeIntent(enabled)
+        if (enabled) {
+            setPaymentGateway('mp')
+            setClientSecret('')
+            setStripeOrderId('')
+        } else if (paymentGateway === 'stripe' && step === 'payment' && !clientSecret) {
+            initStripeIntent(false)
         }
     }
 
@@ -744,7 +749,7 @@ export default function CheckoutPage() {
                     )}
 
                     {/* Gateway Selector */}
-                    {configs?.mp_public_key && configs?.stripe_public_key && (gatewayMode === 'manual' || !gatewayMode) && (
+                    {!pixDiscount && configs?.mp_public_key && configs?.stripe_public_key && (gatewayMode === 'manual' || !gatewayMode) && (
                         <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
                             <button className={`btn ${paymentGateway === 'mp' ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: 1 }} onClick={() => setPaymentGateway('mp')}>
                                 Mercado Pago
@@ -771,6 +776,8 @@ export default function CheckoutPage() {
                             payWithPix={pixDiscount}
                             adsConfig={adsConfig}
                             trackingUser={trackingUser}
+                            installments={installments}
+                            onInstallmentsChange={setInstallments}
                         />
                     )}
 
@@ -812,6 +819,9 @@ export default function CheckoutPage() {
                                 items={items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity, variantId: i.variantId }))}
                                 adsConfig={adsConfig}
                                 trackingUser={trackingUser}
+                                installments={installments}
+                                paymentIntentId={clientSecret ? clientSecret.split('_secret_')[0] : ''}
+                                onInstallmentsChange={setInstallments}
                             />
                         </Elements>
                     )}

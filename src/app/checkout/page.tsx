@@ -165,6 +165,7 @@ export default function CheckoutPage() {
     const [selectedCountry, setSelectedCountry] = useState<string>('BR')
     const [locationDetecting, setLocationDetecting] = useState(true)
     const [pixDiscount, setPixDiscount] = useState(false)
+    const [isDark, setIsDark] = useState(false)
     const lastPostalLookedUp = useRef('')
     const addressForm = useForm<AddressForm>()
 
@@ -183,6 +184,12 @@ export default function CheckoutPage() {
 
     useEffect(() => {
         setMounted(true)
+        setIsDark(document.documentElement.getAttribute('data-theme') === 'dark')
+        const themeObserver = new MutationObserver(() => {
+            setIsDark(document.documentElement.getAttribute('data-theme') === 'dark')
+        })
+        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+
         const saved = Cookies.get('NEXT_LOCALE') as Locale
         if (saved && dictionaries[saved]) setLocale(saved)
 
@@ -246,6 +253,7 @@ export default function CheckoutPage() {
                 }
             })
         }).catch(() => { setLocationDetecting(false) })
+        return () => themeObserver.disconnect()
     }, [])
 
     function handleCountryChange(code: string) {
@@ -768,7 +776,31 @@ export default function CheckoutPage() {
 
                     {/* Stripe Render */}
                     {paymentGateway === 'stripe' && clientSecret && stripePromise && (
-                        <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
+                        <Elements stripe={stripePromise} options={{
+                            clientSecret,
+                            appearance: isDark ? {
+                                theme: 'night',
+                                variables: {
+                                    colorPrimary: '#5b5ef4',
+                                    colorBackground: '#0f0f1a',
+                                    colorText: '#e8e8f5',
+                                    colorTextSecondary: '#a0a0c0',
+                                    colorTextPlaceholder: '#7878a0',
+                                    colorInputBackground: '#17172a',
+                                    colorInputText: '#e8e8f5',
+                                    colorInputBorder: '#252538',
+                                    colorInputPlaceholder: '#7878a0',
+                                    colorDanger: '#f87171',
+                                    borderRadius: '8px',
+                                },
+                            } : {
+                                theme: 'stripe',
+                                variables: {
+                                    colorPrimary: '#5b5ef4',
+                                    borderRadius: '8px',
+                                },
+                            },
+                        }}>
                             <StripeCheckoutForm
                                 orderIdStr={stripeOrderId}
                                 totalAmount={total() + shipping.value}

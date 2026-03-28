@@ -59,7 +59,12 @@ export async function POST(req: NextRequest) {
             metadata: { userId: session.id },
             ...(pixApplies
                 ? { payment_method_types: ['pix'] }
-                : { automatic_payment_methods: { enabled: true } }
+                : {
+                    automatic_payment_methods: { enabled: true },
+                    payment_method_options: {
+                        card: { installments: { enabled: true } },
+                    },
+                }
             ),
         })
 

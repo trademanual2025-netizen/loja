@@ -108,6 +108,39 @@ export async function POST(req: NextRequest) {
         }
     }
 
+    if (event.type === 'payment_intent.canceled') {
+        const pi = event.data.object as Stripe.PaymentIntent
+        const order = await prisma.order.findFirst({
+            where: { gatewayId: pi.id },
+            include: { items: true },
+        })
+        if (order && order.status === 'PENDING') {
+            let existingGw: Record<string, unknown> = {}
+            try { if (order.gatewayData) existingGw = JSON.parse(order.gatewayData) } catch {}
+
+            const stockReserved = existingGw.stockReserved === true
+
+            await prisma.order.update({
+                where: { id: order.id },
+                data: {
+                    status: 'CANCELLED',
+                    gatewayData: JSON.stringify({
+                        ...existingGw,
+                        lastWebhookStatus: 'canceled',
+                        lastWebhookAt: new Date().toISOString(),
+                        statusDetail: pi.cancellation_reason || 'canceled',
+                    }),
+                },
+            })
+
+            if (stockReserved) {
+                increaseStock(order.items).catch((err) => { console.error('[Stripe Webhook] Erro restaurar estoque (canceled):', err) })
+            }
+
+            console.log(`[Stripe Webhook] Pedido ${order.id} cancelado: ${pi.cancellation_reason || 'canceled'}`)
+        }
+    }
+
     if (event.type === 'charge.refunded') {
         const charge = event.data.object as Stripe.Charge
         const piId = typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent?.id

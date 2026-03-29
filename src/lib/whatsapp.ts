@@ -76,7 +76,7 @@ export async function triggerWhatsApp(trigger: WATrigger, ctx: WATriggerContext)
         })
         if (!templates.length) return
 
-        const storeUrl = process.env.NEXT_PUBLIC_STORE_URL || 'https://loja-eta-nine.vercel.app'
+        const storeUrl = process.env.NEXT_PUBLIC_STORE_URL || 'https://giovanadiasjewelry.com.br'
 
         for (const tpl of templates) {
             const vars: Record<string, string | undefined> = {
@@ -192,13 +192,13 @@ export const DEFAULT_TEMPLATES = [
         name: 'Boas-vindas – novo cadastro',
         trigger: WA_TRIGGERS.NEW_LEAD,
         delayMinutes: 0,
-        message: `Olá, *{{nome}}*! 💛\n\nSeja muito bem-vinda à *Giovana Dias – Joias Autorais*! ✨\n\nÉ um prazer ter você aqui. Cada peça da nossa coleção é criada com dedicação e amor, pensada para realçar a sua beleza.\n\n🛍️ Explore nossa loja e encontre sua próxima joia favorita:\n👉 https://loja-eta-nine.vercel.app/loja\n\nQualquer dúvida, é só chamar! 😊\n\n_Giovana Dias – Joias Autorais_`,
+        message: `Olá, *{{nome}}*! 💛\n\nSeja muito bem-vinda à *Giovana Dias – Joias Autorais*! ✨\n\nÉ um prazer ter você aqui. Cada peça da nossa coleção é criada com dedicação e amor, pensada para realçar a sua beleza.\n\n🛍️ Explore nossa loja e encontre sua próxima joia favorita:\n👉 https://giovanadiasjewelry.com.br/loja\n\nQualquer dúvida, é só chamar! 😊\n\n_Giovana Dias – Joias Autorais_`,
     },
     {
         name: 'Lembrete de carrinho (30 min após cadastro)',
         trigger: WA_TRIGGERS.NEW_LEAD,
         delayMinutes: 30,
-        message: `Oi, *{{nome}}*! 😊\n\nNotei que você ainda não finalizou sua compra. Sua joia está esperando por você! 💎\n\nNão perca os itens que você escolheu:\n👉 https://loja-eta-nine.vercel.app/carrinho\n\nSe tiver qualquer dúvida sobre tamanho, material ou prazo de entrega, é só responder aqui. Estou à disposição! 💛\n\n_Giovana Dias – Joias Autorais_`,
+        message: `Oi, *{{nome}}*! 😊\n\nNotei que você ainda não finalizou sua compra. Sua joia está esperando por você! 💎\n\nNão perca os itens que você escolheu:\n👉 https://giovanadiasjewelry.com.br/carrinho\n\nSe tiver qualquer dúvida sobre tamanho, material ou prazo de entrega, é só responder aqui. Estou à disposição! 💛\n\n_Giovana Dias – Joias Autorais_`,
     },
     {
         name: 'Reembolso aprovado',

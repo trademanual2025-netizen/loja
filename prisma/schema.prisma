@@ -117,6 +117,23 @@ model ProductVariant {
   orderItems OrderItem[]
 }
 
+model Coupon {
+  id            String    @id @default(cuid())
+  code          String    @unique
+  type          String    @default("percentage")
+  value         Float
+  scope         String    @default("all")
+  categoryIds   String?
+  productIds    String?
+  maxUses       Int?
+  usedCount     Int       @default(0)
+  expiresAt     DateTime?
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  orders        Order[]
+}
+
 model Order {
   id              String      @id @default(cuid())
   userId          String
@@ -129,6 +146,9 @@ model Order {
   discount        Float       @default(0)
   shippingCost    Float       @default(0)
   total           Float
+  couponId        String?
+  coupon          Coupon?     @relation(fields: [couponId], references: [id])
+  couponCode      String?
   // Endereço de entrega (snapshot no momento da compra)
   country         String   @default("BR")
   zipCode         String

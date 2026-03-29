@@ -12,12 +12,41 @@ export async function POST(req: NextRequest) {
     const secretKey = await getSetting(SETTINGS_KEYS.STRIPE_SECRET_KEY)
     if (!secretKey) return NextResponse.json({ error: 'Stripe não configurado.' }, { status: 400 })
 
-    const { items, shippingCost, address, payWithPix } = await req.json()
+    const { items, shippingCost, address, payWithPix, couponCode: clientCouponCode } = await req.json()
 
     const user = await prisma.user.findUnique({ where: { id: session.id } })
     if (!user) return NextResponse.json({ error: 'Usuário não encontrado.' }, { status: 404 })
 
     const subtotal = items.reduce((s: number, i: { price: number; quantity: number }) => s + i.price * i.quantity, 0)
+
+    let validatedCouponId: string | null = null
+    let validatedCouponCode: string | null = null
+    let couponDiscountAmount = 0
+    if (clientCouponCode) {
+        const coupon = await prisma.coupon.findUnique({ where: { code: String(clientCouponCode).toUpperCase().trim() } })
+        if (coupon && coupon.active && (!coupon.expiresAt || new Date() <= coupon.expiresAt) && (!coupon.maxUses || coupon.usedCount < coupon.maxUses)) {
+            let eligibleItems = items
+            if (coupon.scope === 'products' && coupon.productIds) {
+                const ids = coupon.productIds.split(',').map((s: string) => s.trim()).filter(Boolean)
+                if (ids.length > 0) eligibleItems = items.filter((i: any) => ids.includes(i.id))
+            } else if (coupon.scope === 'categories' && coupon.categoryIds) {
+                const cats = coupon.categoryIds.split(',').map((s: string) => s.trim()).filter(Boolean)
+                if (cats.length > 0) {
+                    const prods = await prisma.product.findMany({ where: { categoryId: { in: cats } }, select: { id: true } })
+                    const pSet = new Set(prods.map((p: any) => p.id))
+                    eligibleItems = items.filter((i: any) => pSet.has(i.id))
+                }
+            }
+            if (eligibleItems.length > 0) {
+                const eligibleSub = eligibleItems.reduce((s: number, i: any) => s + i.price * i.quantity, 0)
+                couponDiscountAmount = coupon.type === 'percentage'
+                    ? Math.round(eligibleSub * (coupon.value / 100) * 100) / 100
+                    : Math.min(coupon.value, eligibleSub)
+                validatedCouponId = coupon.id
+                validatedCouponCode = coupon.code
+            }
+        }
+    }
 
     const pixEnabled = await getSetting(SETTINGS_KEYS.PIX_DISCOUNT_ENABLED)
     const pixRateStr = await getSetting(SETTINGS_KEYS.PIX_DISCOUNT_RATE)
@@ -34,8 +63,8 @@ export async function POST(req: NextRequest) {
             pixApplies = true
         }
     }
-    const discountAmount = pixApplies ? Math.round((subtotal + shippingCost) * pixRate * 100) / 100 : 0
-    const total = subtotal + shippingCost - discountAmount
+    const discountAmount = pixApplies ? Math.round((subtotal + shippingCost - couponDiscountAmount) * pixRate * 100) / 100 : 0
+    const total = Math.max(0, Math.round((subtotal + shippingCost - couponDiscountAmount - discountAmount) * 100) / 100)
 
     // Reservar estoque antes de criar o pagamento
     const stockItems = items.map((i: { id: string; quantity: number; variantId?: string }) => ({
@@ -82,9 +111,10 @@ export async function POST(req: NextRequest) {
                 gatewayData: JSON.stringify(gwData),
                 status: 'PENDING',
                 subtotal,
-                discount: discountAmount,
+                discount: discountAmount + couponDiscountAmount,
                 shippingCost,
                 total,
+                ...(validatedCouponId ? { couponId: validatedCouponId, couponCode: validatedCouponCode || '' } : {}),
                 ...address,
                 items: {
                     create: items.map((i: { id: string; price: number; quantity: number; variantId?: string }) => ({

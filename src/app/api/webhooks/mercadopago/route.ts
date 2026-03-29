@@ -112,12 +112,13 @@ export async function POST(req: NextRequest) {
             include: { user: true, items: { include: { product: true } } },
         }) as any
 
-        if (newStatus === 'PAID') {
-            // Estoque já foi reservado no checkout — só dispara webhook de comprador
+        if (newStatus === 'PAID' && order.status !== 'PAID') {
             if (!stockReserved) {
-                // Pedido antigo (sem reserva) — decrementa agora para compatibilidade
                 const { decreaseStock } = await import('@/lib/inventory')
                 decreaseStock(updated.items).catch((err: Error) => { console.error('[MP Webhook] Erro estoque:', err) })
+            }
+            if (updated.couponId) {
+                prisma.coupon.update({ where: { id: updated.couponId }, data: { usedCount: { increment: 1 } } }).catch((err: Error) => { console.error('[MP Webhook] Erro coupon usedCount:', err) })
             }
             dispatchBuyerWebhook(updated).catch((err: Error) => { console.error('[MP Webhook] Erro webhook:', err) })
             if (updated.user?.phone) {

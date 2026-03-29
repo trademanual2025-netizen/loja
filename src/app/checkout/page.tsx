@@ -170,6 +170,11 @@ export default function CheckoutPage() {
     const [locationDetecting, setLocationDetecting] = useState(true)
     const [pixDiscount, setPixDiscount] = useState(false)
     const [isDark, setIsDark] = useState(false)
+    const [couponCode, setCouponCode] = useState('')
+    const [couponData, setCouponData] = useState<{ couponId: string; code: string; discount: number; type: string; value: number } | null>(null)
+    const [couponLoading, setCouponLoading] = useState(false)
+    const [couponError, setCouponError] = useState('')
+    const [hasCoupons, setHasCoupons] = useState(false)
     const [installments, setInstallments] = useState(1)
     const lastPostalLookedUp = useRef('')
     const addressForm = useForm<AddressForm>()
@@ -232,6 +237,8 @@ export default function CheckoutPage() {
                 gtagBeginCheckout(total(), items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })))
             }
         })
+
+        fetch('/api/coupons/active').then(r => r.json()).then(d => setHasCoupons(d.hasActive)).catch(() => {})
 
         fetch('/api/admin/settings').then(r => r.json()).then(s => {
             setConfigs(s)
@@ -431,6 +438,7 @@ export default function CheckoutPage() {
                     address,
                     shippingCost: shipping.value,
                     payWithPix: withPixDiscount,
+                    couponCode: couponData?.code,
                 }),
             })
             const json = await res.json()
@@ -692,26 +700,93 @@ export default function CheckoutPage() {
                             <span>{dict.checkout.shipping} ({shipping.label})</span>
                             <span>{shipping.value === 0 ? dict.checkout.freeShipping : `R$ ${shipping.value.toFixed(2).replace('.', ',')}`}</span>
                         </div>
+                        {couponData && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#a855f7', marginBottom: 8, fontWeight: 600 }}>
+                                <span>Cupom {couponData.code} ({couponData.type === 'percentage' ? `${couponData.value}%` : `R$ ${couponData.value.toFixed(2).replace('.', ',')}`})</span>
+                                <span>- R$ {couponData.discount.toFixed(2).replace('.', ',')}</span>
+                            </div>
+                        )}
                         {pixDiscount && pixDiscountEligible && (
                             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#22c55e', marginBottom: 8, fontWeight: 600 }}>
                                 <span>Desconto PIX ({pixDiscountRate}%)</span>
-                                <span>- R$ {(Math.round((total() + shipping.value) * (pixDiscountRate / 100) * 100) / 100).toFixed(2).replace('.', ',')}</span>
+                                <span>- R$ {(Math.round((total() + shipping.value - (couponData?.discount || 0)) * (pixDiscountRate / 100) * 100) / 100).toFixed(2).replace('.', ',')}</span>
                             </div>
                         )}
                         <hr className="divider" />
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '1.1rem' }}>
                             <span>{dict.checkout.total}</span>
                             <span style={{ color: 'var(--primary)' }}>
-                                R$ {(pixDiscount && pixDiscountEligible
-                                    ? Math.round((total() + shipping.value) * (1 - pixDiscountRate / 100) * 100) / 100
-                                    : total() + shipping.value
-                                ).toFixed(2).replace('.', ',')}
+                                R$ {(() => {
+                                    let t = total() + shipping.value - (couponData?.discount || 0)
+                                    if (pixDiscount && pixDiscountEligible) t = Math.round(t * (1 - pixDiscountRate / 100) * 100) / 100
+                                    return Math.max(0, t).toFixed(2).replace('.', ',')
+                                })()}
                             </span>
                         </div>
                         {isInternational && (
                             <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 8 }}>{dict.checkout.brlNote}</p>
                         )}
                     </div>
+
+                    {hasCoupons && (
+                        <div style={{ marginBottom: 20 }}>
+                            {couponData ? (
+                                <div style={{
+                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                    padding: '12px 16px', borderRadius: 10,
+                                    background: 'rgba(168,85,247,0.08)', border: '1.5px solid rgba(168,85,247,0.3)',
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        <span style={{ fontSize: '1.1rem' }}>🏷️</span>
+                                        <span style={{ fontWeight: 700, fontSize: '0.88rem', color: '#a855f7' }}>{couponData.code}</span>
+                                        <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                                            - R$ {couponData.discount.toFixed(2).replace('.', ',')}
+                                        </span>
+                                    </div>
+                                    <button onClick={() => { setCouponData(null); setCouponCode(''); setCouponError(''); if (paymentGateway === 'stripe' && clientSecret) { setClientSecret(''); setStripeOrderId('') } }}
+                                        style={{ padding: '4px 12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 6, cursor: 'pointer', fontSize: '0.78rem', color: '#ef4444', fontWeight: 600 }}>
+                                        Remover
+                                    </button>
+                                </div>
+                            ) : (
+                                <div>
+                                    <div style={{ display: 'flex', gap: 8 }}>
+                                        <input className="input" placeholder="Código do cupom" value={couponCode}
+                                            onChange={e => { setCouponCode(e.target.value.toUpperCase()); setCouponError('') }}
+                                            style={{ flex: 1, textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.03em' }} />
+                                        <button onClick={async () => {
+                                            if (!couponCode.trim()) return
+                                            setCouponLoading(true)
+                                            setCouponError('')
+                                            try {
+                                                const res = await fetch('/api/coupons/validate', {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({ code: couponCode, items: items.map(i => ({ id: i.id, price: i.price, quantity: i.quantity })) }),
+                                                })
+                                                const data = await res.json()
+                                                if (!res.ok) { setCouponError(data.error || 'Cupom inválido.'); return }
+                                                setCouponData(data)
+                                                if (paymentGateway === 'stripe' && clientSecret) { setClientSecret(''); setStripeOrderId('') }
+                                            } catch { setCouponError('Erro ao validar cupom.') }
+                                            finally { setCouponLoading(false) }
+                                        }} disabled={couponLoading || !couponCode.trim()}
+                                            style={{
+                                                padding: '10px 18px', borderRadius: 8, border: '1px solid var(--primary)',
+                                                background: 'rgba(99,102,241,0.1)', color: 'var(--primary)',
+                                                fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer',
+                                                opacity: couponLoading || !couponCode.trim() ? 0.5 : 1,
+                                            }}>
+                                            {couponLoading ? '...' : 'Aplicar'}
+                                        </button>
+                                    </div>
+                                    {couponError && (
+                                        <p style={{ fontSize: '0.78rem', color: '#ef4444', marginTop: 6 }}>{couponError}</p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Toggle desconto PIX — só aparece quando habilitado no admin, produtos elegíveis
                         e, no caso do Stripe, apenas antes do formulário carregar (PaymentIntent ainda não criado) */}
@@ -778,12 +853,15 @@ export default function CheckoutPage() {
                     {paymentGateway === 'mp' && configs?.mp_public_key && (
                         <MercadoPagoBrick
                             publicKey={configs.mp_public_key}
-                            totalAmount={pixDiscount && pixDiscountEligible
-                                ? Math.round((total() + shipping.value) * (1 - pixDiscountRate / 100) * 100) / 100
-                                : total() + shipping.value}
+                            totalAmount={(() => {
+                                let t = total() + shipping.value - (couponData?.discount || 0)
+                                if (pixDiscount && pixDiscountEligible) t = Math.round(t * (1 - pixDiscountRate / 100) * 100) / 100
+                                return Math.max(0, Math.round(t * 100) / 100)
+                            })()}
                             items={items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity, variantId: i.variantId }))}
                             address={address}
                             shippingCost={shipping.value}
+                            couponCode={couponData?.code}
                             payWithPix={pixDiscount}
                             adsConfig={adsConfig}
                             trackingUser={trackingUser}
@@ -828,7 +906,7 @@ export default function CheckoutPage() {
                         }}>
                             <StripeCheckoutForm
                                 orderIdStr={stripeOrderId}
-                                totalAmount={total() + shipping.value}
+                                totalAmount={Math.max(0, Math.round((total() + shipping.value - (couponData?.discount || 0)) * 100) / 100)}
                                 items={items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity, variantId: i.variantId }))}
                                 adsConfig={adsConfig}
                                 trackingUser={trackingUser}

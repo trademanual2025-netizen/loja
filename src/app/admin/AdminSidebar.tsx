@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
     LayoutDashboard, Package, ShoppingBag, Users, Settings,
-    Code2, Shield, Tag, LogOut, Sun, Moon, Mail, RotateCcw, ChevronRight, UserCircle, MessageSquare
+    Code2, Shield, Tag, LogOut, Sun, Moon, Mail, RotateCcw, ChevronRight, UserCircle, MessageSquare, Ticket
 } from 'lucide-react'
 import { useTheme } from '@/components/ThemeProvider'
 import { useEffect, useState } from 'react'
@@ -14,6 +14,7 @@ const navItems = [
     { href: '/admin/products', label: 'Produtos', icon: Package },
     { href: '/admin/categories', label: 'Categorias', icon: Tag },
     { href: '/admin/orders', label: 'Pedidos', icon: ShoppingBag },
+    { href: '/admin/cupons', label: 'Cupons', icon: Ticket },
     { href: '/admin/reembolsos', label: 'Reembolsos', icon: RotateCcw },
     { href: '/admin/leads', label: 'Leads', icon: Users },
     { href: '/admin/comunicacao', label: 'Comunicação', icon: MessageSquare },

@@ -54,8 +54,10 @@ export async function POST(req: NextRequest) {
             })
 
             if (!stockReserved) {
-                // Pedido antigo (sem reserva) — decrementa agora para compatibilidade
                 decreaseStock(updated.items).catch((err) => { console.error('[Stripe Webhook] Erro estoque:', err) })
+            }
+            if ((updated as any).couponId) {
+                prisma.coupon.update({ where: { id: (updated as any).couponId }, data: { usedCount: { increment: 1 } } }).catch((err) => { console.error('[Stripe Webhook] Erro coupon usedCount:', err) })
             }
             dispatchBuyerWebhook(updated as any).catch((err) => { console.error('[Stripe Webhook] Erro webhook:', err) })
             if ((updated as any).user?.phone) {

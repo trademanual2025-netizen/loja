@@ -24,6 +24,7 @@ interface MPProps {
     userCpf?: string
     userName?: string
     userZipCode?: string
+    couponCode?: string
 }
 
 type MPMethod = 'card' | 'pix' | 'boleto'
@@ -34,7 +35,7 @@ const METHOD_TABS: { key: MPMethod; label: string; icon: string }[] = [
     { key: 'boleto', label: 'Boleto', icon: '📄' },
 ]
 
-export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shippingCost, payWithPix, adsConfig, trackingUser, userEmail, userCpf, userName, userZipCode }: MPProps) {
+export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shippingCost, payWithPix, adsConfig, trackingUser, userEmail, userCpf, userName, userZipCode, couponCode }: MPProps) {
     const [isReady, setIsReady] = useState(false)
     const [isProcessing, setIsProcessing] = useState(false)
     const [mpMethod, setMpMethod] = useState<MPMethod>('card')
@@ -64,7 +65,7 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
             const res = await fetch('/api/checkout/mercadopago', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ items, address, shippingCost, formData, payWithPix: !!(payWithPix || isPix) }),
+                body: JSON.stringify({ items, address, shippingCost, formData, payWithPix: !!(payWithPix || isPix), couponCode }),
             })
             const data = await res.json()
 

@@ -25,13 +25,42 @@ export async function POST(req: NextRequest) {
     const accessToken = await getSetting(SETTINGS_KEYS.MP_ACCESS_TOKEN)
     if (!accessToken) return NextResponse.json({ error: 'Mercado Pago não configurado.' }, { status: 400 })
 
-    const { items, address, shippingCost, formData, payWithPix } = await req.json()
+    const { items, address, shippingCost, formData, payWithPix, couponCode: clientCouponCode } = await req.json()
 
     const user = await prisma.user.findUnique({ where: { id: session.id } })
     if (!user) return NextResponse.json({ error: 'Usuário não encontrado.' }, { status: 404 })
 
     const subtotal = items.reduce((s: number, i: { price: number; quantity: number }) => s + i.price * i.quantity, 0)
     const shipping = typeof shippingCost === 'number' ? shippingCost : parseFloat(shippingCost) || 0
+
+    let validatedCouponId: string | null = null
+    let validatedCouponCode: string | null = null
+    let couponDiscountAmount = 0
+    if (clientCouponCode) {
+        const coupon = await prisma.coupon.findUnique({ where: { code: String(clientCouponCode).toUpperCase().trim() } })
+        if (coupon && coupon.active && (!coupon.expiresAt || new Date() <= coupon.expiresAt) && (!coupon.maxUses || coupon.usedCount < coupon.maxUses)) {
+            let eligibleItems = items
+            if (coupon.scope === 'products' && coupon.productIds) {
+                const ids = coupon.productIds.split(',').map((s: string) => s.trim()).filter(Boolean)
+                if (ids.length > 0) eligibleItems = items.filter((i: any) => ids.includes(i.id))
+            } else if (coupon.scope === 'categories' && coupon.categoryIds) {
+                const cats = coupon.categoryIds.split(',').map((s: string) => s.trim()).filter(Boolean)
+                if (cats.length > 0) {
+                    const prods = await prisma.product.findMany({ where: { categoryId: { in: cats } }, select: { id: true } })
+                    const pSet = new Set(prods.map((p: any) => p.id))
+                    eligibleItems = items.filter((i: any) => pSet.has(i.id))
+                }
+            }
+            if (eligibleItems.length > 0) {
+                const eligibleSub = eligibleItems.reduce((s: number, i: any) => s + i.price * i.quantity, 0)
+                couponDiscountAmount = coupon.type === 'percentage'
+                    ? Math.round(eligibleSub * (coupon.value / 100) * 100) / 100
+                    : Math.min(coupon.value, eligibleSub)
+                validatedCouponId = coupon.id
+                validatedCouponCode = coupon.code
+            }
+        }
+    }
 
     const pixEnabled = await getSetting(SETTINGS_KEYS.PIX_DISCOUNT_ENABLED)
     const pixRateStr = await getSetting(SETTINGS_KEYS.PIX_DISCOUNT_RATE)
@@ -49,8 +78,8 @@ export async function POST(req: NextRequest) {
             pixApplies = true
         }
     }
-    const discountAmount = pixApplies ? Math.round((subtotal + shipping) * pixRate * 100) / 100 : 0
-    const total = Math.round((subtotal + shipping - discountAmount) * 100) / 100
+    const discountAmount = pixApplies ? Math.round((subtotal + shipping - couponDiscountAmount) * pixRate * 100) / 100 : 0
+    const total = Math.max(0, Math.round((subtotal + shipping - couponDiscountAmount - discountAmount) * 100) / 100)
 
     const recentOrder = await prisma.order.findFirst({
         where: {
@@ -134,9 +163,10 @@ export async function POST(req: NextRequest) {
                 gatewayData: JSON.stringify(gwData),
                 status: orderStatus,
                 subtotal,
-                discount: discountAmount,
+                discount: discountAmount + couponDiscountAmount,
                 shippingCost: shipping,
                 total,
+                ...(validatedCouponId ? { couponId: validatedCouponId, couponCode: validatedCouponCode || '' } : {}),
                 ...address,
                 items: {
                     create: items.map((i: { id: string; price: number; quantity: number; variantId?: string }) => ({
@@ -155,6 +185,9 @@ export async function POST(req: NextRequest) {
 
         // Estoque já decrementado — só dispara webhook de comprador
         if (order.status === 'PAID') {
+            if (validatedCouponId) {
+                prisma.coupon.update({ where: { id: validatedCouponId }, data: { usedCount: { increment: 1 } } }).catch(() => {})
+            }
             dispatchBuyerWebhook(order as any).catch(() => {})
         }
 

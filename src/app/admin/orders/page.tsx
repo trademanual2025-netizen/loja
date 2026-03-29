@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, Fragment } from 'react'
-import { Filter, Loader2, Truck, ChevronDown, ChevronUp, Check, RotateCcw } from 'lucide-react'
+import { Filter, Loader2, Truck, ChevronDown, ChevronUp, Check, RotateCcw, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 
@@ -33,6 +33,8 @@ export default function AdminOrdersPage() {
     const [loading, setLoading] = useState(true)
     const [expandedId, setExpandedId] = useState<string | null>(null)
     const [savingId, setSavingId] = useState<string | null>(null)
+    const [deletingId, setDeletingId] = useState<string | null>(null)
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
     const [trackingForms, setTrackingForms] = useState<Record<string, { trackingCode: string; trackingUrl: string; shippingNote: string; status: string }>>({})
     const LIMIT = 20
 
@@ -95,6 +97,22 @@ export default function AdminOrdersPage() {
             toast.error('Erro ao salvar informações do pedido.')
         } finally {
             setSavingId(null)
+        }
+    }
+
+    const deleteOrder = async (orderId: string) => {
+        setDeletingId(orderId)
+        try {
+            const res = await fetch(`/api/admin/orders/${orderId}`, { method: 'DELETE' })
+            if (!res.ok) throw new Error('Erro ao excluir')
+            toast.success('Pedido excluído com sucesso!')
+            setConfirmDeleteId(null)
+            setExpandedId(null)
+            fetchOrders()
+        } catch {
+            toast.error('Erro ao excluir pedido.')
+        } finally {
+            setDeletingId(null)
         }
     }
 
@@ -241,7 +259,28 @@ export default function AdminOrdersPage() {
                                                                         style={{ resize: 'vertical' }} />
                                                                 </div>
                                                             </div>
-                                                            <div style={{ marginTop: 14, display: 'flex', justifyContent: 'flex-end' }}>
+                                                            <div style={{ marginTop: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                <div>
+                                                                    {confirmDeleteId === o.id ? (
+                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                                            <span style={{ fontSize: '0.82rem', color: '#ef4444', fontWeight: 600 }}>Tem certeza? Essa ação não pode ser desfeita.</span>
+                                                                            <button onClick={() => deleteOrder(o.id)} disabled={deletingId === o.id}
+                                                                                style={{ padding: '6px 14px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                                                {deletingId === o.id ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <Trash2 size={13} />}
+                                                                                Sim, excluir
+                                                                            </button>
+                                                                            <button onClick={() => setConfirmDeleteId(null)}
+                                                                                style={{ padding: '6px 14px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                                                                Cancelar
+                                                                            </button>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <button onClick={() => setConfirmDeleteId(o.id)}
+                                                                            style={{ padding: '6px 14px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 6, cursor: 'pointer', fontSize: '0.8rem', color: '#ef4444', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                                            <Trash2 size={13} /> Excluir Pedido
+                                                                        </button>
+                                                                    )}
+                                                                </div>
                                                                 <button className="btn btn-primary" onClick={() => saveOrderTracking(o.id)} disabled={savingId === o.id}
                                                                     style={{ gap: 6 }}>
                                                                     {savingId === o.id ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={15} />}

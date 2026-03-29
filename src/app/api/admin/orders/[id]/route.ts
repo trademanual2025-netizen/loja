@@ -77,3 +77,32 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         return NextResponse.json({ error: error.message || 'Erro ao atualizar pedido' }, { status: 500 })
     }
 }
+
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    try {
+        const { id } = await params
+
+        const order = await prisma.order.findUnique({
+            where: { id },
+            select: { id: true },
+        })
+
+        if (!order) {
+            return NextResponse.json({ error: 'Pedido não encontrado' }, { status: 404 })
+        }
+
+        await prisma.$transaction([
+            prisma.refundRequest.deleteMany({ where: { orderId: id } }),
+            prisma.orderItem.deleteMany({ where: { orderId: id } }),
+            prisma.webhookLog.deleteMany({ where: { orderId: id } }),
+            prisma.whatsAppLog.deleteMany({ where: { orderId: id } }),
+            prisma.whatsAppQueue.deleteMany({ where: { orderId: id } }),
+            prisma.order.delete({ where: { id } }),
+        ])
+
+        return NextResponse.json({ ok: true })
+    } catch (error: any) {
+        console.error('Error in DELETE /api/admin/orders/[id]:', error)
+        return NextResponse.json({ error: error.message || 'Erro ao excluir pedido' }, { status: 500 })
+    }
+}

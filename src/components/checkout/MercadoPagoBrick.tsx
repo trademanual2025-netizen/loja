@@ -22,6 +22,8 @@ interface MPProps {
     trackingUser?: TrackingUserData
     userEmail?: string
     userCpf?: string
+    userName?: string
+    userZipCode?: string
 }
 
 type MPMethod = 'card' | 'pix' | 'boleto'
@@ -32,7 +34,7 @@ const METHOD_TABS: { key: MPMethod; label: string; icon: string }[] = [
     { key: 'boleto', label: 'Boleto', icon: '📄' },
 ]
 
-export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shippingCost, payWithPix, adsConfig, trackingUser, userEmail, userCpf }: MPProps) {
+export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shippingCost, payWithPix, adsConfig, trackingUser, userEmail, userCpf, userName, userZipCode }: MPProps) {
     const [isReady, setIsReady] = useState(false)
     const [isProcessing, setIsProcessing] = useState(false)
     const [mpMethod, setMpMethod] = useState<MPMethod>('card')
@@ -207,28 +209,62 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
                 })()}
 
                 {/* Pix (via aba ou toggle) */}
-                {(payWithPix || (!payWithPix && mpMethod === 'pix')) && (
-                    <Payment
-                        key={`mp-pix-${totalAmount}`}
-                        initialization={{ amount: totalAmount }}
-                        customization={{ paymentMethods: { bankTransfer: 'all' }, visual: { style: { theme: 'default' } } } as any}
-                        onSubmit={handleSubmit}
-                        onReady={async () => { }}
-                        onError={onError}
-                    />
-                )}
+                {(payWithPix || (!payWithPix && mpMethod === 'pix')) && (() => {
+                    const payerEmail = userEmail || trackingUser?.email || ''
+                    const cleanCpf = userCpf ? userCpf.replace(/\D/g, '') : ''
+                    const validCpf = cleanCpf.length === 11 ? cleanCpf : ''
+                    const nameParts = (userName || '').split(' ')
+                    const firstName = nameParts[0] || ''
+                    const lastName = nameParts.slice(1).join(' ') || ''
+                    const zipCode = (userZipCode || address?.zipCode || '').replace(/\D/g, '')
+                    return (
+                        <Payment
+                            key={`mp-pix-${totalAmount}-${payerEmail}-${validCpf}`}
+                            initialization={{
+                                amount: totalAmount,
+                                payer: {
+                                    email: payerEmail,
+                                    ...(firstName ? { firstName, lastName } : {}),
+                                    ...(validCpf ? { identification: { type: 'CPF', number: validCpf } } : {}),
+                                    ...(zipCode ? { address: { zipCode } } : {}),
+                                },
+                            }}
+                            customization={{ paymentMethods: { bankTransfer: 'all' }, visual: { style: { theme: 'default' } } } as any}
+                            onSubmit={handleSubmit}
+                            onReady={async () => { }}
+                            onError={onError}
+                        />
+                    )
+                })()}
 
                 {/* Boleto */}
-                {!payWithPix && mpMethod === 'boleto' && (
-                    <Payment
-                        key={`mp-boleto-${totalAmount}`}
-                        initialization={{ amount: totalAmount }}
-                        customization={{ paymentMethods: { ticket: 'all' }, visual: { style: { theme: 'default' } } } as any}
-                        onSubmit={handleSubmit}
-                        onReady={async () => { }}
-                        onError={onError}
-                    />
-                )}
+                {!payWithPix && mpMethod === 'boleto' && (() => {
+                    const payerEmail = userEmail || trackingUser?.email || ''
+                    const cleanCpf = userCpf ? userCpf.replace(/\D/g, '') : ''
+                    const validCpf = cleanCpf.length === 11 ? cleanCpf : ''
+                    const nameParts = (userName || '').split(' ')
+                    const firstName = nameParts[0] || ''
+                    const lastName = nameParts.slice(1).join(' ') || ''
+                    const zipCode = (userZipCode || address?.zipCode || '').replace(/\D/g, '')
+                    return (
+                        <Payment
+                            key={`mp-boleto-${totalAmount}-${payerEmail}-${validCpf}`}
+                            initialization={{
+                                amount: totalAmount,
+                                payer: {
+                                    email: payerEmail,
+                                    ...(firstName ? { firstName, lastName } : {}),
+                                    ...(validCpf ? { identification: { type: 'CPF', number: validCpf } } : {}),
+                                    ...(zipCode ? { address: { zipCode } } : {}),
+                                },
+                            }}
+                            customization={{ paymentMethods: { ticket: 'all' }, visual: { style: { theme: 'default' } } } as any}
+                            onSubmit={handleSubmit}
+                            onReady={async () => { }}
+                            onError={onError}
+                        />
+                    )
+                })()}
             </div>
         </div>
     )

@@ -155,6 +155,8 @@ export default function CheckoutPage() {
     const [trackingUser, setTrackingUser] = useState<TrackingUserData | undefined>(undefined)
     const [userEmail, setUserEmail] = useState('')
     const [userCpf, setUserCpf] = useState('')
+    const [userName, setUserName] = useState('')
+    const [userZipCode, setUserZipCode] = useState('')
     const [clientSecret, setClientSecret] = useState<string>('')
     const [stripeOrderId, setStripeOrderId] = useState<string>('')
     const [locale, setLocale] = useState<Locale>(defaultLocale)
@@ -213,6 +215,8 @@ export default function CheckoutPage() {
                 setTrackingUser(tu)
                 setUserEmail(profile.email || '')
                 setUserCpf(profile.cpf || '')
+                setUserName(profile.name || '')
+                setUserZipCode(profile.zipCode || '')
                 if (items.length > 0) {
                     fbTrackInitiateCheckout(total(), items.length, tu)
                     const gtu: GtagUserData = { email: tu.email, phone: tu.phone, firstName: tu.firstName, lastName: tu.lastName, country: 'BR' }
@@ -785,6 +789,8 @@ export default function CheckoutPage() {
                             trackingUser={trackingUser}
                             userEmail={userEmail}
                             userCpf={userCpf}
+                            userName={userName}
+                            userZipCode={userZipCode}
                         />
                     )}
 

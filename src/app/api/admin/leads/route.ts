@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
             include: {
                 user: {
                     include: {
-                        orders: { select: { id: true }, take: 1 },
+                        orders: { select: { id: true, status: true } },
                     }
                 }
             },

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Users, ShoppingBag, Loader2, Download, ChevronDown, ChevronUp, ShoppingCart, RefreshCw } from 'lucide-react'
+import { Users, ShoppingBag, Loader2, Download, ChevronDown, ChevronUp, ShoppingCart, RefreshCw, CreditCard } from 'lucide-react'
 
 interface CartItem {
     id: string
@@ -16,7 +16,7 @@ interface Lead {
     id: string
     source: string
     createdAt: string
-    user: { name: string; email: string; phone?: string; cpf?: string; orders?: { id: string }[]; cartItems?: CartItem[] }
+    user: { name: string; email: string; phone?: string; cpf?: string; orders?: { id: string; status: string }[]; cartItems?: CartItem[] }
 }
 
 const LIMIT = 20
@@ -103,7 +103,7 @@ export default function AdminLeadsPage() {
                 </div>
             </div>
 
-            <div className="grid-2" style={{ marginBottom: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 20 }}>
                 <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px' }}>
                     <div style={{ padding: 10, borderRadius: 10, background: 'rgba(168,85,247,0.15)' }}><Users size={20} color="#a855f7" /></div>
                     <div>
@@ -112,10 +112,17 @@ export default function AdminLeadsPage() {
                     </div>
                 </div>
                 <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px' }}>
+                    <div style={{ padding: 10, borderRadius: 10, background: 'rgba(251,191,36,0.15)' }}><CreditCard size={20} color="#fbbf24" /></div>
+                    <div>
+                        <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>Iniciou Checkout</p>
+                        <p style={{ fontSize: '1.5rem', fontWeight: 800 }}>{leads.filter(l => (l.user.orders?.length || 0) > 0).length}</p>
+                    </div>
+                </div>
+                <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px' }}>
                     <div style={{ padding: 10, borderRadius: 10, background: 'rgba(34,197,94,0.15)' }}><ShoppingBag size={20} color="#22c55e" /></div>
                     <div>
                         <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>Convertidos</p>
-                        <p style={{ fontSize: '1.5rem', fontWeight: 800 }}>{leads.filter(l => (l.user.orders?.length || 0) > 0).length}</p>
+                        <p style={{ fontSize: '1.5rem', fontWeight: 800 }}>{leads.filter(l => l.user.orders?.some(o => o.status === 'PAID' || o.status === 'DELIVERED')).length}</p>
                     </div>
                 </div>
             </div>
@@ -204,9 +211,11 @@ export default function AdminLeadsPage() {
                                                 )}
                                             </td>
                                             <td style={{ padding: '12px 16px', verticalAlign: 'top' }}>
-                                                {(l.user.orders?.length || 0) > 0
+                                                {l.user.orders?.some(o => o.status === 'PAID' || o.status === 'DELIVERED')
                                                     ? <span className="badge badge-green">Sim</span>
-                                                    : <span className="badge badge-yellow">Não</span>}
+                                                    : (l.user.orders?.length || 0) > 0
+                                                        ? <span className="badge badge-yellow">Checkout</span>
+                                                        : <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Não</span>}
                                             </td>
                                             <td style={{ padding: '12px 16px', color: 'var(--text-muted)', fontSize: '0.8rem', verticalAlign: 'top' }}>{new Date(l.createdAt).toLocaleDateString('pt-BR')}</td>
                                             <td style={{ padding: '12px 16px', verticalAlign: 'top' }}>

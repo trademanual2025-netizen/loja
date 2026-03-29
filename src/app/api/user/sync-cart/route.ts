@@ -2,6 +2,25 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
+async function filterValidItems(items: any[]) {
+    if (!items.length) return items
+    const productIds = [...new Set(items.map((i: any) => i.id as string))]
+    const products = await prisma.product.findMany({
+        where: { id: { in: productIds } },
+        select: {
+            id: true,
+            variants: { select: { id: true } },
+        },
+    })
+    const productMap = new Map(products.map(p => [p.id, new Set(p.variants.map(v => v.id))]))
+    return items.filter((item: any) => {
+        const product = productMap.get(item.id)
+        if (!product) return false
+        if (item.variantId && !product.has(item.variantId)) return false
+        return true
+    })
+}
+
 export async function GET() {
     const user = await getAuthUser()
     if (!user) return NextResponse.json({ items: [] })
@@ -11,7 +30,14 @@ export async function GET() {
             where: { id: user.id },
             select: { cartData: true },
         })
-        const items = dbUser?.cartData ? JSON.parse(dbUser.cartData) : []
+        const raw = dbUser?.cartData ? JSON.parse(dbUser.cartData) : []
+        const items = await filterValidItems(raw)
+
+        if (items.length !== raw.length) {
+            const cartData = items.length > 0 ? JSON.stringify(items) : null
+            await prisma.user.update({ where: { id: user.id }, data: { cartData } })
+        }
+
         return NextResponse.json({ items })
     } catch {
         return NextResponse.json({ items: [] })
@@ -24,8 +50,8 @@ export async function POST(req: NextRequest) {
 
     try {
         const { items } = await req.json()
-
-        const cartItems = Array.isArray(items) ? items : []
+        const rawItems = Array.isArray(items) ? items : []
+        const cartItems = await filterValidItems(rawItems)
 
         const cartData = cartItems.length > 0
             ? JSON.stringify(cartItems.map((i: any) => ({
@@ -70,7 +96,7 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        return NextResponse.json({ ok: true })
+        return NextResponse.json({ ok: true, filtered: cartItems.length !== rawItems.length })
     } catch {
         return NextResponse.json({ error: 'Erro ao sincronizar carrinho' }, { status: 500 })
     }

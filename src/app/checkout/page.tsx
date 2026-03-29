@@ -194,7 +194,10 @@ export default function CheckoutPage() {
         const saved = Cookies.get('NEXT_LOCALE') as Locale
         if (saved && dictionaries[saved]) setLocale(saved)
 
-        fetch('/api/user/profile').then(r => r.ok ? r.json() : null).then(profile => {
+        fetch('/api/user/profile').then(r => {
+            if (r.status === 401) { router.replace('/auth?redirect=/checkout'); return null }
+            return r.ok ? r.json() : null
+        }).then(profile => {
             if (profile) {
                 const nameParts = (profile.name || '').split(' ')
                 const tu: TrackingUserData = {

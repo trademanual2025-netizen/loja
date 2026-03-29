@@ -2,23 +2,43 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-async function filterValidItems(items: any[]) {
-    if (!items.length) return items
+async function resolveCartItems(items: any[]) {
+    if (!items.length) return { valid: [], changed: false }
     const productIds = [...new Set(items.map((i: any) => i.id as string))]
     const products = await prisma.product.findMany({
-        where: { id: { in: productIds } },
+        where: { id: { in: productIds }, active: true },
         select: {
             id: true,
-            variants: { select: { id: true } },
+            name: true,
+            price: true,
+            slug: true,
+            images: true,
+            variants: { select: { id: true, price: true } },
         },
     })
-    const productMap = new Map(products.map(p => [p.id, new Set(p.variants.map(v => v.id))]))
-    return items.filter((item: any) => {
+    const productMap = new Map(products.map(p => [p.id, p]))
+
+    let changed = false
+    const valid: any[] = []
+
+    for (const item of items) {
         const product = productMap.get(item.id)
-        if (!product) return false
-        if (item.variantId && !product.has(item.variantId)) return false
-        return true
-    })
+        if (!product) { changed = true; continue }
+
+        let currentPrice = product.price
+        if (item.variantId) {
+            const variant = product.variants.find(v => v.id === item.variantId)
+            if (!variant) { changed = true; continue }
+            if (variant.price != null) currentPrice = variant.price
+        }
+
+        if (currentPrice !== item.price) changed = true
+        const currentImage = item.image || (Array.isArray(product.images) ? product.images[0] : null) || null
+        valid.push({ ...item, price: currentPrice, image: currentImage })
+    }
+
+    if (valid.length !== items.length) changed = true
+    return { valid, changed }
 }
 
 export async function GET() {
@@ -31,14 +51,14 @@ export async function GET() {
             select: { cartData: true },
         })
         const raw = dbUser?.cartData ? JSON.parse(dbUser.cartData) : []
-        const items = await filterValidItems(raw)
+        const { valid, changed } = await resolveCartItems(raw)
 
-        if (items.length !== raw.length) {
-            const cartData = items.length > 0 ? JSON.stringify(items) : null
+        if (changed) {
+            const cartData = valid.length > 0 ? JSON.stringify(valid) : null
             await prisma.user.update({ where: { id: user.id }, data: { cartData } })
         }
 
-        return NextResponse.json({ items })
+        return NextResponse.json({ items: valid })
     } catch {
         return NextResponse.json({ items: [] })
     }
@@ -51,7 +71,7 @@ export async function POST(req: NextRequest) {
     try {
         const { items } = await req.json()
         const rawItems = Array.isArray(items) ? items : []
-        const cartItems = await filterValidItems(rawItems)
+        const { valid: cartItems } = await resolveCartItems(rawItems)
 
         const cartData = cartItems.length > 0
             ? JSON.stringify(cartItems.map((i: any) => ({

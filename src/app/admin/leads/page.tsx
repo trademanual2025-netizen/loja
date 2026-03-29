@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Users, ShoppingBag, Loader2, Download, ChevronDown, ChevronUp, ShoppingCart } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { Users, ShoppingBag, Loader2, Download, ChevronDown, ChevronUp, ShoppingCart, RefreshCw } from 'lucide-react'
 
 interface CartItem {
     id: string
@@ -19,24 +19,42 @@ interface Lead {
     user: { name: string; email: string; phone?: string; cpf?: string; orders?: { id: string }[]; cartItems?: CartItem[] }
 }
 
+const LIMIT = 20
+const REFRESH_INTERVAL = 30_000
+
 export default function AdminLeadsPage() {
     const [leads, setLeads] = useState<Lead[]>([])
     const [total, setTotal] = useState(0)
     const [page, setPage] = useState(1)
     const [loading, setLoading] = useState(true)
+    const [refreshing, setRefreshing] = useState(false)
+    const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
     const [expandedLead, setExpandedLead] = useState<string | null>(null)
-    const LIMIT = 20
+    const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-    const fetchLeads = async () => {
-        setLoading(true)
-        const res = await fetch(`/api/admin/leads?page=${page}&limit=${LIMIT}`)
-        const data = await res.json()
-        setLeads(data.leads || [])
-        setTotal(data.total || 0)
-        setLoading(false)
-    }
+    const fetchLeads = useCallback(async (silent = false) => {
+        if (!silent) setLoading(true)
+        else setRefreshing(true)
+        try {
+            const res = await fetch(`/api/admin/leads?page=${page}&limit=${LIMIT}`)
+            const data = await res.json()
+            setLeads(data.leads || [])
+            setTotal(data.total || 0)
+            setLastUpdated(new Date())
+        } finally {
+            setLoading(false)
+            setRefreshing(false)
+        }
+    }, [page])
 
-    useEffect(() => { fetchLeads() }, [page])
+    useEffect(() => {
+        fetchLeads()
+    }, [fetchLeads])
+
+    useEffect(() => {
+        timerRef.current = setInterval(() => fetchLeads(true), REFRESH_INTERVAL)
+        return () => { if (timerRef.current) clearInterval(timerRef.current) }
+    }, [fetchLeads])
 
     const pages = Math.ceil(total / LIMIT)
 
@@ -63,8 +81,26 @@ export default function AdminLeadsPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <h1 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Leads</h1>
                     <span className="badge badge-blue">{total} leads</span>
+                    {lastUpdated && (
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                            Atualizado {lastUpdated.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        </span>
+                    )}
                 </div>
-                <button className="btn btn-secondary" onClick={exportCSV} style={{ flexShrink: 0 }}><Download size={15} /> Exportar CSV</button>
+                <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                        className="btn btn-secondary"
+                        onClick={() => fetchLeads(true)}
+                        disabled={refreshing}
+                        style={{ flexShrink: 0 }}
+                    >
+                        <RefreshCw size={15} style={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }} />
+                        Atualizar
+                    </button>
+                    <button className="btn btn-secondary" onClick={exportCSV} style={{ flexShrink: 0 }}>
+                        <Download size={15} /> Exportar CSV
+                    </button>
+                </div>
             </div>
 
             <div className="grid-2" style={{ marginBottom: 20 }}>
@@ -107,6 +143,7 @@ export default function AdminLeadsPage() {
                                     const cartItems = l.user.cartItems || []
                                     const hasCart = cartItems.length > 0
                                     const isExpanded = expandedLead === l.id
+                                    const cartTotal = cartItems.reduce((s, i) => s + i.price * i.quantity, 0)
 
                                     return (
                                         <tr key={l.id} style={{ borderTop: '1px solid var(--border)', fontSize: '0.87rem' }}>
@@ -127,6 +164,7 @@ export default function AdminLeadsPage() {
                                                         >
                                                             <ShoppingCart size={13} />
                                                             {cartItems.length} {cartItems.length === 1 ? 'produto' : 'produtos'}
+                                                            {' · '}R$ {cartTotal.toFixed(2).replace('.', ',')}
                                                             {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                                                         </button>
                                                         {isExpanded && (
@@ -156,7 +194,7 @@ export default function AdminLeadsPage() {
                                                                     textAlign: 'right', fontSize: '0.78rem', fontWeight: 700,
                                                                     color: 'var(--primary)', paddingTop: 4
                                                                 }}>
-                                                                    Total: R$ {cartItems.reduce((s, i) => s + i.price * i.quantity, 0).toFixed(2).replace('.', ',')}
+                                                                    Total: R$ {cartTotal.toFixed(2).replace('.', ',')}
                                                                 </div>
                                                             </div>
                                                         )}

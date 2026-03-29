@@ -9,33 +9,38 @@ export function CartSync() {
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const skipNextUpload = useRef(false)
     const hasLoadedFromServer = useRef(false)
-    const userHasInteracted = useRef(false)
 
     useEffect(() => {
         if (hasLoadedFromServer.current) return
-        if (items.length > 0) {
-            hasLoadedFromServer.current = true
-            return
-        }
 
+        const localItems = [...items]
         let cancelled = false
+
         fetch('/api/user/sync-cart')
             .then(res => res.ok ? res.json() : null)
             .then(data => {
-                if (cancelled || !data) return
+                if (cancelled) return
                 hasLoadedFromServer.current = true
+                if (!data) return
+
                 if (Array.isArray(data.items) && data.items.length > 0) {
-                    skipNextUpload.current = true
-                    setItems(data.items.map((item: any) => ({
-                        id: item.id,
-                        name: item.name,
-                        price: item.price,
-                        quantity: item.quantity || 1,
-                        image: item.image || '',
-                        slug: item.slug || item.id,
-                        variantId: item.variantId || undefined,
-                        variantName: item.variantName || undefined,
-                    })))
+                    const serverKeys = new Set(data.items.map((i: any) => `${i.id}::${i.variantId ?? ''}`))
+                    const localOnly = localItems.filter(i => !serverKeys.has(`${i.id}::${i.variantId ?? ''}`))
+                    const merged = [
+                        ...data.items.map((item: any) => ({
+                            id: item.id,
+                            name: item.name,
+                            price: item.price,
+                            quantity: item.quantity || 1,
+                            image: item.image || '',
+                            slug: item.slug || item.id,
+                            variantId: item.variantId || undefined,
+                            variantName: item.variantName || undefined,
+                        })),
+                        ...localOnly,
+                    ]
+                    skipNextUpload.current = localOnly.length === 0
+                    setItems(merged)
                 }
             })
             .catch(() => { hasLoadedFromServer.current = true })

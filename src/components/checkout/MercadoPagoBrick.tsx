@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { initMercadoPago, Payment } from '@mercadopago/sdk-react'
+import { initMercadoPago, CardPayment, Payment } from '@mercadopago/sdk-react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/lib/cart'
@@ -22,9 +22,18 @@ interface MPProps {
     trackingUser?: TrackingUserData
 }
 
+type MPMethod = 'card' | 'pix' | 'boleto'
+
+const METHOD_TABS: { key: MPMethod; label: string; icon: string }[] = [
+    { key: 'card', label: 'Cartão de Crédito', icon: '💳' },
+    { key: 'pix', label: 'Pix', icon: '⚡' },
+    { key: 'boleto', label: 'Boleto', icon: '📄' },
+]
+
 export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shippingCost, payWithPix, adsConfig, trackingUser }: MPProps) {
     const [isReady, setIsReady] = useState(false)
     const [isProcessing, setIsProcessing] = useState(false)
+    const [mpMethod, setMpMethod] = useState<MPMethod>('card')
     const [pendingOrderId, setPendingOrderId] = useState<string | null>(null)
     const [pendingStatus, setPendingStatus] = useState<'pix' | 'boleto' | 'other' | null>(null)
     const [pixData, setPixData] = useState<{ qrCode: string | null; qrCodeBase64: string | null } | null>(null)
@@ -42,32 +51,16 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
 
     if (!isReady) return <div className="spinner" />
 
-    const initialization = { amount: totalAmount }
-
-    const customization = payWithPix
-        ? {
-            paymentMethods: { bankTransfer: 'all' },
-            visual: { style: { theme: 'default' } },
-        }
-        : {
-            paymentMethods: {
-                creditCard: 'all',
-                debitCard: 'all',
-                ticket: 'all',
-                bankTransfer: 'all',
-            },
-            visual: { style: { theme: 'default' } },
-        }
-
-    const onSubmit = async ({ selectedPaymentMethod, formData }: any) => {
+    const handleSubmit = async ({ selectedPaymentMethod, formData }: any) => {
         if (isProcessing) return
         setIsProcessing(true)
 
         try {
+            const isPix = selectedPaymentMethod === 'bank_transfer' || mpMethod === 'pix'
             const res = await fetch('/api/checkout/mercadopago', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ items, address, shippingCost, formData, payWithPix: !!payWithPix }),
+                body: JSON.stringify({ items, address, shippingCost, formData, payWithPix: !!(payWithPix || isPix) }),
             })
             const data = await res.json()
 
@@ -78,8 +71,8 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
             }
 
             const isApproved = data.status === 'approved'
-            const isPix = selectedPaymentMethod === 'bank_transfer' || data.statusDetail?.includes('pix')
-            const isBoleto = selectedPaymentMethod === 'ticket'
+            const pixDetected = selectedPaymentMethod === 'bank_transfer' || data.statusDetail?.includes('pix')
+            const boletoDetected = selectedPaymentMethod === 'ticket'
 
             if (isApproved) {
                 const productIds = items.map((i: any) => i.id)
@@ -89,13 +82,13 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
                 clearCart()
                 router.push(`/pedido/${data.orderId}`)
             } else {
-                if (isPix && (data.pixQrCode || data.pixQrCodeBase64)) {
+                if (pixDetected && (data.pixQrCode || data.pixQrCodeBase64)) {
                     setPixData({ qrCode: data.pixQrCode, qrCodeBase64: data.pixQrCodeBase64 })
                 }
-                if (isBoleto && (data.boletoUrl || data.ticketUrl)) {
+                if (boletoDetected && (data.boletoUrl || data.ticketUrl)) {
                     setBoletoUrl(data.boletoUrl || data.ticketUrl)
                 }
-                setPendingStatus(isPix ? 'pix' : isBoleto ? 'boleto' : 'other')
+                setPendingStatus(pixDetected ? 'pix' : boletoDetected ? 'boleto' : 'other')
                 setPendingOrderId(data.orderId)
                 clearCart()
             }
@@ -109,8 +102,6 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
         console.error(error)
         toast.error('Ocorreu um erro no formulário de pagamento.')
     }
-
-    const onReady = async () => { }
 
     if (pendingOrderId) {
         return (
@@ -132,7 +123,6 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
                         )}
                     </div>
                 )}
-
                 {pendingStatus === 'boleto' && (
                     <div style={{ padding: '24px', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 12, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
                         <p style={{ fontWeight: 700, fontSize: '1.1rem' }}>Boleto gerado com sucesso!</p>
@@ -140,13 +130,11 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
                         {boletoUrl && <a href={boletoUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ width: '100%', maxWidth: 300 }}>Abrir Boleto</a>}
                     </div>
                 )}
-
                 {pendingStatus === 'other' && (
                     <div style={{ padding: '20px', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 12, textAlign: 'center' }}>
                         <p style={{ fontWeight: 700 }}>Pagamento em processamento...</p>
                     </div>
                 )}
-
                 <div style={{ padding: '16px 20px', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
                     <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                         Seu pedido foi registrado. O status será atualizado automaticamente após a confirmação do pagamento.
@@ -167,15 +155,70 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Processando pagamento...</p>
                 </div>
             )}
+
             <div style={{ display: isProcessing ? 'none' : 'block' }}>
-                <Payment
-                    key={`mp-${totalAmount}-${payWithPix}`}
-                    initialization={initialization}
-                    customization={customization as any}
-                    onSubmit={onSubmit}
-                    onReady={onReady}
-                    onError={onError}
-                />
+                {/* Abas de método — só aparecem quando NÃO estamos no modo PIX-toggle */}
+                {!payWithPix && (
+                    <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                        {METHOD_TABS.map(tab => (
+                            <button
+                                key={tab.key}
+                                onClick={() => setMpMethod(tab.key)}
+                                style={{
+                                    flex: 1, padding: '10px 8px', borderRadius: 8, fontSize: '0.82rem', fontWeight: 600,
+                                    cursor: 'pointer', border: `1.5px solid ${mpMethod === tab.key ? 'var(--primary)' : 'var(--border)'}`,
+                                    background: mpMethod === tab.key ? 'rgba(91,94,244,0.1)' : 'var(--bg-card)',
+                                    color: mpMethod === tab.key ? 'var(--primary)' : 'var(--text)',
+                                    transition: 'all 0.15s',
+                                }}
+                            >
+                                <span style={{ display: 'block', fontSize: '1.1rem', marginBottom: 2 }}>{tab.icon}</span>
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
+                {/* Cartão de Crédito → CardPayment (mostra parcelas antes dos dados) */}
+                {!payWithPix && mpMethod === 'card' && (
+                    <CardPayment
+                        key={`mp-card-${totalAmount}`}
+                        initialization={{
+                            amount: totalAmount,
+                            payer: { email: address?.email || '' },
+                        }}
+                        customization={{
+                            paymentMethods: { minInstallments: 1, maxInstallments: 12 },
+                            visual: { style: { theme: 'default' } },
+                        } as any}
+                        onSubmit={handleSubmit}
+                        onError={onError}
+                    />
+                )}
+
+                {/* Pix (via aba ou toggle) */}
+                {(payWithPix || (!payWithPix && mpMethod === 'pix')) && (
+                    <Payment
+                        key={`mp-pix-${totalAmount}`}
+                        initialization={{ amount: totalAmount }}
+                        customization={{ paymentMethods: { bankTransfer: 'all' }, visual: { style: { theme: 'default' } } } as any}
+                        onSubmit={handleSubmit}
+                        onReady={async () => { }}
+                        onError={onError}
+                    />
+                )}
+
+                {/* Boleto */}
+                {!payWithPix && mpMethod === 'boleto' && (
+                    <Payment
+                        key={`mp-boleto-${totalAmount}`}
+                        initialization={{ amount: totalAmount }}
+                        customization={{ paymentMethods: { ticket: 'all' }, visual: { style: { theme: 'default' } } } as any}
+                        onSubmit={handleSubmit}
+                        onReady={async () => { }}
+                        onError={onError}
+                    />
+                )}
             </div>
         </div>
     )

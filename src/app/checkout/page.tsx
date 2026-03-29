@@ -745,10 +745,10 @@ export default function CheckoutPage() {
                         </div>
                     )}
 
-                    {/* Aviso de localização / gateway */}
-                    {gatewayMode === 'auto' && detectedCountry && (
+                    {/* Aviso de localização / gateway (só para internacional) */}
+                    {gatewayMode === 'auto' && detectedCountry && detectedCountry !== 'BR' && (
                         <div style={{ padding: '10px 14px', background: 'rgba(99,102,241,0.08)', borderRadius: 8, border: '1px solid rgba(99,102,241,0.15)', marginBottom: 16, fontSize: '0.82rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                            🌍 {detectedCountry === 'BR' ? dict.checkout.brazilDetected : dict.checkout.internationalDetected}
+                            🌍 {dict.checkout.internationalDetected}
                         </div>
                     )}
 

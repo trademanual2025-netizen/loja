@@ -28,6 +28,7 @@ export async function GET(req: NextRequest) {
             name: true,
             email: true,
             phone: true,
+            cpf: true,
             avatarUrl: true,
             zipCode: true,
             street: true,

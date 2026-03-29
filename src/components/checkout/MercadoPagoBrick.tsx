@@ -20,6 +20,8 @@ interface MPProps {
     payWithPix?: boolean
     adsConfig: { adsId: string; adsLabel: string } | null
     trackingUser?: TrackingUserData
+    userEmail?: string
+    userCpf?: string
 }
 
 type MPMethod = 'card' | 'pix' | 'boleto'
@@ -30,7 +32,7 @@ const METHOD_TABS: { key: MPMethod; label: string; icon: string }[] = [
     { key: 'boleto', label: 'Boleto', icon: '📄' },
 ]
 
-export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shippingCost, payWithPix, adsConfig, trackingUser }: MPProps) {
+export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shippingCost, payWithPix, adsConfig, trackingUser, userEmail, userCpf }: MPProps) {
     const [isReady, setIsReady] = useState(false)
     const [isProcessing, setIsProcessing] = useState(false)
     const [mpMethod, setMpMethod] = useState<MPMethod>('card')
@@ -179,22 +181,30 @@ export function MercadoPagoBrick({ publicKey, totalAmount, items, address, shipp
                     </div>
                 )}
 
-                {/* Cartão de Crédito → CardPayment (mostra parcelas antes dos dados) */}
-                {!payWithPix && mpMethod === 'card' && (
-                    <CardPayment
-                        key={`mp-card-${totalAmount}`}
-                        initialization={{
-                            amount: totalAmount,
-                            payer: { email: address?.email || '' },
-                        }}
-                        customization={{
-                            paymentMethods: { minInstallments: 1, maxInstallments: 12 },
-                            visual: { style: { theme: 'default' } },
-                        } as any}
-                        onSubmit={handleSubmit}
-                        onError={onError}
-                    />
-                )}
+                {/* Cartão de Crédito → CardPayment */}
+                {!payWithPix && mpMethod === 'card' && (() => {
+                    const payerEmail = userEmail || trackingUser?.email || ''
+                    const cleanCpf = userCpf ? userCpf.replace(/\D/g, '') : ''
+                    const validCpf = cleanCpf.length === 11 ? cleanCpf : ''
+                    return (
+                        <CardPayment
+                            key={`mp-card-${totalAmount}-${payerEmail}-${validCpf}`}
+                            initialization={{
+                                amount: totalAmount,
+                                payer: {
+                                    email: payerEmail,
+                                    ...(validCpf ? { identification: { type: 'CPF', number: validCpf } } : {}),
+                                },
+                            }}
+                            customization={{
+                                paymentMethods: { minInstallments: 1, maxInstallments: 12 },
+                                visual: { style: { theme: 'default' } },
+                            } as any}
+                            onSubmit={handleSubmit}
+                            onError={onError}
+                        />
+                    )
+                })()}
 
                 {/* Pix (via aba ou toggle) */}
                 {(payWithPix || (!payWithPix && mpMethod === 'pix')) && (

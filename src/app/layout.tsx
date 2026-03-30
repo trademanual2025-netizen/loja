@@ -27,6 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const metaDesc = settings[SETTINGS_KEYS.SEO_META_DESCRIPTION] || `Joias autênticas para pessoas autênticas. Conheça as coleções exclusivas da ${storeName}.`;
 
   return {
+    metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://giovanadiasjewelry.com.br'),
     title: {
       default: metaTitle,
       template: `%s | ${storeName}`,

@@ -198,7 +198,7 @@ export function LandingPageClient({
 
                 <section className="hero-section">
                     <div className="hero-img-wrap">
-                        <Image src={heroImage || '/hero-ring.jpg'} alt={heroTitle} fill priority style={{ objectFit: 'cover', objectPosition: 'center' }} />
+                        <Image src={heroImage || '/hero-ring.jpg'} alt={heroTitle} fill priority sizes="100vw" style={{ objectFit: 'cover', objectPosition: 'center' }} />
                     </div>
 
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(5,3,1,0.35) 0%, rgba(10,6,2,0.55) 40%, rgba(5,3,1,0.9) 100%)' }} />
@@ -303,24 +303,24 @@ export function LandingPageClient({
                                 </a>
                             </div>
 
-                            <div className="custom-banner-grid">
-                                <a className="banner-product-link" href="/produto/choker-amuleto-dente-de-javali">
-                                    <Image src="/produtos/colar-placa.png" alt="Produto" fill style={{ objectFit: 'cover', objectPosition: 'center' }} />
+                            <div className="custom-banner-grid" suppressHydrationWarning>
+                                <a className="banner-product-link" href="/produto/choker-amuleto-dente-de-javali" suppressHydrationWarning>
+                                    <Image src="/produtos/colar-placa.png" alt="Produto" fill sizes="33vw" style={{ objectFit: 'cover', objectPosition: 'center' }} />
                                 </a>
-                                <a className="banner-product-link" href="/produto/brinco-concha-expressiva-brinco-memoria-do-mar">
-                                    <Image src="/produtos/brinco-sol.png" alt="Produto" fill style={{ objectFit: 'cover', objectPosition: 'center' }} />
+                                <a className="banner-product-link" href="/produto/brinco-concha-expressiva-brinco-memoria-do-mar" suppressHydrationWarning>
+                                    <Image src="/produtos/brinco-sol.png" alt="Produto" fill sizes="33vw" style={{ objectFit: 'cover', objectPosition: 'center' }} />
                                 </a>
-                                <a className="banner-product-link" href="/produto/anel-coral">
-                                    <Image src="/produtos/anel-sementes.png" alt="Produto" fill style={{ objectFit: 'cover', objectPosition: 'center' }} />
+                                <a className="banner-product-link" href="/produto/anel-coral" suppressHydrationWarning>
+                                    <Image src="/produtos/anel-sementes.png" alt="Produto" fill sizes="33vw" style={{ objectFit: 'cover', objectPosition: 'center' }} />
                                 </a>
-                                <a className="banner-product-link" href="/produto/anel-quadrado-textura-coral-anel-falesia">
-                                    <Image src="/produtos/anel-martelado.png" alt="Produto" fill style={{ objectFit: 'cover', objectPosition: 'center top' }} />
+                                <a className="banner-product-link" href="/produto/anel-quadrado-textura-coral-anel-falesia" suppressHydrationWarning>
+                                    <Image src="/produtos/anel-martelado.png" alt="Produto" fill sizes="33vw" style={{ objectFit: 'cover', objectPosition: 'center top' }} />
                                 </a>
-                                <a className="banner-product-link" href="/produto/brinco-coral-com-rubi-cravado-brinco-jardim-silencioso">
-                                    <Image src="/produtos/brinco-coral.png" alt="Produto" fill style={{ objectFit: 'cover', objectPosition: 'center' }} />
+                                <a className="banner-product-link" href="/produto/brinco-coral-com-rubi-cravado-brinco-jardim-silencioso" suppressHydrationWarning>
+                                    <Image src="/produtos/brinco-coral.png" alt="Produto" fill sizes="33vw" style={{ objectFit: 'cover', objectPosition: 'center' }} />
                                 </a>
-                                <a className="banner-product-link" href="/produto/colar-amuleto-dente-de-crocodilo">
-                                    <Image src="/produtos/colar-dente.png" alt="Produto" fill style={{ objectFit: 'cover', objectPosition: 'center' }} />
+                                <a className="banner-product-link" href="/produto/colar-amuleto-dente-de-crocodilo" suppressHydrationWarning>
+                                    <Image src="/produtos/colar-dente.png" alt="Produto" fill sizes="33vw" style={{ objectFit: 'cover', objectPosition: 'center' }} />
                                 </a>
                             </div>
                         </div>

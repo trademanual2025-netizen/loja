@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
-  allowedDevOrigins: ["*.replit.dev", "*.repl.co", "*.picard.replit.dev"],
+  allowedDevOrigins: ["*.replit.dev", "*.repl.co", "*.picard.replit.dev", "*.kirk.replit.dev"],
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,

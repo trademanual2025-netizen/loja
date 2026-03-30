@@ -50,6 +50,7 @@ Giovana Dias Joias is an e-commerce platform for handmade jewelry, built with Ne
 - **Performance**: Aggregated database queries, caching strategies for frequently accessed data (e.g., user status, settings), and parallelized API calls. Connection pooling for PostgreSQL.
 - **Banner Images**: Landing page banner grid uses CSS `background-image` on `<a>` elements (not `<Image fill>`) to avoid a React 19 + Next.js 16 + Turbopack hydration mismatch caused by `fetchPriority` attribute discrepancy. Each banner link has `aria-label` for accessibility.
 - **Cache Headers**: `/_next/static/*` immutable caching only applied in `NODE_ENV=production` (not dev) to prevent stale JS bundles in the Replit preview proxy.
+- **Image Storage**: Product, variant, and settings images are stored on Backblaze B2 (`giovana-dias-imagens` bucket, public). Upload route (`/api/admin/upload`) sends to B2 via native API, with base64 fallback if B2 credentials are missing. B2 env vars: `B2_KEY_ID`, `B2_APP_KEY`, `B2_BUCKET_NAME`, `B2_ENDPOINT`, `B2_REGION`. Public download URL: `https://f005.backblazeb2.com/file/giovana-dias-imagens/...`.
 - **Error Handling**: Global error boundary (`src/app/error.tsx`).
 - **Webhook Field Mapping**: Customizable webhook payload fields for integration with external tools.
 - **Product Variants**: Support for individual images per product variant, enhancing product display.

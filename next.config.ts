@@ -27,6 +27,11 @@ const nextConfig: NextConfig = {
         hostname: 'giovanadiasjewelry.com.br',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'f005.backblazeb2.com',
+        pathname: '/file/giovana-dias-imagens/**',
+      },
     ],
   },
   async headers() {

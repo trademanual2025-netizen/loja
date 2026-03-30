@@ -136,6 +136,7 @@ export default async function RootLayout({
   const websiteJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
+    '@id': `${baseUrl}/#website`,
     name: storeName,
     url: baseUrl,
     potentialAction: {

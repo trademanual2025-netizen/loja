@@ -70,6 +70,15 @@ export default async function RingSizePage() {
 
     const storeName = storeSettings[SETTINGS_KEYS.STORE_NAME] || 'Giovana Dias'
     const logoUrl = storeSettings[SETTINGS_KEYS.STORE_LOGO] || null
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://giovanadiasjewelry.com.br'
+    const breadcrumbJsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            { '@type': 'ListItem', position: 1, name: dict.nav.home, item: baseUrl },
+            { '@type': 'ListItem', position: 2, name: dict.ringsize.pageTitle, item: `${baseUrl}/ringsize` },
+        ],
+    }
 
     const steps = [
         { step: '01', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(200,160,80,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C8.5 2 7 4.5 7 7v6l-2 2v2h14v-2l-2-2V7c0-2.5-1.5-5-5-5z" /><circle cx="12" cy="20" r="2" /></svg>, title: r.step1Title, desc: r.step1Desc },
@@ -80,6 +89,7 @@ export default async function RingSizePage() {
 
     return (
         <>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
             <StoreHeader storeName={storeName} logoUrl={logoUrl} user={user} dict={dict} />
 
             <main style={{ background: 'var(--bg)', minHeight: '100vh', paddingBottom: 80 }}>

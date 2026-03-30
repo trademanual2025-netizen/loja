@@ -58,9 +58,19 @@ export default async function ContatoPage() {
     const whatsappLink = whatsapp ? `https://wa.me/${whatsapp.replace(/\D/g, '')}` : null
 
     const features = [c.feat1, c.feat2, c.feat3, c.feat4]
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://giovanadiasjewelry.com.br'
+    const breadcrumbJsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            { '@type': 'ListItem', position: 1, name: dict.nav.home, item: baseUrl },
+            { '@type': 'ListItem', position: 2, name: dict.nav.contact, item: `${baseUrl}/contato` },
+        ],
+    }
 
     return (
         <>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
             <StoreHeader storeName={storeName} logoUrl={logoUrl} user={user} dict={dict} />
 
             <main style={{ background: 'var(--bg)', minHeight: '100vh', paddingBottom: 80 }}>

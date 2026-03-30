@@ -56,9 +56,19 @@ export default async function NossaMarcaPage() {
 
     const storeName = storeSettings[SETTINGS_KEYS.STORE_NAME] || 'Velour'
     const logoUrl = storeSettings[SETTINGS_KEYS.STORE_LOGO] || null
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://giovanadiasjewelry.com.br'
+    const breadcrumbJsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            { '@type': 'ListItem', position: 1, name: dict.nav.home, item: baseUrl },
+            { '@type': 'ListItem', position: 2, name: dict.nav.ourBrand, item: `${baseUrl}/nossamarca` },
+        ],
+    }
 
     return (
         <>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
             <StoreHeader storeName={storeName} logoUrl={logoUrl} user={user} dict={dict} />
 
             <style>{`

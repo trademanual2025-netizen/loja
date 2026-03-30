@@ -180,13 +180,11 @@ export function LandingPageClient({
                 }
                 .banner-product-link {
                     overflow: hidden; position: relative; display: block; cursor: pointer;
+                    background-size: cover;
+                    transition: background-size 0.5s ease;
                 }
-                .banner-product-link img {
-                    width: 100%; height: 100%; object-fit: cover; display: block;
-                    transition: transform 0.5s;
-                }
-                .banner-product-link:hover img {
-                    transform: scale(1.08);
+                .banner-product-link:hover {
+                    background-size: 108%;
                 }
                 @media (max-width: 1024px) {
                     .custom-banner { flex-direction: column; border-radius: 12px; }
@@ -303,25 +301,13 @@ export function LandingPageClient({
                                 </a>
                             </div>
 
-                            <div className="custom-banner-grid" suppressHydrationWarning>
-                                <a className="banner-product-link" href="/produto/choker-amuleto-dente-de-javali" suppressHydrationWarning>
-                                    <Image src="/produtos/colar-placa.png" alt="Produto" fill sizes="33vw" style={{ objectFit: 'cover', objectPosition: 'center' }} />
-                                </a>
-                                <a className="banner-product-link" href="/produto/brinco-concha-expressiva-brinco-memoria-do-mar" suppressHydrationWarning>
-                                    <Image src="/produtos/brinco-sol.png" alt="Produto" fill sizes="33vw" style={{ objectFit: 'cover', objectPosition: 'center' }} />
-                                </a>
-                                <a className="banner-product-link" href="/produto/anel-coral" suppressHydrationWarning>
-                                    <Image src="/produtos/anel-sementes.png" alt="Produto" fill sizes="33vw" style={{ objectFit: 'cover', objectPosition: 'center' }} />
-                                </a>
-                                <a className="banner-product-link" href="/produto/anel-quadrado-textura-coral-anel-falesia" suppressHydrationWarning>
-                                    <Image src="/produtos/anel-martelado.png" alt="Produto" fill sizes="33vw" style={{ objectFit: 'cover', objectPosition: 'center top' }} />
-                                </a>
-                                <a className="banner-product-link" href="/produto/brinco-coral-com-rubi-cravado-brinco-jardim-silencioso" suppressHydrationWarning>
-                                    <Image src="/produtos/brinco-coral.png" alt="Produto" fill sizes="33vw" style={{ objectFit: 'cover', objectPosition: 'center' }} />
-                                </a>
-                                <a className="banner-product-link" href="/produto/colar-amuleto-dente-de-crocodilo" suppressHydrationWarning>
-                                    <Image src="/produtos/colar-dente.png" alt="Produto" fill sizes="33vw" style={{ objectFit: 'cover', objectPosition: 'center' }} />
-                                </a>
+                            <div className="custom-banner-grid">
+                                <a className="banner-product-link" href="/produto/choker-amuleto-dente-de-javali" style={{ backgroundImage: 'url(/produtos/colar-placa.png)', backgroundSize: 'cover', backgroundPosition: 'center' }} aria-label="Ver produto: Choker Amuleto Dente de Javali" />
+                                <a className="banner-product-link" href="/produto/brinco-concha-expressiva-brinco-memoria-do-mar" style={{ backgroundImage: 'url(/produtos/brinco-sol.png)', backgroundSize: 'cover', backgroundPosition: 'center' }} aria-label="Ver produto: Brinco Memória do Mar" />
+                                <a className="banner-product-link" href="/produto/anel-coral" style={{ backgroundImage: 'url(/produtos/anel-sementes.png)', backgroundSize: 'cover', backgroundPosition: 'center' }} aria-label="Ver produto: Anel Coral" />
+                                <a className="banner-product-link" href="/produto/anel-quadrado-textura-coral-anel-falesia" style={{ backgroundImage: 'url(/produtos/anel-martelado.png)', backgroundSize: 'cover', backgroundPosition: 'center top' }} aria-label="Ver produto: Anel Falésia" />
+                                <a className="banner-product-link" href="/produto/brinco-coral-com-rubi-cravado-brinco-jardim-silencioso" style={{ backgroundImage: 'url(/produtos/brinco-coral.png)', backgroundSize: 'cover', backgroundPosition: 'center' }} aria-label="Ver produto: Brinco Jardim Silencioso" />
+                                <a className="banner-product-link" href="/produto/colar-amuleto-dente-de-crocodilo" style={{ backgroundImage: 'url(/produtos/colar-dente.png)', backgroundSize: 'cover', backgroundPosition: 'center' }} aria-label="Ver produto: Colar Amuleto Dente de Crocodilo" />
                             </div>
                         </div>
                     </section>

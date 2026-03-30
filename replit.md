@@ -48,6 +48,8 @@ Giovana Dias Joias is an e-commerce platform for handmade jewelry, built with Ne
 - **Light/Dark Mode**: CSS variables defined in `globals.css` for both `[data-theme='light']` and `[data-theme='dark']`. Theme state is managed by `ThemeProvider` (localStorage + `data-theme` attribute on `<html>`). Footer and landing page use theme-aware variables (`--footer-heading`, `--footer-accent`, `--landing-bg`, `--landing-text`). Toaster uses `ThemedToaster` wrapper for dynamic theme support.
 - **Security**: Robust authentication with JWTs and bcrypt, HMAC signature verification for webhooks, and secure handling of environment variables.
 - **Performance**: Aggregated database queries, caching strategies for frequently accessed data (e.g., user status, settings), and parallelized API calls. Connection pooling for PostgreSQL.
+- **Banner Images**: Landing page banner grid uses CSS `background-image` on `<a>` elements (not `<Image fill>`) to avoid a React 19 + Next.js 16 + Turbopack hydration mismatch caused by `fetchPriority` attribute discrepancy. Each banner link has `aria-label` for accessibility.
+- **Cache Headers**: `/_next/static/*` immutable caching only applied in `NODE_ENV=production` (not dev) to prevent stale JS bundles in the Replit preview proxy.
 - **Error Handling**: Global error boundary (`src/app/error.tsx`).
 - **Webhook Field Mapping**: Customizable webhook payload fields for integration with external tools.
 - **Product Variants**: Support for individual images per product variant, enhancing product display.

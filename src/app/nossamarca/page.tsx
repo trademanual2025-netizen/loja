@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { getSettings, SETTINGS_KEYS } from '@/lib/config'
 import { getAuthUser } from '@/lib/auth'
 import { StoreHeader } from '@/components/store/StoreHeader'
@@ -272,14 +273,14 @@ export default async function NossaMarcaPage() {
                     </div>
 
                     <div className="marca-hero-right">
-                        <img src="/marca-giovana.jpg" alt="Giovana Dias" />
+                        <Image src="/marca-giovana.jpg" alt="Giovana Dias" fill style={{ objectFit: 'contain', objectPosition: 'center bottom' }} />
                     </div>
                 </section>
 
                 {/* ── ABOUT ── */}
                 <section className="marca-about">
                     <div className="marca-about-img">
-                        <img src="/marca-joias.jpg" alt="Joias autorais Giovana Dias" />
+                        <Image src="/marca-joias.jpg" alt="Joias autorais Giovana Dias" fill style={{ objectFit: 'cover', objectPosition: 'center 35%' }} />
                     </div>
                     <div className="marca-about-text">
                         <div style={{

@@ -79,6 +79,11 @@ model Product {
   options      ProductOption[]
   variants     ProductVariant[]
   reservations StockReservation[]
+
+  @@index([active])
+  @@index([categoryId])
+  @@index([price])
+  @@index([createdAt])
 }
 
 model StockReservation {
@@ -92,6 +97,7 @@ model StockReservation {
   createdAt DateTime @default(now())
 
   @@unique([userId, productId, variantId])
+  @@index([expiresAt])
 }
 
 model ProductOption {
@@ -169,6 +175,10 @@ model Order {
   items         OrderItem[]
   webhookLogs   WebhookLog[]
   refundRequest RefundRequest?
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model RefundRequest {
@@ -218,6 +228,9 @@ model OrderItem {
   variant   ProductVariant?  @relation(fields: [variantId], references: [id])
   quantity  Int
   price     Float
+
+  @@index([orderId])
+  @@index([productId])
 }
 
 model Lead {

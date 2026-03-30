@@ -10,13 +10,21 @@ import { gtagBeginCheckout } from '@/components/tracking/GoogleAds'
 import type { TrackingUserData } from '@/lib/tracking'
 import type { GtagUserData } from '@/components/tracking/GoogleAds'
 import { MapPin, CreditCard, Truck, Globe } from 'lucide-react'
-import { MercadoPagoBrick } from '@/components/checkout/MercadoPagoBrick'
-import { StripeCheckoutForm } from '@/components/checkout/StripeCheckoutForm'
+import dynamic from 'next/dynamic'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 import Cookies from 'js-cookie'
 import { COUNTRIES, getCountry, type Country } from '@/lib/countries'
 import { dictionaries, Locale, defaultLocale } from '@/lib/i18n'
+
+const MercadoPagoBrick = dynamic(
+    () => import('@/components/checkout/MercadoPagoBrick').then(m => m.MercadoPagoBrick),
+    { ssr: false }
+)
+const StripeCheckoutForm = dynamic(
+    () => import('@/components/checkout/StripeCheckoutForm').then(m => m.StripeCheckoutForm),
+    { ssr: false }
+)
 
 function getCepState(cep: string): string | null {
     const prefix = parseInt(cep.substring(0, 3), 10)

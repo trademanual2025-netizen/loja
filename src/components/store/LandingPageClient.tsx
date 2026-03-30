@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Instagram, ChevronRight } from 'lucide-react'
 import { Dictionary } from '@/lib/i18n'
 import { StoreHeader } from '@/components/store/StoreHeader'
@@ -197,7 +198,7 @@ export function LandingPageClient({
 
                 <section className="hero-section">
                     <div className="hero-img-wrap">
-                        <img src={heroImage || '/hero-ring.jpg'} alt={heroTitle} />
+                        <Image src={heroImage || '/hero-ring.jpg'} alt={heroTitle} fill priority style={{ objectFit: 'cover', objectPosition: 'center' }} />
                     </div>
 
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(5,3,1,0.35) 0%, rgba(10,6,2,0.55) 40%, rgba(5,3,1,0.9) 100%)' }} />
@@ -304,22 +305,22 @@ export function LandingPageClient({
 
                             <div className="custom-banner-grid">
                                 <a className="banner-product-link" href="/produto/choker-amuleto-dente-de-javali">
-                                    <img src="/produtos/colar-placa.png" alt="Produto" style={{ objectPosition: 'center' }} />
+                                    <Image src="/produtos/colar-placa.png" alt="Produto" fill style={{ objectFit: 'cover', objectPosition: 'center' }} />
                                 </a>
                                 <a className="banner-product-link" href="/produto/brinco-concha-expressiva-brinco-memoria-do-mar">
-                                    <img src="/produtos/brinco-sol.png" alt="Produto" style={{ objectPosition: 'center' }} />
+                                    <Image src="/produtos/brinco-sol.png" alt="Produto" fill style={{ objectFit: 'cover', objectPosition: 'center' }} />
                                 </a>
                                 <a className="banner-product-link" href="/produto/anel-coral">
-                                    <img src="/produtos/anel-sementes.png" alt="Produto" style={{ objectPosition: 'center' }} />
+                                    <Image src="/produtos/anel-sementes.png" alt="Produto" fill style={{ objectFit: 'cover', objectPosition: 'center' }} />
                                 </a>
                                 <a className="banner-product-link" href="/produto/anel-quadrado-textura-coral-anel-falesia">
-                                    <img src="/produtos/anel-martelado.png" alt="Produto" style={{ objectPosition: 'center top' }} />
+                                    <Image src="/produtos/anel-martelado.png" alt="Produto" fill style={{ objectFit: 'cover', objectPosition: 'center top' }} />
                                 </a>
                                 <a className="banner-product-link" href="/produto/brinco-coral-com-rubi-cravado-brinco-jardim-silencioso">
-                                    <img src="/produtos/brinco-coral.png" alt="Produto" style={{ objectPosition: 'center' }} />
+                                    <Image src="/produtos/brinco-coral.png" alt="Produto" fill style={{ objectFit: 'cover', objectPosition: 'center' }} />
                                 </a>
                                 <a className="banner-product-link" href="/produto/colar-amuleto-dente-de-crocodilo">
-                                    <img src="/produtos/colar-dente.png" alt="Produto" style={{ objectPosition: 'center' }} />
+                                    <Image src="/produtos/colar-dente.png" alt="Produto" fill style={{ objectFit: 'cover', objectPosition: 'center' }} />
                                 </a>
                             </div>
                         </div>
@@ -401,7 +402,7 @@ export function LandingPageClient({
 
                     <div style={{ borderTop: '1px solid var(--border)', paddingTop: 24, textAlign: 'center' }}>
                         {logoUrl && (
-                            <img src={logoUrl} alt={storeName} className="store-logo-img" style={{ height: 40, margin: '0 auto 16px', opacity: 0.7, display: 'block' }} />
+                            <Image src={logoUrl} alt={storeName} width={0} height={0} className="store-logo-img" unoptimized style={{ height: 40, width: 'auto', margin: '0 auto 16px', opacity: 0.7, display: 'block' }} />
                         )}
                         <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
                             &copy; {new Date().getFullYear()} {storeName}. {dict.footer?.rights}

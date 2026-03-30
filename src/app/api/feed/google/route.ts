@@ -60,7 +60,7 @@ export async function GET() {
         const desc = esc(stripHtml(product.description || product.name).substring(0, 5000))
         const additionalImages = product.images
             .slice(1, 10)
-            .map(img => `      <g:additional_image_link>${img}</g:additional_image_link>`)
+            .map(img => `      <g:additional_image_link>${esc(img)}</g:additional_image_link>`)
             .join('\n')
         const catName = product.category?.name
         const gCat = googleCategory(catName)
@@ -79,8 +79,8 @@ export async function GET() {
       <g:item_group_id>${product.slug}</g:item_group_id>
       <g:title>${esc(product.name)} — ${esc(variant.name)}</g:title>
       <g:description>${desc}</g:description>
-      <g:link>${link}</g:link>
-      <g:image_link>${variantImage}</g:image_link>
+      <g:link>${esc(link)}</g:link>
+      <g:image_link>${esc(variantImage)}</g:image_link>
 ${additionalImages}
       <g:availability>${variant.stock > 0 ? 'in stock' : 'out of stock'}</g:availability>
       <g:price>${displayPrice} BRL</g:price>
@@ -104,8 +104,8 @@ ${variant.sku ? `      <g:mpn>${esc(variant.sku)}</g:mpn>` : ''}
       <g:id>${product.slug}</g:id>
       <g:title>${esc(product.name)}</g:title>
       <g:description>${desc}</g:description>
-      <g:link>${link}</g:link>
-      <g:image_link>${firstImage}</g:image_link>
+      <g:link>${esc(link)}</g:link>
+      <g:image_link>${esc(firstImage)}</g:image_link>
 ${additionalImages}
       <g:availability>${availability}</g:availability>
       <g:price>${displayPrice} BRL</g:price>

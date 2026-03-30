@@ -11,9 +11,23 @@ export async function generateMetadata() {
     const localeCookie = cookieStore.get('NEXT_LOCALE')?.value as Locale
     const currentLocale = (localeCookie && dictionaries[localeCookie]) ? localeCookie : defaultLocale
     const dict = dictionaries[currentLocale]
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://giovanadiasjewelry.com.br'
+
     return {
         title: dict.contactPage.title,
         description: dict.contactPage.subtitle,
+        alternates: { canonical: `${baseUrl}/contato` },
+        openGraph: {
+            title: dict.contactPage.title,
+            description: dict.contactPage.subtitle,
+            type: 'website',
+            url: `${baseUrl}/contato`,
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: dict.contactPage.title,
+            description: dict.contactPage.subtitle,
+        },
     }
 }
 

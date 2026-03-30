@@ -32,15 +32,20 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const plainDesc = desc ? desc.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ').replace(/\s+/g, ' ').trim() : ''
     const description = plainDesc ? plainDesc.substring(0, 160) : `${name} — Joia artesanal exclusiva por Giovana Dias.`
     const image = product.images[0] || undefined
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://giovanadiasjewelry.com.br'
 
     return {
         title,
         description,
+        alternates: {
+            canonical: `${baseUrl}/produto/${slug}`,
+        },
         openGraph: {
             title,
             description,
             type: 'website',
-            ...(image ? { images: [{ url: image }] } : {}),
+            url: `${baseUrl}/produto/${slug}`,
+            ...(image ? { images: [{ url: image, width: 1200, height: 630, alt: name }] } : {}),
         },
         twitter: {
             card: 'summary_large_image',
@@ -124,27 +129,54 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     const productName = currentLocale === 'en' ? (product.nameEn || product.name) : currentLocale === 'es' ? (product.nameEs || product.name) : product.name
     const productDescription = currentLocale === 'en' ? (product.descriptionEn || product.description || '') : currentLocale === 'es' ? (product.descriptionEs || product.description || '') : (product.description || '')
 
+    const productUrl = `${baseUrl}/produto/${product.slug}`
+    const hasVariants = product.variants && product.variants.length > 0
+    const inStock = hasVariants
+        ? product.variants.some(v => v.stock > 0)
+        : product.stock > 0
+
+    const variantOffers = hasVariants
+        ? product.variants.map(v => ({
+            '@type': 'Offer',
+            name: v.name,
+            url: productUrl,
+            priceCurrency: 'BRL',
+            price: Number(v.price || product.price).toFixed(2),
+            availability: v.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            itemCondition: 'https://schema.org/NewCondition',
+            seller: { '@type': 'Organization', name: storeName },
+        }))
+        : null
+
     const productJsonLd = {
         '@context': 'https://schema.org',
         '@type': 'Product',
+        '@id': productUrl,
         name: productName,
-        description: productDescription.replace(/<[^>]*>/g, '').substring(0, 500),
+        description: productDescription.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().substring(0, 500),
         image: product.images.length > 0 ? product.images : undefined,
         sku: product.slug,
         brand: {
             '@type': 'Brand',
             name: storeName,
         },
-        offers: {
+        offers: hasVariants && variantOffers ? {
+            '@type': 'AggregateOffer',
+            url: productUrl,
+            priceCurrency: 'BRL',
+            lowPrice: Math.min(...product.variants.map(v => Number(v.price || product.price))).toFixed(2),
+            highPrice: Math.max(...product.variants.map(v => Number(v.price || product.price))).toFixed(2),
+            offerCount: product.variants.length,
+            availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            offers: variantOffers,
+        } : {
             '@type': 'Offer',
-            url: `${baseUrl}/produto/${product.slug}`,
+            url: productUrl,
             priceCurrency: 'BRL',
             price: Number(product.price).toFixed(2),
-            availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-            seller: {
-                '@type': 'Organization',
-                name: storeName,
-            },
+            availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            itemCondition: 'https://schema.org/NewCondition',
+            seller: { '@type': 'Organization', name: storeName },
         },
     }
 

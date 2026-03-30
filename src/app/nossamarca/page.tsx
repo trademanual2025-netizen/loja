@@ -22,10 +22,23 @@ export async function generateMetadata() {
         es: 'Conoce la historia de Giovana Dias y la esencia detrás de cada joya artesanal.',
     }
 
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://giovanadiasjewelry.com.br'
+
     return {
         title: titles[currentLocale],
         description: descriptions[currentLocale],
-        openGraph: { title: titles[currentLocale], description: descriptions[currentLocale] },
+        alternates: { canonical: `${baseUrl}/nossamarca` },
+        openGraph: {
+            title: titles[currentLocale],
+            description: descriptions[currentLocale],
+            type: 'website',
+            url: `${baseUrl}/nossamarca`,
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: titles[currentLocale],
+            description: descriptions[currentLocale],
+        },
     }
 }
 

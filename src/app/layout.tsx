@@ -65,6 +65,8 @@ async function getLayoutSettings() {
             SETTINGS_KEYS.SEO_META_TITLE,
             SETTINGS_KEYS.SEO_META_DESCRIPTION,
             SETTINGS_KEYS.SEO_OG_IMAGE,
+            SETTINGS_KEYS.LANDING_INSTAGRAM,
+            SETTINGS_KEYS.LANDING_WHATSAPP,
           ],
         },
       },
@@ -111,16 +113,24 @@ export default async function RootLayout({
   const metaTitle = settings[SETTINGS_KEYS.SEO_META_TITLE] || `${storeName} — Joias Artesanais`;
   const metaDesc = settings[SETTINGS_KEYS.SEO_META_DESCRIPTION] || `Joias autênticas para pessoas autênticas. Conheça as coleções exclusivas da ${storeName}.`;
   const ogImage = settings[SETTINGS_KEYS.SEO_OG_IMAGE] || "";
+  const instagram = settings[SETTINGS_KEYS.LANDING_INSTAGRAM] || "";
+  const whatsapp = settings[SETTINGS_KEYS.LANDING_WHATSAPP] || "";
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://giovanadiasjewelry.com.br');
+
+  const sameAs: string[] = [];
+  if (instagram) sameAs.push(instagram.startsWith('http') ? instagram : `https://www.instagram.com/${instagram.replace(/^@/, '')}`);
 
   const organizationJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
+    '@id': `${baseUrl}/#organization`,
     name: storeName,
     url: baseUrl,
-    ...(logoUrl ? { logo: logoUrl } : {}),
+    ...(logoUrl ? { logo: { '@type': 'ImageObject', url: logoUrl } } : {}),
     ...(ogImage ? { image: ogImage } : {}),
+    ...(sameAs.length > 0 ? { sameAs } : {}),
+    ...(whatsapp ? { contactPoint: [{ '@type': 'ContactPoint', telephone: whatsapp, contactType: 'customer service', availableLanguage: 'Portuguese' }] } : {}),
   };
 
   const websiteJsonLd = {

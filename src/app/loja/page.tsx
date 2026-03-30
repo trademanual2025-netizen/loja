@@ -24,10 +24,23 @@ export async function generateMetadata(): Promise<Metadata> {
         es: 'Explora nuestra colección exclusiva de joyas artesanales hechas a mano por Giovana Dias.',
     }
 
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://giovanadiasjewelry.com.br'
+
     return {
         title: titles[currentLocale],
         description: descriptions[currentLocale],
-        openGraph: { title: titles[currentLocale], description: descriptions[currentLocale] },
+        alternates: { canonical: `${baseUrl}/loja` },
+        openGraph: {
+            title: titles[currentLocale],
+            description: descriptions[currentLocale],
+            type: 'website',
+            url: `${baseUrl}/loja`,
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: titles[currentLocale],
+            description: descriptions[currentLocale],
+        },
     }
 }
 

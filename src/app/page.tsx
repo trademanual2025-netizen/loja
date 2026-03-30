@@ -25,15 +25,20 @@ export async function generateMetadata(): Promise<Metadata> {
     }
     const description = seoSettings[SETTINGS_KEYS.SEO_META_DESCRIPTION] || defaultDescs[currentLocale]
     const ogImage = seoSettings[SETTINGS_KEYS.SEO_OG_IMAGE] || undefined
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://giovanadiasjewelry.com.br'
 
     return {
         title: { absolute: title },
         description,
+        alternates: {
+            canonical: baseUrl,
+        },
         openGraph: {
             title,
             description,
             type: 'website',
-            ...(ogImage ? { images: [{ url: ogImage }] } : {}),
+            url: baseUrl,
+            ...(ogImage ? { images: [{ url: ogImage, width: 1200, height: 630 }] } : {}),
         },
         twitter: {
             card: 'summary_large_image',

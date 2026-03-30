@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { getCookie } from 'cookies-next'
 import { useState, useEffect } from 'react'
 import { dictionaries, Locale, defaultLocale, translateDb } from '@/lib/i18n'
+import { isExternalUrl } from '@/lib/image-utils'
 
 export default function CarrinhoPage() {
     const { items, removeItem, updateQuantity, total } = useCart()
@@ -57,7 +58,7 @@ export default function CarrinhoPage() {
                     {items.map((item) => (
                         <div key={`${item.id}-${item.variantId || 'base'}`} className="card cart-item" style={{ display: 'flex', gap: 16, padding: 16, alignItems: 'center' }}>
                             <div style={{ width: 80, height: 80, background: 'var(--bg-card2)', borderRadius: 8, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
-                                {item.image ? <Image src={item.image} alt={item.name} fill sizes="80px" style={{ objectFit: 'cover' }} /> : null}
+                                {item.image ? <Image src={item.image} alt={item.name} fill sizes="80px" style={{ objectFit: 'cover' }} unoptimized={isExternalUrl(item.image)} /> : null}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                                 <p style={{ fontWeight: 600, marginBottom: 4 }}>{translateDb(item.name, locale)}</p>

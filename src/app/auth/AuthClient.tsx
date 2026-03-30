@@ -8,6 +8,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getCookie } from 'cookies-next'
 import { dictionaries, Locale, defaultLocale } from '@/lib/i18n'
+import { isExternalUrl } from '@/lib/image-utils'
 import { Suspense } from 'react'
 
 type Mode = 'login' | 'register'
@@ -74,7 +75,7 @@ function AuthContent({ logoUrl }: { logoUrl?: string }) {
             <div className="card fade-in" style={{ width: '100%', maxWidth: 440 }}>
                 {logoUrl && (
                     <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                        <Image src={logoUrl} alt="Logo da loja" width={160} height={60} style={{ objectFit: 'contain', maxHeight: 60 }} />
+                        <Image src={logoUrl} alt="Logo da loja" width={160} height={60} style={{ objectFit: 'contain', maxHeight: 60 }} unoptimized={isExternalUrl(logoUrl)} />
                     </div>
                 )}
 

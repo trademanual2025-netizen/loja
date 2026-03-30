@@ -9,6 +9,7 @@ import Image from 'next/image'
 import Cookies from 'js-cookie'
 import { triggerCartNotification } from './CartNotification'
 import { dictionaries, Locale, defaultLocale } from '@/lib/i18n'
+import { isExternalUrl } from '@/lib/image-utils'
 
 interface ProductOption { name: string; values: string[] }
 interface ProductVariant { id: string; name: string; price: number | null; stock: number; sku: string | null; image: string | null }
@@ -106,7 +107,7 @@ export function ProductPageClient({ product, dict, relatedProducts = [], install
                 <div style={{ position: 'relative', aspectRatio: '1', background: 'var(--bg-card)', borderRadius: 12, overflow: 'hidden', marginBottom: 12 }}>
                     {allImages.length > 0 ? (
                         <>
-                            <Image src={allImages[mainImage] || allImages[0]} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" style={{ objectFit: 'cover' }} priority />
+                            <Image src={allImages[mainImage] || allImages[0]} alt={product.name} fill sizes="(max-width: 768px) 100vw, 50vw" style={{ objectFit: 'cover' }} priority unoptimized={isExternalUrl(allImages[mainImage] || allImages[0])} />
                             {allImages.length > 1 && (
                                 <>
                                     <button onClick={() => setMainImage((p) => (p - 1 + allImages.length) % allImages.length)}
@@ -129,7 +130,7 @@ export function ProductPageClient({ product, dict, relatedProducts = [], install
                         {allImages.map((img, i) => (
                             <button key={i} onClick={() => setMainImage(i)}
                                 style={{ width: 70, height: 70, borderRadius: 8, overflow: 'hidden', border: `2px solid ${i === mainImage ? 'var(--primary)' : 'var(--border)'}`, flexShrink: 0, cursor: 'pointer', padding: 0, position: 'relative', background: 'var(--bg-card2)' }}>
-                                <Image src={img} alt="" fill sizes="70px" style={{ objectFit: 'cover' }} />
+                                <Image src={img} alt="" fill sizes="70px" style={{ objectFit: 'cover' }} unoptimized={isExternalUrl(img)} />
                             </button>
                         ))}
                     </div>
@@ -219,7 +220,7 @@ export function ProductPageClient({ product, dict, relatedProducts = [], install
                                     >
                                         <div className="related-card-image" style={{ position: 'relative', width: '100%', paddingBottom: '100%', overflow: 'hidden', background: 'var(--bg-card2)' }}>
                                             {rp.image ? (
-                                                <Image src={rp.image} alt={rp.name} fill sizes="(max-width: 768px) 50vw, 25vw" style={{ objectFit: 'cover' }} />
+                                                <Image src={rp.image} alt={rp.name} fill sizes="(max-width: 768px) 50vw, 25vw" style={{ objectFit: 'cover' }} unoptimized={isExternalUrl(rp.image)} />
                                             ) : (
                                                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>{dict.noImage}</div>
                                             )}

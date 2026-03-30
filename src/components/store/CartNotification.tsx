@@ -5,6 +5,7 @@ import { ShoppingBag, X, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useCart } from '@/lib/cart'
+import { isExternalUrl } from '@/lib/image-utils'
 
 interface CartNotificationItem {
     name: string
@@ -58,7 +59,7 @@ export function CartNotification() {
                 <div className="cart-notification-product">
                     {item.image && (
                         <div className="cart-notification-img">
-                            <Image src={item.image} alt={item.name} fill sizes="48px" style={{ objectFit: 'cover' }} />
+                            <Image src={item.image} alt={item.name} fill sizes="48px" style={{ objectFit: 'cover' }} unoptimized={isExternalUrl(item.image)} />
                         </div>
                     )}
                     <div style={{ flex: 1, minWidth: 0 }}>

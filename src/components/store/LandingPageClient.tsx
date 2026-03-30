@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Instagram, ChevronRight } from 'lucide-react'
 import { Dictionary } from '@/lib/i18n'
+import { isExternalUrl } from '@/lib/image-utils'
 import { StoreHeader } from '@/components/store/StoreHeader'
 
 interface Props {
@@ -196,7 +197,7 @@ export function LandingPageClient({
 
                 <section className="hero-section">
                     <div className="hero-img-wrap">
-                        <Image src={heroImage || '/hero-ring.jpg'} alt={heroTitle} fill priority sizes="100vw" style={{ objectFit: 'cover', objectPosition: 'center' }} />
+                        <Image src={heroImage || '/hero-ring.jpg'} alt={heroTitle} fill priority sizes="100vw" style={{ objectFit: 'cover', objectPosition: 'center' }} unoptimized={isExternalUrl(heroImage || '/hero-ring.jpg')} />
                     </div>
 
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(5,3,1,0.35) 0%, rgba(10,6,2,0.55) 40%, rgba(5,3,1,0.9) 100%)' }} />

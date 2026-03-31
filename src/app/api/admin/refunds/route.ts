@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyAdminToken, unauthorizedResponse } from '@/lib/admin-auth'
+import { requirePermission, forbiddenResponse } from '@/lib/admin-auth'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(req: NextRequest) {
-    const admin = await verifyAdminToken(req)
-    if (!admin) return unauthorizedResponse()
+    const perm = await requirePermission(req, 'reembolsos')
+    if (!perm) return forbiddenResponse()
 
     const refunds = await prisma.refundRequest.findMany({
         orderBy: { createdAt: 'desc' },

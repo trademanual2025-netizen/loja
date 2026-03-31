@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { autoTranslateProduct } from '@/lib/translate'
+import { requirePermission, forbiddenResponse } from '@/lib/admin-auth'
 
-// GET /api/admin/products/[id]
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const perm = await requirePermission(req, 'products')
+    if (!perm) return forbiddenResponse()
     try {
         const { id } = await params
         const product = await prisma.product.findUnique({
@@ -31,8 +33,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     }
 }
 
-// PATCH /api/admin/products/[id]
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const perm = await requirePermission(req, 'products')
+    if (!perm) return forbiddenResponse()
     try {
         const { id } = await params
         const body = await req.json()
@@ -140,8 +143,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 }
 
-// DELETE /api/admin/products/[id]
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const perm = await requirePermission(req, 'products')
+    if (!perm) return forbiddenResponse()
     const { id } = await params
     await prisma.product.delete({ where: { id } })
     return NextResponse.json({ ok: true })

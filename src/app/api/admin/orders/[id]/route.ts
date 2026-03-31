@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { increaseStock } from '@/lib/inventory'
 import { triggerWhatsApp, WA_TRIGGERS } from '@/lib/whatsapp'
+import { requirePermission, forbiddenResponse } from '@/lib/admin-auth'
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const perm = await requirePermission(req, 'orders')
+    if (!perm) return forbiddenResponse()
     try {
         const { id } = await params
         const body = await req.json()
@@ -78,7 +81,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const perm = await requirePermission(req, 'orders')
+    if (!perm) return forbiddenResponse()
     try {
         const { id } = await params
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getAdminEmailFromRequest, unauthorizedResponse } from '@/lib/admin-auth'
+import { getAdminEmailFromRequest, unauthorizedResponse, ALL_MODULES } from '@/lib/admin-auth'
 import bcrypt from 'bcryptjs'
 
 export async function GET(req: NextRequest) {
@@ -8,10 +8,13 @@ export async function GET(req: NextRequest) {
     if (!email) return unauthorizedResponse()
     const admin = await prisma.adminUser.findUnique({
         where: { email },
-        select: { id: true, name: true, email: true, avatarUrl: true },
+        select: { id: true, name: true, email: true, avatarUrl: true, role: true, permissions: true },
     })
     if (!admin) return unauthorizedResponse()
-    return NextResponse.json(admin)
+    return NextResponse.json({
+        ...admin,
+        permissions: admin.role === 'superadmin' ? [...ALL_MODULES] : admin.permissions,
+    })
 }
 
 export async function PATCH(req: NextRequest) {
@@ -47,7 +50,7 @@ export async function PATCH(req: NextRequest) {
     const updated = await prisma.adminUser.update({
         where: { id: admin.id },
         data,
-        select: { id: true, name: true, email: true, avatarUrl: true },
+        select: { id: true, name: true, email: true, avatarUrl: true, role: true, permissions: true },
     })
     return NextResponse.json(updated)
 }

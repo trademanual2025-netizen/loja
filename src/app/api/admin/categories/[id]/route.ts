@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { autoTranslateCategory } from '@/lib/translate'
+import { requirePermission, forbiddenResponse } from '@/lib/admin-auth'
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const perm = await requirePermission(req, 'categories')
+    if (!perm) return forbiddenResponse()
     const { id } = await params
     const { name, slug } = await req.json()
     if (!name) return NextResponse.json({ error: 'Nome é obrigatório.' }, { status: 400 })
@@ -31,7 +34,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const perm = await requirePermission(req, 'categories')
+    if (!perm) return forbiddenResponse()
     const { id } = await params
     await prisma.product.updateMany({ where: { categoryId: id }, data: { categoryId: null } })
     await prisma.category.delete({ where: { id } })

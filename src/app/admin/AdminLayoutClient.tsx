@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 import { AdminSidebar } from './AdminSidebar'
+import { AdminGuard } from './AdminGuard'
 import { useState, useEffect, useRef } from 'react'
 import { Menu, X, LogOut, User, Settings, ChevronDown } from 'lucide-react'
 import { ThemeProvider } from '@/components/ThemeProvider'
@@ -186,7 +187,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
                         .admin-main { margin-left: 240px; }
                         @media (max-width: 768px) { .admin-main { margin-left: 0 !important; padding-left: 16px !important; padding-right: 16px !important; } }
                     `}</style>
-                    {children}
+                    <AdminGuard>{children}</AdminGuard>
                 </main>
             </div>
         </ThemeProvider>

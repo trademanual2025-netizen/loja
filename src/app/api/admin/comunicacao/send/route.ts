@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminEmailFromRequest, unauthorizedResponse } from '@/lib/admin-auth'
+import { requirePermission, forbiddenResponse } from '@/lib/admin-auth'
 import { sendWhatsAppRaw, formatPhone } from '@/lib/whatsapp'
 import { prisma } from '@/lib/prisma'
 
 export async function POST(req: NextRequest) {
-    const email = getAdminEmailFromRequest(req)
-    if (!email) return unauthorizedResponse()
+    const perm = await requirePermission(req, 'comunicacao')
+    if (!perm) return forbiddenResponse()
 
     const { phone, message, orderId, userId } = await req.json()
 

@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requirePermission, forbiddenResponse } from '@/lib/admin-auth'
 
 export async function GET(req: NextRequest) {
+    const perm = await requirePermission(req, 'leads')
+    if (!perm) return forbiddenResponse()
     const { searchParams } = new URL(req.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = 20

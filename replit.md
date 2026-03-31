@@ -40,7 +40,8 @@ Giovana Dias Joias is an e-commerce platform for handmade jewelry, built with Ne
 - **Refund System**: A dedicated refund request and management system with a two-way chat between users and administrators.
 - **Tracking**: Server-side tracking for Meta CAPI (PageView, ViewContent, AddToCart, InitiateCheckout, Purchase) and Google Ads Enhanced Conversions, ensuring data accuracy and deduplication.
 - **WhatsApp Integration**: Via Evolution API for automated messaging and customer support, configurable from the admin panel.
-- **Admin Panel**: Comprehensive dashboard for product, order, user, settings management, and data backup.
+- **Admin Panel**: Comprehensive dashboard for product, order, user, settings management, and data backup. Role-based access control with superadmin/admin roles and module-level permissions.
+- **Admin Roles & Permissions**: Two roles: `superadmin` (full access, can manage other admins' permissions) and `admin` (access controlled by permissions array). 14 modules: dashboard, products, categories, orders, cupons, reembolsos, leads, comunicacao, mensagens, admins, integracoes, settings, embed, perfil. Sidebar filters nav items by permissions. API routes enforce permissions server-side via `requirePermission()`. AdminGuard component redirects unauthorized page access. Superadmin: `leogracio42@gmail.com`, Admin: `gcdias97@gmail.com`.
 
 ### System Design Choices
 - **Data Fetching**: Prisma queries optimize performance by using `select` for specific fields and HTTP caching for listing endpoints. Note: Neon DB uses `PrismaPg` adapter with `uselibpqcompat=true`; raw `pg` queries cannot access tables directly — always use Prisma client for DB operations.

@@ -10,20 +10,20 @@ import { useTheme } from '@/components/ThemeProvider'
 import { useEffect, useState } from 'react'
 
 const navItems = [
-    { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/admin/products', label: 'Produtos', icon: Package },
-    { href: '/admin/categories', label: 'Categorias', icon: Tag },
-    { href: '/admin/orders', label: 'Pedidos', icon: ShoppingBag },
-    { href: '/admin/cupons', label: 'Cupons', icon: Ticket },
-    { href: '/admin/reembolsos', label: 'Reembolsos', icon: RotateCcw },
-    { href: '/admin/leads', label: 'Leads', icon: Users },
-    { href: '/admin/comunicacao', label: 'Comunicação', icon: MessageSquare },
-    { href: '/admin/mensagens', label: 'Mensagens', icon: Mail },
-    { href: '/admin/admins', label: 'Administradores', icon: Shield },
-    { href: '/admin/integracoes', label: 'Integrações', icon: Globe },
-    { href: '/admin/settings', label: 'Configurações', icon: Settings },
-    { href: '/admin/embed', label: 'Embed / iFrame', icon: Code2 },
-    { href: '/admin/perfil', label: 'Meu Perfil', icon: UserCircle },
+    { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, module: 'dashboard' },
+    { href: '/admin/products', label: 'Produtos', icon: Package, module: 'products' },
+    { href: '/admin/categories', label: 'Categorias', icon: Tag, module: 'categories' },
+    { href: '/admin/orders', label: 'Pedidos', icon: ShoppingBag, module: 'orders' },
+    { href: '/admin/cupons', label: 'Cupons', icon: Ticket, module: 'cupons' },
+    { href: '/admin/reembolsos', label: 'Reembolsos', icon: RotateCcw, module: 'reembolsos' },
+    { href: '/admin/leads', label: 'Leads', icon: Users, module: 'leads' },
+    { href: '/admin/comunicacao', label: 'Comunicação', icon: MessageSquare, module: 'comunicacao' },
+    { href: '/admin/mensagens', label: 'Mensagens', icon: Mail, module: 'mensagens' },
+    { href: '/admin/admins', label: 'Administradores', icon: Shield, module: 'admins' },
+    { href: '/admin/integracoes', label: 'Integrações', icon: Globe, module: 'integracoes' },
+    { href: '/admin/settings', label: 'Configurações', icon: Settings, module: 'settings' },
+    { href: '/admin/embed', label: 'Embed / iFrame', icon: Code2, module: 'embed' },
+    { href: '/admin/perfil', label: 'Meu Perfil', icon: UserCircle, module: 'perfil' },
 ]
 
 interface Props { isOpen: boolean }
@@ -34,6 +34,9 @@ export function AdminSidebar({ isOpen }: Props) {
     const { theme, setTheme } = useTheme()
     const [logo, setLogo] = useState<string>('')
     const [storeName, setStoreName] = useState<string>('')
+    const [permissions, setPermissions] = useState<string[]>([])
+    const [role, setRole] = useState<string>('admin')
+    const [loaded, setLoaded] = useState(false)
 
     useEffect(() => {
         fetch('/api/admin/settings')
@@ -43,7 +46,20 @@ export function AdminSidebar({ isOpen }: Props) {
                 setStoreName(s.store_name || '')
             })
             .catch(() => {})
+
+        fetch('/api/admin/me')
+            .then(r => r.json())
+            .then(data => {
+                setRole(data.role || 'admin')
+                setPermissions(data.permissions || [])
+                setLoaded(true)
+            })
+            .catch(() => setLoaded(true))
     }, [])
+
+    const visibleItems = loaded
+        ? navItems.filter(item => role === 'superadmin' || permissions.includes(item.module))
+        : navItems
 
     async function handleLogout() {
         await fetch('/api/admin/logout', { method: 'POST' })
@@ -74,10 +90,8 @@ export function AdminSidebar({ isOpen }: Props) {
                 transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
                 overflow: 'hidden',
             }}>
-                {/* Top accent line */}
                 <div style={{ height: 3, background: 'linear-gradient(90deg, #6366f1, #a855f7, #ec4899)', flexShrink: 0 }} />
 
-                {/* Brand header */}
                 <div style={{ padding: '18px 16px 14px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
                     {logo ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -115,10 +129,9 @@ export function AdminSidebar({ isOpen }: Props) {
                     )}
                 </div>
 
-                {/* Navigation */}
                 <nav style={{ flex: 1, padding: '10px 8px', overflowY: 'auto' }}>
                     <p style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', padding: '8px 8px 4px' }}>Menu</p>
-                    {navItems.map(({ href, label, icon: Icon }) => {
+                    {visibleItems.map(({ href, label, icon: Icon }) => {
                         const isActive = pathname === href || (href !== '/admin' && pathname.startsWith(href))
                         return (
                             <Link key={href} href={href} className="nav-item" style={{
@@ -141,9 +154,7 @@ export function AdminSidebar({ isOpen }: Props) {
                     })}
                 </nav>
 
-                {/* Bottom section */}
                 <div style={{ padding: '10px 8px 14px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-                    {/* Theme toggle */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px', marginBottom: 6, background: 'var(--bg)', borderRadius: 8 }}>
                         <button type="button" onClick={() => setTheme('light')} style={{
                             flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,

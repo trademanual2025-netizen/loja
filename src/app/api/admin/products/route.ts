@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { autoTranslateProduct } from '@/lib/translate'
+import { requirePermission, unauthorizedResponse, forbiddenResponse } from '@/lib/admin-auth'
 
-// GET /api/admin/products — lista todos os produtos (com inativos)
 export async function GET(req: NextRequest) {
+    const perm = await requirePermission(req, 'products')
+    if (!perm) return forbiddenResponse()
     const { searchParams } = new URL(req.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
@@ -25,8 +27,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ products, total })
 }
 
-// POST /api/admin/products — cria produto
 export async function POST(req: NextRequest) {
+    const perm = await requirePermission(req, 'products')
+    if (!perm) return forbiddenResponse()
     const body = await req.json()
     const { name, nameEn, nameEs, description, descriptionEn, descriptionEs, price, comparePrice, stock, images, bannerUrl, active, categoryId, options, variants, weight, height, width, length } = body
 

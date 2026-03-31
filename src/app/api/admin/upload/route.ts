@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { uploadToB2, isB2Configured } from '@/lib/b2'
+import { getAdminInfoFromRequest, forbiddenResponse } from '@/lib/admin-auth'
 
 const MAX_SIZE_MB = 5
 
 export async function POST(req: NextRequest) {
+    const info = await getAdminInfoFromRequest(req)
+    if (!info) return forbiddenResponse()
     const formData = await req.formData()
     const file = formData.get('file') as File
 

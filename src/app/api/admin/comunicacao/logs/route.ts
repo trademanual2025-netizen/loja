@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminEmailFromRequest, unauthorizedResponse } from '@/lib/admin-auth'
+import { requirePermission, forbiddenResponse } from '@/lib/admin-auth'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(req: NextRequest) {
-    const email = getAdminEmailFromRequest(req)
-    if (!email) return unauthorizedResponse()
+    const perm = await requirePermission(req, 'comunicacao')
+    if (!perm) return forbiddenResponse()
 
     const url = new URL(req.url)
     const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'))

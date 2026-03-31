@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminEmailFromRequest, unauthorizedResponse } from '@/lib/admin-auth'
+import { requirePermission, forbiddenResponse } from '@/lib/admin-auth'
 import { prisma } from '@/lib/prisma'
 import { DEFAULT_TEMPLATES } from '@/lib/whatsapp'
 
 export async function GET(req: NextRequest) {
-    const email = getAdminEmailFromRequest(req)
-    if (!email) return unauthorizedResponse()
+    const perm = await requirePermission(req, 'comunicacao')
+    if (!perm) return forbiddenResponse()
 
     let templates = await prisma.whatsAppTemplate.findMany({
         orderBy: [{ trigger: 'asc' }, { createdAt: 'asc' }],

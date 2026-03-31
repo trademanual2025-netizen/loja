@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 
         if (!passwordValid) return NextResponse.json({ error: 'Credenciais inválidas.' }, { status: 401 })
 
-        const token = sign({ email: admin.email, role: 'admin' }, ADMIN_SECRET, { expiresIn: '30d' })
+        const token = sign({ email: admin.email, role: admin.role || 'admin' }, ADMIN_SECRET, { expiresIn: '30d' })
         const res = NextResponse.json({ ok: true })
         res.cookies.set('admin_token', token, {
             httpOnly: true,

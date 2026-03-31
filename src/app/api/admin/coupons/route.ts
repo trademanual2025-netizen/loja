@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requirePermission, forbiddenResponse } from '@/lib/admin-auth'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+    const perm = await requirePermission(req, 'cupons')
+    if (!perm) return forbiddenResponse()
     try {
         const coupons = await prisma.coupon.findMany({
             orderBy: { createdAt: 'desc' },
@@ -14,6 +17,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+    const perm = await requirePermission(req, 'cupons')
+    if (!perm) return forbiddenResponse()
     try {
         const body = await req.json()
         const { code, type, value, scope, categoryIds, productIds, maxUses, expiresAt, active } = body
@@ -48,6 +53,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
+    const perm = await requirePermission(req, 'cupons')
+    if (!perm) return forbiddenResponse()
     try {
         const body = await req.json()
         const { id, code, type, value, scope, categoryIds, productIds, maxUses, expiresAt, active } = body
@@ -85,6 +92,8 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+    const perm = await requirePermission(req, 'cupons')
+    if (!perm) return forbiddenResponse()
     try {
         const { searchParams } = new URL(req.url)
         const id = searchParams.get('id')

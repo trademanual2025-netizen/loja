@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { verifyAdminToken, unauthorizedResponse } from '@/lib/admin-auth'
+import { getAdminInfoFromRequest, forbiddenResponse } from '@/lib/admin-auth'
 
 export async function GET(req: NextRequest) {
-    if (!verifyAdminToken(req)) return unauthorizedResponse()
+    const info = await getAdminInfoFromRequest(req)
+    if (!info || info.role !== 'superadmin') return forbiddenResponse()
 
     try {
         const [

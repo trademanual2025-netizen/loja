@@ -3,8 +3,9 @@ import { prisma } from '@/lib/prisma'
 import { clearSettingsCache } from '@/lib/config'
 import { revalidatePath } from 'next/cache'
 import { revalidateTag } from 'next/cache'
+import { requirePermission, forbiddenResponse } from '@/lib/admin-auth'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     const settings = await prisma.settings.findMany()
     const map: Record<string, string> = {}
     for (const s of settings) map[s.key] = s.value
@@ -12,6 +13,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+    const perm = await requirePermission(req, 'settings')
+    if (!perm) return forbiddenResponse()
     const body: Record<string, string> = await req.json()
 
     await Promise.all(

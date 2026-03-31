@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { autoTranslateCategory } from '@/lib/translate'
+import { requirePermission, forbiddenResponse } from '@/lib/admin-auth'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+    const perm = await requirePermission(req, 'categories')
+    if (!perm) return forbiddenResponse()
     const categories = await prisma.category.findMany({
         orderBy: { name: 'asc' },
         include: { _count: { select: { products: true } } },
@@ -11,6 +14,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+    const perm = await requirePermission(req, 'categories')
+    if (!perm) return forbiddenResponse()
     const { name, slug } = await req.json()
     if (!name) return NextResponse.json({ error: 'Nome é obrigatório.' }, { status: 400 })
 

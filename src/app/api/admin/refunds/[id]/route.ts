@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyAdminToken, unauthorizedResponse } from '@/lib/admin-auth'
+import { requirePermission, forbiddenResponse } from '@/lib/admin-auth'
 import { prisma } from '@/lib/prisma'
 import { triggerWhatsApp, WA_TRIGGERS } from '@/lib/whatsapp'
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-    const admin = await verifyAdminToken(req)
-    if (!admin) return unauthorizedResponse()
+    const perm = await requirePermission(req, 'reembolsos')
+    if (!perm) return forbiddenResponse()
 
     const { id } = await params
     const { status, restoreStock } = await req.json()

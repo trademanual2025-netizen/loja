@@ -22,8 +22,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-    const email = getAdminEmailFromRequest(req)
-    if (!email) return unauthorizedResponse()
+    const perm = await requirePermission(req, 'comunicacao')
+    if (!perm) return forbiddenResponse()
 
     const body = await req.json()
     const { name, trigger, delayMinutes, message, active } = body

@@ -16,6 +16,9 @@ const ROUTE_TO_MODULE: Record<string, string> = {
     '/admin/admins': 'admins',
     '/admin/integracoes': 'integracoes',
     '/admin/settings': 'settings',
+    '/admin/tracking': 'tracking',
+    '/admin/webhooks': 'webhooks',
+    '/admin/frete': 'frete',
     '/admin/embed': 'embed',
     '/admin/perfil': 'perfil',
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyAdminToken } from '@/lib/admin-auth'
+import { requirePermission, forbiddenResponse } from '@/lib/admin-auth'
 import { getSetting } from '@/lib/config'
 import { prisma } from '@/lib/prisma'
 import { LEAD_FIELDS, BUYER_FIELDS, type FieldMapping } from '@/lib/webhook-fields'
@@ -68,9 +68,8 @@ function buildTestPayload(type: 'lead' | 'buyer', mapping: FieldMapping | null) 
 }
 
 export async function POST(req: NextRequest) {
-    if (!verifyAdminToken(req)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const perm = await requirePermission(req, 'webhooks')
+    if (!perm) return forbiddenResponse()
 
     try {
         const { type } = await req.json() as { type: 'lead' | 'buyer' }

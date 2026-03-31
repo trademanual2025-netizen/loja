@@ -45,6 +45,9 @@ function AdminTopBar({ onMenuToggle, isOpen }: { onMenuToggle: () => void; isOpe
         '/admin/mensagens': 'Mensagens',
         '/admin/admins': 'Administradores',
         '/admin/settings': 'Configurações',
+        '/admin/tracking': 'Tracking',
+        '/admin/webhooks': 'Webhooks',
+        '/admin/frete': 'Frete',
         '/admin/embed': 'Embed / iFrame',
         '/admin/perfil': 'Meu Perfil',
     }

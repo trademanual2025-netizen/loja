@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
     LayoutDashboard, Package, ShoppingBag, Users, Settings,
-    Code2, Shield, Tag, LogOut, Sun, Moon, Mail, RotateCcw, ChevronRight, UserCircle, MessageSquare, Ticket, Globe
+    Code2, Shield, Tag, LogOut, Sun, Moon, Mail, RotateCcw, ChevronRight, UserCircle, MessageSquare, Ticket, Globe,
+    Crosshair, Webhook, Truck
 } from 'lucide-react'
 import { useTheme } from '@/components/ThemeProvider'
 import { useEffect, useState } from 'react'
@@ -22,6 +23,9 @@ const navItems = [
     { href: '/admin/admins', label: 'Administradores', icon: Shield, module: 'admins' },
     { href: '/admin/integracoes', label: 'Integrações', icon: Globe, module: 'integracoes' },
     { href: '/admin/settings', label: 'Configurações', icon: Settings, module: 'settings' },
+    { href: '/admin/tracking', label: 'Tracking', icon: Crosshair, module: 'tracking' },
+    { href: '/admin/webhooks', label: 'Webhooks', icon: Webhook, module: 'webhooks' },
+    { href: '/admin/frete', label: 'Frete', icon: Truck, module: 'frete' },
     { href: '/admin/embed', label: 'Embed / iFrame', icon: Code2, module: 'embed' },
     { href: '/admin/perfil', label: 'Meu Perfil', icon: UserCircle, module: 'perfil' },
 ]

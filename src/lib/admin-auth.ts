@@ -7,7 +7,8 @@ const ADMIN_SECRET = process.env.ADMIN_JWT_SECRET || ''
 
 export const ALL_MODULES = [
     'dashboard', 'products', 'categories', 'orders', 'cupons', 'reembolsos',
-    'leads', 'comunicacao', 'mensagens', 'admins', 'integracoes', 'settings', 'embed', 'perfil',
+    'leads', 'comunicacao', 'mensagens', 'admins', 'integracoes', 'settings',
+    'tracking', 'webhooks', 'frete', 'embed', 'perfil',
 ] as const
 
 export type AdminModule = typeof ALL_MODULES[number]

@@ -17,6 +17,9 @@ const MODULE_LABELS: Record<string, string> = {
     admins: 'Administradores',
     integracoes: 'Integrações',
     settings: 'Configurações',
+    tracking: 'Tracking',
+    webhooks: 'Webhooks',
+    frete: 'Frete',
     embed: 'Embed / iFrame',
     perfil: 'Meu Perfil',
 }

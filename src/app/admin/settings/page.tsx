@@ -3,11 +3,9 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Save, TestTube2, Download, Loader2 } from 'lucide-react'
-import WebhooksTab from '@/components/admin/WebhooksTab'
-import ShippingByRegionTab from '@/components/admin/ShippingByRegionTab'
 import WhatsAppTab from '@/components/admin/WhatsAppTab'
 
-const TABS = ['Banco de Dados', 'Pagamentos', 'Tracking', 'Webhooks', 'Frete', 'Loja', 'SEO', 'Banner', 'Email / SMTP', 'WhatsApp']
+const TABS = ['Banco de Dados', 'Pagamentos', 'Loja', 'SEO', 'Banner', 'Email / SMTP', 'WhatsApp']
 
 const ImageF = ({ label, k, help = '', settings, uploadFile }: { label: string; k: string; help?: string; settings: any; uploadFile: any }) => (
     <div className="form-group">
@@ -76,8 +74,6 @@ const ColorF = ({ label, k, defaultColor, settings, set }: { label: string; k: s
     )
 }
 
-const formatCEP = (val: string) => val.replace(/\D/g, '').substring(0, 8)
-
 type ThemeColors = {
     store_primary_color: string; store_bg_color: string; store_bg_card_color: string;
     store_text_color: string; store_text_title: string; store_btn_buy: string;
@@ -131,25 +127,6 @@ export default function AdminSettings() {
         toast.success('Configurações salvas!')
     }
 
-    async function testWebhook(type: 'lead' | 'buyer') {
-        const url = type === 'lead' ? settings.webhook_lead_url : settings.webhook_buyer_url
-        if (!url) { toast.error('Configure a URL primeiro.'); return }
-        try {
-            const token = document.cookie.split('; ').find(c => c.startsWith('admin_token='))?.split('=')[1]
-            const res = await fetch('/api/admin/webhooks/test', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-                body: JSON.stringify({ type }),
-            })
-            const data = await res.json()
-            if (data.success) {
-                toast.success(`Webhook disparado com sucesso! Status: ${data.status}`)
-            } else {
-                toast.error(data.error || `Webhook falhou (status ${data.status})`)
-            }
-        } catch { toast.error('Erro ao disparar webhook de teste.') }
-    }
-
     async function uploadFile(file: File, key: string) {
         setSaving(true)
         const formData = new FormData()
@@ -166,8 +143,6 @@ export default function AdminSettings() {
         setSaving(false)
     }
 
-
-    const formatCEP = (val: string) => val.replace(/\D/g, '').substring(0, 8)
 
     return (
         <div>
@@ -383,155 +358,6 @@ export default function AdminSettings() {
                         <button className="btn btn-primary" onClick={() => save(['mp_public_key', 'mp_access_token', 'mp_webhook_secret', 'mp_enabled', 'stripe_public_key', 'stripe_secret_key', 'stripe_webhook_secret', 'stripe_enabled', 'payment_gateway_mode', 'pix_discount_enabled', 'pix_discount_rate', 'pix_discount_scope', 'pix_discount_products'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
                     </div>
                 )}
-
-                {/* Tracking */}
-                {tab === 'Tracking' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                        <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8 }}>
-                            <p style={{ fontWeight: 700, marginBottom: 4 }}>🔵 Meta Pixel + Conversions API (CAPI)</p>
-                            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 14 }}>
-                                O Pixel rastreia eventos no navegador. O CAPI envia os mesmos eventos pelo servidor com dados adicionais (IP, email, telefone, endereço) para nota maxima de correspondencia no Gerenciador de Eventos.
-                            </p>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                <F settings={settings} set={set} label="Pixel ID" k="fb_pixel_id" placeholder="123456789012345" />
-                                <F settings={settings} set={set} label="Access Token (CAPI server-side)" k="fb_capi_token" type="password" />
-                                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                                    <input type="checkbox" checked={settings.fb_pixel_enabled === 'true'} onChange={e => set('fb_pixel_enabled', e.target.checked ? 'true' : 'false')} />
-                                    <span style={{ fontSize: '0.88rem', fontWeight: 600 }}>Habilitar Meta Pixel + CAPI</span>
-                                </label>
-                            </div>
-                            <div style={{ marginTop: 14, padding: 12, background: 'var(--bg)', borderRadius: 6, border: '1px solid var(--border)' }}>
-                                <p style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: 8, color: 'var(--primary)' }}>Eventos enviados (Browser + Servidor)</p>
-                                {[
-                                    { ev: 'PageView', desc: 'Todas as paginas visitadas' },
-                                    { ev: 'ViewContent', desc: 'Visualizou pagina de produto' },
-                                    { ev: 'AddToCart', desc: 'Adicionou produto ao carrinho' },
-                                    { ev: 'InitiateCheckout', desc: 'Entrou no checkout' },
-                                    { ev: 'Purchase', desc: 'Compra confirmada (valor, produtos, pedido)' },
-                                ].map(e => (
-                                    <div key={e.ev} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                                        <span style={{ fontSize: '0.72rem', fontWeight: 700, background: 'rgba(59,130,246,0.15)', color: '#3b82f6', padding: '1px 6px', borderRadius: 4, fontFamily: 'monospace' }}>{e.ev}</span>
-                                        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{e.desc}</span>
-                                    </div>
-                                ))}
-                                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 8, lineHeight: 1.5 }}>
-                                    Todos os eventos usam <strong>event_id</strong> para deduplicacao (Browser + CAPI nao duplicam). O CAPI envia: IP, User-Agent, email, telefone, nome, cidade, estado, CEP, pais (tudo hasheado SHA-256), cookies _fbc/_fbp e fbclid.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div style={{ padding: 16, background: 'var(--bg-card2)', borderRadius: 8 }}>
-                            <p style={{ fontWeight: 700, marginBottom: 4 }}>🟢 Google Ads + Enhanced Conversions</p>
-                            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 14 }}>
-                                Rastreia eventos de e-commerce e envia dados do usuario para melhorar a correspondencia de conversoes.
-                            </p>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                <F settings={settings} set={set} label="Google Ads ID" k="google_ads_id" placeholder="AW-XXXXXXXXX" />
-                                <F settings={settings} set={set} label="Conversion Label (apenas Purchase)" k="google_ads_label" placeholder="AbCdEfGhIj" />
-                                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                                    <input type="checkbox" checked={settings.google_ads_enabled === 'true'} onChange={e => set('google_ads_enabled', e.target.checked ? 'true' : 'false')} />
-                                    <span style={{ fontSize: '0.88rem', fontWeight: 600 }}>Habilitar Google Ads</span>
-                                </label>
-                            </div>
-                            <div style={{ marginTop: 14, padding: 12, background: 'var(--bg)', borderRadius: 6, border: '1px solid var(--border)' }}>
-                                <p style={{ fontWeight: 700, fontSize: '0.8rem', marginBottom: 8, color: '#22c55e' }}>Eventos enviados</p>
-                                {[
-                                    { ev: 'page_view', desc: 'Todas as paginas visitadas', label: false },
-                                    { ev: 'view_item', desc: 'Visualizou pagina de produto', label: false },
-                                    { ev: 'add_to_cart', desc: 'Adicionou produto ao carrinho', label: false },
-                                    { ev: 'begin_checkout', desc: 'Entrou no checkout (com dados do usuario)', label: false },
-                                    { ev: 'purchase', desc: 'Compra confirmada (evento GA4 padrao)', label: false },
-                                    { ev: 'conversion', desc: 'Conversao Google Ads (usa o Label acima)', label: true },
-                                ].map(e => (
-                                    <div key={e.ev} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                                        <span style={{ fontSize: '0.72rem', fontWeight: 700, background: e.label ? 'rgba(234,179,8,0.15)' : 'rgba(34,197,94,0.15)', color: e.label ? '#eab308' : '#22c55e', padding: '1px 6px', borderRadius: 4, fontFamily: 'monospace' }}>{e.ev}</span>
-                                        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{e.desc}</span>
-                                        {e.label && <span style={{ fontSize: '0.68rem', background: 'rgba(234,179,8,0.15)', color: '#eab308', padding: '1px 5px', borderRadius: 3, fontWeight: 600 }}>precisa do Label</span>}
-                                    </div>
-                                ))}
-                                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 8, lineHeight: 1.5 }}>
-                                    Os eventos padrao (page_view ate purchase) <strong>nao precisam de Label</strong> — sao rastreados automaticamente pelo Google. Somente o evento <strong>conversion</strong> (usado para otimizar campanhas de Google Ads) precisa do Label configurado acima. Enhanced Conversions envia email, telefone, nome e endereco do cliente para melhorar a taxa de correspondencia.
-                                </p>
-                            </div>
-                        </div>
-                        <button className="btn btn-primary" onClick={() => save(['fb_pixel_id', 'fb_capi_token', 'fb_pixel_enabled', 'google_ads_id', 'google_ads_label', 'google_ads_enabled'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
-                    </div>
-                )}
-
-                {/* Webhooks */}
-                {tab === 'Webhooks' && (
-                    <WebhooksTab settings={settings} set={set} save={save} saving={saving} testWebhook={testWebhook} />
-                )}
-
-                {/* Frete */}
-                {tab === 'Frete' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                        <div className="form-group">
-                            <label className="form-label">Modo de Frete</label>
-                            <select className="input" value={settings.shipping_mode || 'free'} onChange={e => set('shipping_mode', e.target.value)}>
-                                <option value="free">Frete Grátis (sempre)</option>
-                                <option value="fixed">Valor Fixo</option>
-                                <option value="by_state">Por Estado (tabela)</option>
-                                <option value="correios">📦 Correios (PAC + SEDEX — preço e prazo reais)</option>
-                            </select>
-                        </div>
-
-                        {settings.shipping_mode === 'fixed' && (
-                            <>
-                                <F settings={settings} set={set} label="Valor do Frete (R$)" k="shipping_fixed_value" placeholder="15.00" />
-                                <F settings={settings} set={set} label="Frete Grátis acima de (R$) — deixe 0 para desativar" k="shipping_free_above" placeholder="0" />
-                            </>
-                        )}
-
-                        {settings.shipping_mode === 'by_state' && (
-                            <ShippingByRegionTab
-                                value={settings.shipping_state_table || '[]'}
-                                onChange={v => set('shipping_state_table', v)}
-                            />
-                        )}
-
-                        {settings.shipping_mode === 'correios' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                                <div style={{ padding: 12, background: 'rgba(99,102,241,0.08)', borderRadius: 8, border: '1px solid rgba(99,102,241,0.25)', fontSize: '0.83rem', color: 'var(--text-muted)' }}>
-                                    📦 Usa o webservice público dos Correios — sem necessidade de contrato. Para cotações com desconto contratual, preencha também o Código Empresa e Senha abaixo.
-                                </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                                    <div className="form-group" style={{ marginBottom: 0 }}>
-                                        <label className="form-label">CEP de Origem (só números) *</label>
-                                        <input className="input" placeholder="01310100" maxLength={8}
-                                            value={settings.shipping_origin_cep || ''}
-                                            onChange={e => set('shipping_origin_cep', formatCEP(e.target.value))} />
-                                    </div>
-                                    <div className="form-group" style={{ marginBottom: 0 }}>
-                                        <label className="form-label">Frete Grátis acima de R$ (0 = nunca)</label>
-                                        <input className="input" placeholder="0" type="number" step="0.01" value={settings.shipping_free_above || ''} onChange={e => set('shipping_free_above', e.target.value)} />
-                                    </div>
-                                </div>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: -4 }}>
-                                    Peso e dimensões são configurados por produto. O Correios usará os dados do produto para calcular o frete real.
-                                </p>
-                                <hr className="divider" />
-                                <p style={{ fontWeight: 600, fontSize: '0.88rem' }}>Credenciais de Contrato (Opcional)</p>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: -8 }}>
-                                    Deixe em branco se você não tem contrato com os Correios. Se você possui um contrato (Correios Fácil), insira o código e a senha para habilitar o cálculo com desconto.
-                                </p>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                                    <div className="form-group">
-                                        <label className="form-label">Código Empresa</label>
-                                        <input className="input" placeholder="(deixe vazio sem contrato)" value={settings.shipping_correios_user || ''} onChange={e => set('shipping_correios_user', e.target.value)} />
-                                    </div>
-                                    <div className="form-group">
-                                        <label className="form-label">Senha</label>
-                                        <input className="input" type="password" placeholder="(deixe vazio sem contrato)" value={settings.shipping_correios_pass || ''} onChange={e => set('shipping_correios_pass', e.target.value)} />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        <button className="btn btn-primary" onClick={() => save(['shipping_mode', 'shipping_fixed_value', 'shipping_free_above', 'shipping_state_table', 'shipping_origin_cep', 'shipping_default_weight', 'shipping_default_height', 'shipping_default_width', 'shipping_default_length', 'shipping_correios_user', 'shipping_correios_pass'])} disabled={saving}><Save size={16} />{saving ? 'Salvando...' : 'Salvar'}</button>
-                    </div>
-                )}
-
 
                 {/* Loja */}
                 {tab === 'Loja' && (
